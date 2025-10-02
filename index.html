@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>แบบบันทึกกิจกรรมลูกเสือสามัญรุ่นใหญ่</title>
+    <title>บันทึกกิจกรรมลูกเสือสามัญรุ่นใหญ่</title>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -80,7 +80,7 @@
     <!-- Main Content -->
     <main class="container mx-auto px-4 py-8">
         <!-- Quick Actions -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <button onclick="openStudentManagement()" class="bg-white/90 backdrop-blur-md rounded-xl card-shadow p-4 hover:bg-purple-50 transition-colors">
                 <div class="flex items-center space-x-3">
                     <span class="text-2xl">👥</span>
@@ -96,6 +96,24 @@
                     <div class="text-left">
                         <h3 class="font-semibold text-gray-800">เช็คชื่อรายวัน</h3>
                         <p class="text-sm text-gray-600">บันทึกการเข้าร่วมกิจกรรม</p>
+                    </div>
+                </div>
+            </button>
+            <button onclick="showActivityReport()" class="bg-white/90 backdrop-blur-md rounded-xl card-shadow p-4 hover:bg-green-50 transition-colors">
+                <div class="flex items-center space-x-3">
+                    <span class="text-2xl">📊</span>
+                    <div class="text-left">
+                        <h3 class="font-semibold text-gray-800">รายงานกิจกรรม</h3>
+                        <p class="text-sm text-gray-600">ดูข้อมูลกิจกรรมที่บันทึก</p>
+                    </div>
+                </div>
+            </button>
+            <button onclick="showAttendanceReport()" class="bg-white/90 backdrop-blur-md rounded-xl card-shadow p-4 hover:bg-blue-50 transition-colors">
+                <div class="flex items-center space-x-3">
+                    <span class="text-2xl">📋</span>
+                    <div class="text-left">
+                        <h3 class="font-semibold text-gray-800">รายงานการเช็คชื่อ</h3>
+                        <p class="text-sm text-gray-600">ดูสถิติการเข้าร่วม</p>
                     </div>
                 </div>
             </button>
@@ -307,7 +325,7 @@
                             </div>
                             <div>
                                 <label class="block text-xs text-gray-600 mb-1">หมู่</label>
-                                <select id="selectedTroop" onchange="loadStudentList()" class="w-full px-3 py-2 rounded-lg border border-purple-200 focus:ring-2 focus:ring-purple-500">
+                                <select id="selectedTroop" onchange="loadStudentList()" class="w-full px-3 py-2 rounded-lg border border-purple-200 focus:ring-2 focus:ring-purple-500" disabled>
                                     <option value="">เลือกหมู่</option>
                                 </select>
                             </div>
@@ -949,6 +967,11 @@
                     option.textContent = `หมู่ ${i}`;
                     troopSelect.appendChild(option);
                 }
+                
+                // Enable the troop select
+                troopSelect.disabled = false;
+            } else {
+                troopSelect.disabled = true;
             }
             
             // Hide student list when group changes
@@ -1337,62 +1360,280 @@
             sendDataToGoogleSheets(attendanceRecord);
         }
 
+        // Local storage for demo purposes
+        let activityRecords = JSON.parse(localStorage.getItem('scoutActivityRecords') || '[]');
+        let attendanceRecords = JSON.parse(localStorage.getItem('scoutAttendanceRecords') || '[]');
+
         function sendDataToGoogleSheets(data) {
-            const scriptUrl = 'https://script.google.com/macros/s/AKfycbzDRZ5YxnSbn3RiVbnGUeXzWTk6USKZhHzOtq4Wp1IK9GAMVUrDNvRzxhEnhRy5QCHn/exec';
+            // Google Apps Script URL
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbz2r-M5INOk3j7Rgzg3oDLsTTqCVPtKdhVXr3lV6GJMFCPtuCFOm6qniADlOGl_wGoe/exec';
             
-            // Create JSONP callback
-            const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
-            
-            window[callbackName] = function(response) {
-                // Clean up
-                document.head.removeChild(script);
-                delete window[callbackName];
+            // Send data to Google Sheets
+            fetch(scriptURL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(() => {
+                // Also save locally as backup
+                if (data.type === 'attendance') {
+                    attendanceRecords.push(data);
+                    localStorage.setItem('scoutAttendanceRecords', JSON.stringify(attendanceRecords));
+                } else {
+                    activityRecords.push(data);
+                    localStorage.setItem('scoutActivityRecords', JSON.stringify(activityRecords));
+                }
                 
-                if (response.status === 'success') {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'บันทึกสำเร็จ! 🎉',
-                        text: 'ข้อมูลได้ถูกบันทึกลงใน Google Sheets แล้ว',
-                        confirmButtonColor: '#8b5cf6'
-                    });
-                    
+                showSuccessMessage(data);
+            })
+            .catch((error) => {
+                console.error('Error sending to Google Sheets:', error);
+                // Still save locally if Google Sheets fails
+                if (data.type === 'attendance') {
+                    attendanceRecords.push(data);
+                    localStorage.setItem('scoutAttendanceRecords', JSON.stringify(attendanceRecords));
+                } else {
+                    activityRecords.push(data);
+                    localStorage.setItem('scoutActivityRecords', JSON.stringify(activityRecords));
+                }
+                
+                showSuccessMessage(data, true);
+            });
+        }
+        
+        function showSuccessMessage(data, isOffline = false) {
+            // Simulate processing time
+            setTimeout(() => {
+                try {
                     if (data.type === 'attendance') {
+                        // Save attendance data
+                        attendanceRecords.push(data);
+                        localStorage.setItem('scoutAttendanceRecords', JSON.stringify(attendanceRecords));
+                        
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'บันทึกการเช็คชื่อสำเร็จ! ✅',
+                            html: `
+                                <div class="text-left">
+                                    <p><strong>วันที่:</strong> ${data.date}</p>
+                                    <p><strong>กิจกรรม:</strong> ${data.activity}</p>
+                                    <p><strong>กอง-หมู่:</strong> ${data.group} ${data.troop}</p>
+                                    <p><strong>จำนวนนักเรียน:</strong> ${data.attendanceData.length} คน</p>
+                                </div>
+                                <div class="mt-4 p-3 ${isOffline ? 'bg-yellow-50' : 'bg-green-50'} rounded-lg">
+                                    <p class="text-sm ${isOffline ? 'text-yellow-700' : 'text-green-700'}">
+                                        ${isOffline ? '⚠️ บันทึกในเครื่องเท่านั้น (ไม่มีอินเทอร์เน็ต)' : '☁️ บันทึกลง Google Sheets และในเครื่องแล้ว'}
+                                    </p>
+                                    <p class="text-xs ${isOffline ? 'text-yellow-600' : 'text-green-600'} mt-1">คลิก "ดูรายงาน" เพื่อดูข้อมูลที่บันทึก</p>
+                                </div>
+                            `,
+                            confirmButtonColor: '#10b981',
+                            confirmButtonText: 'ตกลง',
+                            showCancelButton: true,
+                            cancelButtonText: 'ดูรายงาน',
+                            cancelButtonColor: '#8b5cf6'
+                        }).then((result) => {
+                            if (result.dismiss === Swal.DismissReason.cancel) {
+                                showAttendanceReport();
+                            }
+                        });
+                        
                         closeAttendanceCheck();
+                        
                     } else {
+                        // Save activity data
+                        activityRecords.push(data);
+                        localStorage.setItem('scoutActivityRecords', JSON.stringify(activityRecords));
+                        
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'บันทึกกิจกรรมสำเร็จ! 🎉',
+                            html: `
+                                <div class="text-left">
+                                    <p><strong>เวลา:</strong> ${data.time}</p>
+                                    <p><strong>กิจกรรม:</strong> ${data.activity}</p>
+                                    <p><strong>คะแนนรวม:</strong> ${data.totalScore}/100</p>
+                                    <p><strong>ระดับ:</strong> ${data.gradeLevel}</p>
+                                </div>
+                                <div class="mt-4 p-3 ${isOffline ? 'bg-yellow-50' : 'bg-purple-50'} rounded-lg">
+                                    <p class="text-sm ${isOffline ? 'text-yellow-700' : 'text-purple-700'}">
+                                        ${isOffline ? '⚠️ บันทึกในเครื่องเท่านั้น (ไม่มีอินเทอร์เน็ต)' : '☁️ บันทึกลง Google Sheets และในเครื่องแล้ว'}
+                                    </p>
+                                    <p class="text-xs ${isOffline ? 'text-yellow-600' : 'text-purple-600'} mt-1">คลิก "ดูรายงาน" เพื่อดูข้อมูลที่บันทึก</p>
+                                </div>
+                            `,
+                            confirmButtonColor: '#8b5cf6',
+                            confirmButtonText: 'ตกลง',
+                            showCancelButton: true,
+                            cancelButtonText: 'ดูรายงาน',
+                            cancelButtonColor: '#10b981'
+                        }).then((result) => {
+                            if (result.dismiss === Swal.DismissReason.cancel) {
+                                showActivityReport();
+                            }
+                        });
+                        
                         closeModal();
                     }
-                } else {
+                    
+                } catch (error) {
                     Swal.fire({
                         icon: 'error',
                         title: 'เกิดข้อผิดพลาด',
-                        text: response.message || 'ไม่สามารถบันทึกข้อมูลได้',
-                        confirmButtonColor: '#8b5cf6'
+                        text: 'ไม่สามารถบันทึกข้อมูลได้: ' + error.message,
+                        confirmButtonColor: '#ef4444'
                     });
                 }
-            };
-            
-            // Create script element for JSONP
-            const script = document.createElement('script');
-            const params = new URLSearchParams({
-                callback: callbackName,
-                data: JSON.stringify(data)
-            });
-            script.src = `${scriptUrl}?${params.toString()}`;
-            
-            // Handle errors
-            script.onerror = function() {
-                document.head.removeChild(script);
-                delete window[callbackName];
+            }, 1500);
+        }
+
+        function showActivityReport() {
+            if (activityRecords.length === 0) {
                 Swal.fire({
-                    icon: 'error',
-                    title: 'เกิดข้อผิดพลาด',
-                    text: 'ไม่สามารถเชื่อมต่อกับ Google Sheets ได้',
+                    icon: 'info',
+                    title: 'ไม่มีข้อมูลกิจกรรม',
+                    text: 'ยังไม่มีการบันทึกกิจกรรมในระบบ',
                     confirmButtonColor: '#8b5cf6'
                 });
-            };
+                return;
+            }
+
+            let reportHtml = `
+                <div class="max-h-96 overflow-y-auto text-left">
+                    <h4 class="font-bold text-lg mb-4 text-purple-800">📊 รายงานกิจกรรม (${activityRecords.length} รายการ)</h4>
+            `;
+
+            activityRecords.forEach((record, index) => {
+                reportHtml += `
+                    <div class="mb-4 p-4 border border-purple-200 rounded-lg bg-purple-50">
+                        <div class="flex justify-between items-start mb-2">
+                            <h5 class="font-semibold text-purple-800">#${index + 1} ${record.activity}</h5>
+                            <span class="text-xs text-gray-500">${record.timestamp}</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-sm">
+                            <div><strong>เวลา:</strong> ${record.time}</div>
+                            <div><strong>ระดับ:</strong> ${record.grade}</div>
+                            <div><strong>คะแนน:</strong> ${record.totalScore}/100</div>
+                            <div><strong>เกรด:</strong> ${record.gradeLevel}</div>
+                        </div>
+                        ${record.comments ? `<div class="mt-2 text-sm"><strong>ความคิดเห็น:</strong> ${record.comments}</div>` : ''}
+                    </div>
+                `;
+            });
+
+            reportHtml += '</div>';
+
+            Swal.fire({
+                title: 'รายงานกิจกรรม',
+                html: reportHtml,
+                width: '800px',
+                confirmButtonColor: '#8b5cf6',
+                confirmButtonText: 'ปิด',
+                showCancelButton: true,
+                cancelButtonText: '🗑️ ล้างข้อมูล',
+                cancelButtonColor: '#ef4444'
+            }).then((result) => {
+                if (result.dismiss === Swal.DismissReason.cancel) {
+                    confirmClearData('activity');
+                }
+            });
+        }
+
+        function showAttendanceReport() {
+            if (attendanceRecords.length === 0) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'ไม่มีข้อมูลการเช็คชื่อ',
+                    text: 'ยังไม่มีการบันทึกการเช็คชื่อในระบบ',
+                    confirmButtonColor: '#10b981'
+                });
+                return;
+            }
+
+            let reportHtml = `
+                <div class="max-h-96 overflow-y-auto text-left">
+                    <h4 class="font-bold text-lg mb-4 text-green-800">✅ รายงานการเช็คชื่อ (${attendanceRecords.length} ครั้ง)</h4>
+            `;
+
+            attendanceRecords.forEach((record, index) => {
+                const summary = record.attendanceData.reduce((acc, student) => {
+                    acc[student.status] = (acc[student.status] || 0) + 1;
+                    return acc;
+                }, {});
+
+                reportHtml += `
+                    <div class="mb-4 p-4 border border-green-200 rounded-lg bg-green-50">
+                        <div class="flex justify-between items-start mb-2">
+                            <h5 class="font-semibold text-green-800">#${index + 1} ${record.activity}</h5>
+                            <span class="text-xs text-gray-500">${record.timestamp}</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-sm mb-2">
+                            <div><strong>วันที่:</strong> ${record.date}</div>
+                            <div><strong>กอง-หมู่:</strong> ${record.group} ${record.troop}</div>
+                        </div>
+                        <div class="flex space-x-4 text-sm">
+                            <span class="text-green-600">✅ มา: ${summary.มา || 0}</span>
+                            <span class="text-yellow-600">📋 ลา: ${summary.ลา || 0}</span>
+                            <span class="text-red-600">❌ ขาด: ${summary.ขาด || 0}</span>
+                            <span class="text-orange-600">🏃 หนี: ${summary.หนี || 0}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            reportHtml += '</div>';
+
+            Swal.fire({
+                title: 'รายงานการเช็คชื่อ',
+                html: reportHtml,
+                width: '800px',
+                confirmButtonColor: '#10b981',
+                confirmButtonText: 'ปิด',
+                showCancelButton: true,
+                cancelButtonText: '🗑️ ล้างข้อมูล',
+                cancelButtonColor: '#ef4444'
+            }).then((result) => {
+                if (result.dismiss === Swal.DismissReason.cancel) {
+                    confirmClearData('attendance');
+                }
+            });
+        }
+
+        function confirmClearData(type) {
+            const title = type === 'activity' ? 'ล้างข้อมูลกิจกรรม' : 'ล้างข้อมูลการเช็คชื่อ';
+            const text = type === 'activity' ? 'ข้อมูลกิจกรรมทั้งหมดจะถูกลบ' : 'ข้อมูลการเช็คชื่อทั้งหมดจะถูกลบ';
             
-            document.head.appendChild(script);
+            Swal.fire({
+                title: title,
+                text: text,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#8b5cf6',
+                confirmButtonText: 'ลบทั้งหมด',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if (type === 'activity') {
+                        activityRecords = [];
+                        localStorage.removeItem('scoutActivityRecords');
+                    } else {
+                        attendanceRecords = [];
+                        localStorage.removeItem('scoutAttendanceRecords');
+                    }
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'ล้างข้อมูลสำเร็จ',
+                        text: 'ข้อมูลทั้งหมดถูกลบแล้ว',
+                        confirmButtonColor: '#10b981'
+                    });
+                }
+            });
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9880d6fad7ab7336',t:'MTc1OTM3Mjg3Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9881d3b9a1ab1d37',t:'MTc1OTM4MzIyOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

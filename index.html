@@ -1366,46 +1366,105 @@
 
         function sendDataToGoogleSheets(data) {
             // Google Apps Script URL
-            const scriptURL = 'https://script.google.com/macros/s/AKfycbyU4hrYAC5OVHQmbg0mN6RZjoYRQ1d9EA9oYL4B_W8Ju4zFUdQJGr7ajZ5QUC_HIB1v/exec';
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbxB6yWRU_zNqZgnV1TOzHuNiAp-otXrx7oUPTD1GNAiit-nWPa3ZxNnQI4PJVJRXiNR/exec';
             
-            // Prepare form data for Google Apps Script
+            console.log('Sending data to Google Sheets:', data);
+            
+            // Method 1: Try POST with JSON
+            fetch(scriptURL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    ...data,
+                    sheetId: '1xCjpO9YqiRGeUogaEl7RH38KJlqWrxYcDyx2I1JDHhA'
+                }),
+                mode: 'no-cors'
+            })
+            .then(() => {
+                console.log('POST JSON method attempted');
+                // Wait a bit then try alternative method
+                setTimeout(() => {
+                    tryFormDataMethod(scriptURL, data);
+                }, 1000);
+            })
+            .catch((error) => {
+                console.error('POST JSON failed:', error);
+                tryFormDataMethod(scriptURL, data);
+            });
+        }
+        
+        function tryFormDataMethod(scriptURL, data) {
+            // Method 2: Try POST with FormData
             const formData = new FormData();
-            
-            // Add Google Sheets ID
             formData.append('sheetId', '1xCjpO9YqiRGeUogaEl7RH38KJlqWrxYcDyx2I1JDHhA');
             
-            // Add all data fields
+            // Add all data fields to FormData
             for (const key in data) {
-                if (typeof data[key] === 'object') {
+                if (typeof data[key] === 'object' && data[key] !== null) {
                     formData.append(key, JSON.stringify(data[key]));
                 } else {
-                    formData.append(key, data[key]);
+                    formData.append(key, data[key] || '');
                 }
             }
             
-            // Send data to Google Sheets using FormData
             fetch(scriptURL, {
                 method: 'POST',
-                body: formData
+                body: formData,
+                mode: 'no-cors'
             })
-            .then(response => response.text())
-            .then(result => {
-                console.log('Google Sheets response:', result);
-                
-                // Also save locally as backup
-                if (data.type === 'attendance') {
-                    attendanceRecords.push(data);
-                    localStorage.setItem('scoutAttendanceRecords', JSON.stringify(attendanceRecords));
-                } else {
-                    activityRecords.push(data);
-                    localStorage.setItem('scoutActivityRecords', JSON.stringify(activityRecords));
-                }
-                
-                showSuccessMessage(data);
+            .then(() => {
+                console.log('POST FormData method attempted');
+                // Wait a bit then try GET method
+                setTimeout(() => {
+                    tryGetMethod(scriptURL, data);
+                }, 1000);
             })
             .catch((error) => {
-                console.error('Error sending to Google Sheets:', error);
-                // Still save locally if Google Sheets fails
+                console.error('POST FormData failed:', error);
+                tryGetMethod(scriptURL, data);
+            });
+        }
+        
+        function tryGetMethod(scriptURL, data) {
+            // Method 3: Try GET with URL parameters
+            const params = new URLSearchParams();
+            params.append('sheetId', '1xCjpO9YqiRGeUogaEl7RH38KJlqWrxYcDyx2I1JDHhA');
+            
+            // Add all data fields as URL parameters
+            for (const key in data) {
+                if (typeof data[key] === 'object' && data[key] !== null) {
+                    params.append(key, JSON.stringify(data[key]));
+                } else {
+                    params.append(key, data[key] || '');
+                }
+            }
+            
+            const fullURL = `${scriptURL}?${params.toString()}`;
+            
+            fetch(fullURL, {
+                method: 'GET',
+                mode: 'no-cors'
+            })
+            .then(() => {
+                console.log('GET method attempted');
+                // All methods attempted, show success
+                setTimeout(() => {
+                    saveDataLocally(data);
+                    showSuccessMessage(data);
+                }, 1500);
+            })
+            .catch((error) => {
+                console.error('GET method failed:', error);
+                // All methods failed, save locally only
+                saveDataLocally(data);
+                showSuccessMessage(data, true);
+            });
+        }
+        
+        function saveDataLocally(data) {
+            try {
                 if (data.type === 'attendance') {
                     attendanceRecords.push(data);
                     localStorage.setItem('scoutAttendanceRecords', JSON.stringify(attendanceRecords));
@@ -1413,9 +1472,10 @@
                     activityRecords.push(data);
                     localStorage.setItem('scoutActivityRecords', JSON.stringify(activityRecords));
                 }
-                
-                showSuccessMessage(data, true);
-            });
+                console.log('Data saved locally successfully');
+            } catch (error) {
+                console.error('Error saving locally:', error);
+            }
         }
         
         function showSuccessMessage(data, isOffline = false) {
@@ -1649,5 +1709,5 @@
             });
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9883a8a071803e0d',t:'MTc1OTQwMjQzNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9883dc5641f3d176',t:'MTc1OTQwNDU1My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

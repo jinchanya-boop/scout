@@ -53,7 +53,6 @@
     </style>
 </head>
 <body class="gradient-bg min-h-screen">
-    <!-- Header -->
     <header class="bg-white/90 backdrop-blur-md shadow-lg sticky top-0 z-50">
         <div class="container mx-auto px-4 py-4">
             <div class="flex items-center justify-between">
@@ -77,9 +76,7 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <main class="container mx-auto px-4 py-8">
-        <!-- Quick Actions -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <button onclick="openStudentManagement()" class="bg-white/90 backdrop-blur-md rounded-xl card-shadow p-4 hover:bg-purple-50 transition-colors">
                 <div class="flex items-center space-x-3">
@@ -119,7 +116,6 @@
             </button>
         </div>
 
-        <!-- Schedule Table -->
         <div class="bg-white/90 backdrop-blur-md rounded-2xl card-shadow p-6 mb-8">
             <div class="flex items-center mb-6">
                 <span class="text-2xl mr-3">📅</span>
@@ -127,12 +123,10 @@
             </div>
             
             <div id="scheduleTable" class="overflow-x-auto">
-                <!-- Schedule content will be populated by JavaScript -->
-            </div>
+                </div>
         </div>
     </main>
 
-    <!-- Student Management Modal -->
     <div id="studentManagementModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
             <div class="p-6 border-b border-purple-100">
@@ -146,7 +140,6 @@
             </div>
             
             <div class="p-6">
-                <!-- Group and Troop Selection for Management -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">กอง</label>
@@ -171,7 +164,6 @@
                     </div>
                 </div>
 
-                <!-- Add/Edit Student Form -->
                 <div id="studentForm" class="hidden mb-6 p-4 bg-purple-50 rounded-lg">
                     <h4 class="font-medium text-gray-800 mb-4" id="formTitle">เพิ่มนักเรียนใหม่</h4>
                     <form id="addStudentForm">
@@ -200,7 +192,6 @@
                     </form>
                 </div>
 
-                <!-- Student List -->
                 <div id="manageStudentList">
                     <div class="text-center text-gray-500 py-8">
                         <span class="text-4xl block mb-2">👥</span>
@@ -211,7 +202,6 @@
         </div>
     </div>
 
-    <!-- Attendance Check Modal -->
     <div id="attendanceModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div class="p-6 border-b border-purple-100">
@@ -225,7 +215,6 @@
             </div>
             
             <div class="p-6">
-                <!-- Date and Activity Selection -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">วันที่</label>
@@ -242,7 +231,6 @@
                     </div>
                 </div>
 
-                <!-- Group Selection for Attendance -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">กอง</label>
@@ -262,7 +250,6 @@
                     </div>
                 </div>
 
-                <!-- Attendance List -->
                 <div id="attendanceStudentList">
                     <div class="text-center text-gray-500 py-8">
                         <span class="text-4xl block mb-2">✅</span>
@@ -270,7 +257,6 @@
                     </div>
                 </div>
 
-                <!-- Save Attendance Button -->
                 <div class="flex justify-end mt-6">
                     <button onclick="saveAttendance()" class="px-6 py-2 btn-primary text-white rounded-lg font-medium">
                         💾 บันทึกการเช็คชื่อ
@@ -280,7 +266,6 @@
         </div>
     </div>
 
-    <!-- Activity Recording Modal -->
     <div id="activityModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div class="p-6 border-b border-purple-100">
@@ -295,7 +280,6 @@
             
             <div class="p-6">
                 <form id="activityForm">
-                    <!-- Activity Info -->
                     <div class="mb-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
@@ -309,7 +293,6 @@
                         </div>
                     </div>
 
-                    <!-- Group and Troop Selection -->
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-2">👥 เลือกกองและหมู่</label>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -325,36 +308,21 @@
                             </div>
                             <div>
                                 <label class="block text-xs text-gray-600 mb-1">หมู่</label>
-                                <select id="selectedTroop" onchange="loadStudentList()" class="w-full px-3 py-2 rounded-lg border border-purple-200 focus:ring-2 focus:ring-purple-500" disabled>
+                                <select id="selectedTroop" class="w-full px-3 py-2 rounded-lg border border-purple-200 focus:ring-2 focus:ring-purple-500" disabled>
                                     <option value="">เลือกหมู่</option>
                                 </select>
                             </div>
                         </div>
-                        
-                        <!-- Student List for Attendance -->
-                        <div id="studentAttendanceList" class="hidden">
-                            <div class="bg-purple-50 rounded-lg p-4">
-                                <h4 class="font-medium text-gray-800 mb-3 flex items-center">
-                                    <span class="mr-2">📋</span>รายชื่อนักเรียน - เช็คชื่อ
-                                </h4>
-                                <div id="studentCheckList" class="space-y-2">
-                                    <!-- Student attendance list will be populated here -->
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
-                    <!-- Rubric Assessment -->
                     <div class="mb-6">
                         <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                             <span class="mr-2">⭐</span>เกณฑ์การประเมิน
                         </h4>
                         <div class="space-y-3" id="rubricItems">
-                            <!-- Rubric items will be populated by JavaScript -->
-                        </div>
+                            </div>
                     </div>
 
-                    <!-- Score and Comments -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">🎯 คะแนนรวม</label>
@@ -373,19 +341,16 @@
                         </div>
                     </div>
 
-                    <!-- Comments -->
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-2">💬 ความคิดเห็น/คอมเมนท์</label>
                         <textarea id="comments" rows="4" class="w-full px-4 py-2 rounded-lg border border-purple-200 focus:ring-2 focus:ring-purple-500" placeholder="บันทึกความคิดเห็นเกี่ยวกับการทำกิจกรรม..."></textarea>
                     </div>
 
-                    <!-- Notes -->
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-2">📝 หมายเหตุของผู้กำกับ</label>
                         <textarea id="notes" rows="3" class="w-full px-4 py-2 rounded-lg border border-purple-200 focus:ring-2 focus:ring-purple-500" placeholder="หมายเหตุเพิ่มเติม..."></textarea>
                     </div>
 
-                    <!-- Signature -->
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-2">✍️ ลายเซ็นผู้กำกับ</label>
                         <div class="signature-pad rounded-lg p-4 text-center">
@@ -396,7 +361,6 @@
                         </div>
                     </div>
 
-                    <!-- Action Buttons -->
                     <div class="flex justify-end space-x-3">
                         <button type="button" onclick="closeModal()" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
                             ยกเลิก
@@ -411,191 +375,62 @@
     </div>
 
     <script>
+        // *** START CONFIGURATION ***
+        // -----------------------------------------------------------------------------
+        // <<< สำคัญ >>> วาง URL ของเว็บแอปที่คุณได้จากการ Deploy ใหม่ที่นี่
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxoNKQtmbti9-i2QNOnkF_vQb0bbbfWTzvWxfjD7oulooaRb57XcjkvzvJlo9rERAjY/exec'; 
+        // -----------------------------------------------------------------------------
+        // *** END CONFIGURATION ***
+
         // Schedule data for each grade
         const scheduleData = {
             m1: {
                 title: "ม.1 - พื้นฐานและการปรับตัว",
                 focus: "ระเบียบวินัย – เงื่อนพื้นฐาน – การทำงานเป็นหมู่",
                 schedule: [
-                    {
-                        time: "08.30 – 09.00",
-                        day1: "พิธีเปิด / เคารพธงชาติ",
-                        day2: "กิจกรรมหน้าเสาธง",
-                        day3: "กิจกรรมหน้าเสาธง"
-                    },
-                    {
-                        time: "09.00 – 10.00",
-                        day1: "ระเบียบแถว (เบื้องต้น)",
-                        day2: "เดินทางไกล (2–3 กม.)",
-                        day3: "ปฐมพยาบาลบาดแผลเล็กน้อย"
-                    },
-                    {
-                        time: "10.00 – 10.15",
-                        day1: "พัก",
-                        day2: "พัก",
-                        day3: "พัก"
-                    },
-                    {
-                        time: "10.15 – 11.15",
-                        day1: "เงื่อนพื้นฐาน (พิรอด, ตะกรุดเบ็ด, ขัดสมาธิ)",
-                        day2: "ฝึกใช้เข็มทิศ",
-                        day3: "การก่อไฟง่าย ๆ"
-                    },
-                    {
-                        time: "11.15 – 12.00",
-                        day1: "เกมกลุ่มสัมพันธ์",
-                        day2: "กิจกรรม Teamwork",
-                        day3: "การแข่งขันผูกเงื่อน"
-                    },
-                    {
-                        time: "12.00 – 13.00",
-                        day1: "พักกลางวัน",
-                        day2: "พักกลางวัน",
-                        day3: "พักกลางวัน"
-                    },
-                    {
-                        time: "13.00 – 14.30",
-                        day1: "ใช้เข็มทิศเบื้องต้น",
-                        day2: "บำเพ็ญประโยชน์ (ในโรงเรียน)",
-                        day3: "กิจกรรมทบทวน (เงื่อน + เข็มทิศ)"
-                    },
-                    {
-                        time: "14.30 – 15.30",
-                        day1: "เกมผู้นำ-ผู้ตาม",
-                        day2: "เพลงและเกมลูกเสือ",
-                        day3: "สะท้อนคิด (Reflection)"
-                    },
-                    {
-                        time: "15.30 – 16.00",
-                        day1: "สรุปกิจกรรม",
-                        day2: "สรุปกิจกรรม",
-                        day3: "พิธีปิด + มอบเกียรติบัตร"
-                    }
+                    { time: "08.30 – 09.00", day1: "พิธีเปิด / เคารพธงชาติ", day2: "กิจกรรมหน้าเสาธง", day3: "กิจกรรมหน้าเสาธง" },
+                    { time: "09.00 – 10.00", day1: "ระเบียบแถว (เบื้องต้น)", day2: "เดินทางไกล (2–3 กม.)", day3: "ปฐมพยาบาลบาดแผลเล็กน้อย" },
+                    { time: "10.00 – 10.15", day1: "พัก", day2: "พัก", day3: "พัก" },
+                    { time: "10.15 – 11.15", day1: "เงื่อนพื้นฐาน (พิรอด, ตะกรุดเบ็ด, ขัดสมาธิ)", day2: "ฝึกใช้เข็มทิศ", day3: "การก่อไฟง่าย ๆ" },
+                    { time: "11.15 – 12.00", day1: "เกมกลุ่มสัมพันธ์", day2: "กิจกรรม Teamwork", day3: "การแข่งขันผูกเงื่อน" },
+                    { time: "12.00 – 13.00", day1: "พักกลางวัน", day2: "พักกลางวัน", day3: "พักกลางวัน" },
+                    { time: "13.00 – 14.30", day1: "ใช้เข็มทิศเบื้องต้น", day2: "บำเพ็ญประโยชน์ (ในโรงเรียน)", day3: "กิจกรรมทบทวน (เงื่อน + เข็มทิศ)" },
+                    { time: "14.30 – 15.30", day1: "เกมผู้นำ-ผู้ตาม", day2: "เพลงและเกมลูกเสือ", day3: "สะท้อนคิด (Reflection)" },
+                    { time: "15.30 – 16.00", day1: "สรุปกิจกรรม", day2: "สรุปกิจกรรม", day3: "พิธีปิด + มอบเกียรติบัตร" }
                 ]
             },
             m2: {
                 title: "ม.2 - การประยุกต์ใช้และความรับผิดชอบ",
                 focus: "การสื่อสาร – เงื่อนประยุกต์ – เดินทางไกลจริง – ปฐมพยาบาลขั้นกลาง",
                 schedule: [
-                    {
-                        time: "08.30 – 09.00",
-                        day1: "พิธีเปิด / หน้าเสาธง",
-                        day2: "กิจกรรมหน้าเสาธง",
-                        day3: "กิจกรรมหน้าเสาธง"
-                    },
-                    {
-                        time: "09.00 – 10.00",
-                        day1: "ระเบียบแถวขั้นสูง (เดินหมู่, รายงานแถว)",
-                        day2: "เดินทางไกล (4–5 กม.)",
-                        day3: "ปฐมพยาบาล (ห้ามเลือด, หามผู้บาดเจ็บ)"
-                    },
-                    {
-                        time: "10.00 – 10.15",
-                        day1: "พัก",
-                        day2: "พัก",
-                        day3: "พัก"
-                    },
-                    {
-                        time: "10.15 – 11.15",
-                        day1: "เงื่อนประยุกต์ (บ่วงสายธนู, เงื่อนจับตะกร้า)",
-                        day2: "ศึกษาธรรมชาติ / จุดเรียนรู้",
-                        day3: "การสร้างที่พักชั่วคราว"
-                    },
-                    {
-                        time: "11.15 – 12.00",
-                        day1: "เกมผู้นำ-ผู้ตาม",
-                        day2: "ฐานเชื่อใจ/Team Building",
-                        day3: "เกมกลุ่มสัมพันธ์"
-                    },
-                    {
-                        time: "12.00 – 13.00",
-                        day1: "พักกลางวัน",
-                        day2: "พักกลางวัน",
-                        day3: "พักกลางวัน"
-                    },
-                    {
-                        time: "13.00 – 14.30",
-                        day1: "การใช้เข็มทิศร่วมกับแผนที่",
-                        day2: "บำเพ็ญประโยชน์ (ชุมชน/วัด)",
-                        day3: "การแข่งขันฐานลูกเสือ (เงื่อน + เข็มทิศ + ปฐมพยาบาล)"
-                    },
-                    {
-                        time: "14.30 – 15.30",
-                        day1: "เกมสร้างทีม",
-                        day2: "เพลงลูกเสือประสานเสียง",
-                        day3: "กิจกรรมสะท้อนคิด"
-                    },
-                    {
-                        time: "15.30 – 16.00",
-                        day1: "สรุปกิจกรรม",
-                        day2: "สรุปกิจกรรม",
-                        day3: "พิธีปิด + มอบเกียรติบัตร"
-                    }
+                    { time: "08.30 – 09.00", day1: "พิธีเปิด / หน้าเสาธง", day2: "กิจกรรมหน้าเสาธง", day3: "กิจกรรมหน้าเสาธง" },
+                    { time: "09.00 – 10.00", day1: "ระเบียบแถวขั้นสูง (เดินหมู่, รายงานแถว)", day2: "เดินทางไกล (4–5 กม.)", day3: "ปฐมพยาบาล (ห้ามเลือด, หามผู้บาดเจ็บ)" },
+                    { time: "10.00 – 10.15", day1: "พัก", day2: "พัก", day3: "พัก" },
+                    { time: "10.15 – 11.15", day1: "เงื่อนประยุกต์ (บ่วงสายธนู, เงื่อนจับตะกร้า)", day2: "ศึกษาธรรมชาติ / จุดเรียนรู้", day3: "การสร้างที่พักชั่วคราว" },
+                    { time: "11.15 – 12.00", day1: "เกมผู้นำ-ผู้ตาม", day2: "ฐานเชื่อใจ/Team Building", day3: "เกมกลุ่มสัมพันธ์" },
+                    { time: "12.00 – 13.00", day1: "พักกลางวัน", day2: "พักกลางวัน", day3: "พักกลางวัน" },
+                    { time: "13.00 – 14.30", day1: "การใช้เข็มทิศร่วมกับแผนที่", day2: "บำเพ็ญประโยชน์ (ชุมชน/วัด)", day3: "การแข่งขันฐานลูกเสือ (เงื่อน + เข็มทิศ + ปฐมพยาบาล)" },
+                    { time: "14.30 – 15.30", day1: "เกมสร้างทีม", day2: "เพลงลูกเสือประสานเสียง", day3: "กิจกรรมสะท้อนคิด" },
+                    { time: "15.30 – 16.00", day1: "สรุปกิจกรรม", day2: "สรุปกิจกรรม", day3: "พิธีปิด + มอบเกียรติบัตร" }
                 ]
             },
             m3: {
                 title: "ม.3 - ความเป็นผู้นำและการเอาตัวรอด",
                 focus: "ความเป็นผู้นำ – การวางแผน – เอาตัวรอด – ถ่ายทอดความรู้",
                 schedule: [
-                    {
-                        time: "08.30 – 09.00",
-                        day1: "พิธีเปิด / หน้าเสาธง",
-                        day2: "กิจกรรมหน้าเสาธง",
-                        day3: "กิจกรรมหน้าเสาธง"
-                    },
-                    {
-                        time: "09.00 – 10.00",
-                        day1: "ระเบียบแถวและการบังคับบัญชา (สั่งการเป็นหมู่)",
-                        day2: "เดินทางไกล (6–8 กม. + ฐานระหว่างทาง)",
-                        day3: "ปฐมพยาบาลขั้นสูง (ดามกระดูก, เคลื่อนย้าย)"
-                    },
-                    {
-                        time: "10.00 – 10.15",
-                        day1: "พัก",
-                        day2: "พัก",
-                        day3: "พัก"
-                    },
-                    {
-                        time: "10.15 – 11.15",
-                        day1: "เงื่อนขั้นสูง (เงื่อนผูกรอก, เงื่อนสมอ)",
-                        day2: "ศึกษาทรัพยากรท้องถิ่น / ภูมิปัญญาชุมชน",
-                        day3: "ทักษะเอาตัวรอด (หาน้ำ, หาทิศจากดวงดาว)"
-                    },
-                    {
-                        time: "11.15 – 12.00",
-                        day1: "กิจกรรมภาวะผู้นำ (ฝึกสั่งการกลุ่มเล็ก)",
-                        day2: "กิจกรรมผู้นำฐานย่อย",
-                        day3: "นักเรียน ม.3 จัดฐานให้น้อง ม.1–ม.2"
-                    },
-                    {
-                        time: "12.00 – 13.00",
-                        day1: "พักกลางวัน",
-                        day2: "พักกลางวัน",
-                        day3: "พักกลางวัน"
-                    },
-                    {
-                        time: "13.00 – 14.30",
-                        day1: "การใช้แผนที่ภูมิประเทศ",
-                        day2: "บำเพ็ญประโยชน์ (โครงการพัฒนาเล็ก ๆ)",
-                        day3: "การแข่งขันฐานรวม (เงื่อน + เข็มทิศ + ปฐมพยาบาล + ภาวะผู้นำ)"
-                    },
-                    {
-                        time: "14.30 – 15.30",
-                        day1: "เกมผู้นำ-การตัดสินใจ",
-                        day2: "การแสดงเชิงสร้างสรรค์ (Mini Camp Fire)",
-                        day3: "กิจกรรมสะท้อนคิด"
-                    },
-                    {
-                        time: "15.30 – 16.00",
-                        day1: "สรุปกิจกรรม",
-                        day2: "สรุปกิจกรรม",
-                        day3: "พิธีปิด + มอบเกียรติบัตร"
-                    }
+                    { time: "08.30 – 09.00", day1: "พิธีเปิด / หน้าเสาธง", day2: "กิจกรรมหน้าเสาธง", day3: "กิจกรรมหน้าเสาธง" },
+                    { time: "09.00 – 10.00", day1: "ระเบียบแถวและการบังคับบัญชา (สั่งการเป็นหมู่)", day2: "เดินทางไกล (6–8 กม. + ฐานระหว่างทาง)", day3: "ปฐมพยาบาลขั้นสูง (ดามกระดูก, เคลื่อนย้าย)" },
+                    { time: "10.00 – 10.15", day1: "พัก", day2: "พัก", day3: "พัก" },
+                    { time: "10.15 – 11.15", day1: "เงื่อนขั้นสูง (เงื่อนผูกรอก, เงื่อนสมอ)", day2: "ศึกษาทรัพยากรท้องถิ่น / ภูมิปัญญาชุมชน", day3: "ทักษะเอาตัวรอด (หาน้ำ, หาทิศจากดวงดาว)" },
+                    { time: "11.15 – 12.00", day1: "กิจกรรมภาวะผู้นำ (ฝึกสั่งการกลุ่มเล็ก)", day2: "กิจกรรมผู้นำฐานย่อย", day3: "นักเรียน ม.3 จัดฐานให้น้อง ม.1–ม.2" },
+                    { time: "12.00 – 13.00", day1: "พักกลางวัน", day2: "พักกลางวัน", day3: "พักกลางวัน" },
+                    { time: "13.00 – 14.30", day1: "การใช้แผนที่ภูมิประเทศ", day2: "บำเพ็ญประโยชน์ (โครงการพัฒนาเล็ก ๆ)", day3: "การแข่งขันฐานรวม (เงื่อน + เข็มทิศ + ปฐมพยาบาล + ภาวะผู้นำ)" },
+                    { time: "14.30 – 15.30", day1: "เกมผู้นำ-การตัดสินใจ", day2: "การแสดงเชิงสร้างสรรค์ (Mini Camp Fire)", day3: "กิจกรรมสะท้อนคิด" },
+                    { time: "15.30 – 16.00", day1: "สรุปกิจกรรม", day2: "สรุปกิจกรรม", day3: "พิธีปิด + มอบเกียรติบัตร" }
                 ]
             }
         };
 
-        // Rubric criteria for different activities
         const rubricCriteria = {
             default: [
                 { criteria: "การเข้าร่วมกิจกรรม", maxScore: 25 },
@@ -617,105 +452,26 @@
             ]
         };
 
-        // Student data storage
-        let studentData = {
-            กอง1: {
-                หมู่1: [
-                    { id: '001', firstName: 'สมชาย', lastName: 'ใจดี' },
-                    { id: '002', firstName: 'สมหญิง', lastName: 'รักเรียน' },
-                    { id: '003', firstName: 'วิชัย', lastName: 'มานะ' }
-                ],
-                หมู่2: [
-                    { id: '004', firstName: 'นิรันดร์', lastName: 'สุขใส' },
-                    { id: '005', firstName: 'ปรีชา', lastName: 'เก่งกาจ' }
-                ],
-                หมู่3: [
-                    { id: '006', firstName: 'สุรชัย', lastName: 'ดีเด่น' },
-                    { id: '007', firstName: 'อนุชา', lastName: 'มั่นคง' }
-                ],
-                หมู่4: [
-                    { id: '008', firstName: 'ธนาคาร', lastName: 'เจริญ' },
-                    { id: '009', firstName: 'กิตติ', lastName: 'ศักดิ์' }
-                ]
-            },
-            กอง2: {
-                หมู่1: [
-                    { id: '010', firstName: 'มานิต', lastName: 'สว่าง' },
-                    { id: '011', firstName: 'ชัยวัฒน์', lastName: 'เก่า' }
-                ],
-                หมู่2: [
-                    { id: '012', firstName: 'ประยุทธ', lastName: 'ใหม่' },
-                    { id: '013', firstName: 'สมศักดิ์', lastName: 'ดี' }
-                ],
-                หมู่3: [
-                    { id: '014', firstName: 'วิทยา', lastName: 'เก่ง' },
-                    { id: '015', firstName: 'อำนาจ', lastName: 'มาก' }
-                ],
-                หมู่4: [
-                    { id: '016', firstName: 'บุญมี', lastName: 'เยอะ' },
-                    { id: '017', firstName: 'สุขสันต์', lastName: 'ดี' }
-                ]
-            },
-            กอง3: {
-                หมู่1: [
-                    { id: '018', firstName: 'ชาญชัย', lastName: 'เก่ง' },
-                    { id: '019', firstName: 'วีระ', lastName: 'ชาติ' }
-                ],
-                หมู่2: [
-                    { id: '020', firstName: 'สมบัติ', lastName: 'เงิน' },
-                    { id: '021', firstName: 'ธีระ', lastName: 'ศักดิ์' }
-                ],
-                หมู่3: [
-                    { id: '022', firstName: 'อนันต์', lastName: 'สุข' },
-                    { id: '023', firstName: 'วิษณุ', lastName: 'กรรม' }
-                ],
-                หมู่4: [
-                    { id: '024', firstName: 'ชัยณรงค์', lastName: 'ดี' },
-                    { id: '025', firstName: 'ประสิทธิ์', lastName: 'ผล' }
-                ]
-            },
-            กอง4: {
-                หมู่1: [
-                    { id: '026', firstName: 'สุรพล', lastName: 'แก้ว' },
-                    { id: '027', firstName: 'ชาคริต', lastName: 'ทอง' }
-                ],
-                หมู่2: [
-                    { id: '028', firstName: 'วิชิต', lastName: 'เงิน' },
-                    { id: '029', firstName: 'สมพงษ์', lastName: 'นคร' }
-                ],
-                หมู่3: [
-                    { id: '030', firstName: 'อดิศักดิ์', lastName: 'ใหญ่' },
-                    { id: '031', firstName: 'ปิยะ', lastName: 'ชาติ' }
-                ],
-                หมู่4: [
-                    { id: '032', firstName: 'สุทธิ', lastName: 'ชัย' },
-                    { id: '033', firstName: 'วิรัช', lastName: 'ศักดิ์' }
-                ]
-            }
+        let studentData = JSON.parse(localStorage.getItem('scoutStudentData')) || {
+             กอง1: { หมู่1: [], หมู่2: [], หมู่3: [], หมู่4: [] },
+             กอง2: { หมู่1: [], หมู่2: [], หมู่3: [], หมู่4: [] },
+             กอง3: { หมู่1: [], หมู่2: [], หมู่3: [], หมู่4: [] },
+             กอง4: { หมู่1: [], หมู่2: [], หมู่3: [], หมู่4: [] }
         };
 
-        // Current editing student
         let editingStudent = null;
-
-        // Signature canvas setup
         let canvas, ctx, isDrawing = false;
 
-        // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
             loadSchedule();
             setupSignatureCanvas();
-            
-            // Grade selection change handler
             document.getElementById('gradeSelect').addEventListener('change', loadSchedule);
-            
-            // Set today's date for attendance
             document.getElementById('attendanceDate').value = new Date().toISOString().split('T')[0];
-            
-            // Student form submission
             document.getElementById('addStudentForm').addEventListener('submit', function(e) {
                 e.preventDefault();
                 saveStudent();
             });
+            document.getElementById('activityForm').addEventListener('submit', handleActivityFormSubmit);
         });
 
         function loadSchedule() {
@@ -780,10 +536,11 @@
         }
 
         function openActivityModal(time, activity, day) {
+            document.getElementById('activityForm').reset();
+            clearSignature();
             document.getElementById('activityTime').value = time;
             document.getElementById('activityName').value = activity;
             
-            // Load appropriate rubric criteria
             let criteria = rubricCriteria.default;
             if (activity.includes('เงื่อน') || activity.includes('เข็มทิศ') || activity.includes('ปฐมพยาบาล')) {
                 criteria = rubricCriteria.skill;
@@ -797,33 +554,26 @@
 
         function loadRubricItems(criteria) {
             const container = document.getElementById('rubricItems');
-            let html = '';
-            
-            criteria.forEach((item, index) => {
-                html += `
-                    <div class="rubric-item rounded-lg p-4 border border-purple-200">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="font-medium text-gray-800">${item.criteria}</span>
-                            <span class="text-sm text-purple-600">คะแนนเต็ม: ${item.maxScore}</span>
-                        </div>
-                        <div class="flex items-center space-x-4">
-                            <input type="range" min="0" max="${item.maxScore}" value="0" 
-                                   class="flex-1 h-2 bg-purple-200 rounded-lg appearance-none cursor-pointer"
-                                   id="rubric_${index}" 
-                                   oninput="updateRubricScore(${index}, this.value, ${item.maxScore})">
-                            <span id="score_${index}" class="font-bold text-purple-600 min-w-[60px]">0/${item.maxScore}</span>
-                        </div>
+            container.innerHTML = criteria.map((item, index) => `
+                <div class="rubric-item rounded-lg p-4 border border-purple-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-medium text-gray-800">${item.criteria}</span>
+                        <span class="text-sm text-purple-600">คะแนนเต็ม: ${item.maxScore}</span>
                     </div>
-                `;
-            });
-            
-            container.innerHTML = html;
+                    <div class="flex items-center space-x-4">
+                        <input type="range" min="0" max="${item.maxScore}" value="0" 
+                               class="flex-1 h-2 bg-purple-200 rounded-lg appearance-none cursor-pointer"
+                               id="rubric_${index}" 
+                               oninput="updateRubricScore(${index}, this.value, ${item.maxScore})">
+                        <span id="score_${index}" class="font-bold text-purple-600 min-w-[60px]">0/${item.maxScore}</span>
+                    </div>
+                </div>
+            `).join('');
         }
 
         function updateRubricScore(index, value, maxScore) {
             document.getElementById(`score_${index}`).textContent = `${value}/${maxScore}`;
             
-            // Calculate total score
             const rubricItems = document.querySelectorAll('[id^="rubric_"]');
             let total = 0;
             rubricItems.forEach(item => {
@@ -831,7 +581,6 @@
             });
             document.getElementById('totalScore').value = total;
             
-            // Auto-select grade level
             const gradeSelect = document.getElementById('gradeLevel');
             if (total >= 90) gradeSelect.value = 'ดีเยี่ยม';
             else if (total >= 80) gradeSelect.value = 'ดีมาก';
@@ -844,37 +593,49 @@
             canvas = document.getElementById('signatureCanvas');
             ctx = canvas.getContext('2d');
             
-            // Set canvas background
             ctx.fillStyle = '#faf5ff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Mouse events
             canvas.addEventListener('mousedown', startDrawing);
             canvas.addEventListener('mousemove', draw);
             canvas.addEventListener('mouseup', stopDrawing);
             canvas.addEventListener('mouseout', stopDrawing);
             
-            // Touch events for mobile
-            canvas.addEventListener('touchstart', handleTouch);
-            canvas.addEventListener('touchmove', handleTouch);
+            canvas.addEventListener('touchstart', handleTouch, { passive: false });
+            canvas.addEventListener('touchmove', handleTouch, { passive: false });
             canvas.addEventListener('touchend', stopDrawing);
+        }
+
+        function getMousePos(canvas, evt) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: evt.clientX - rect.left,
+                y: evt.clientY - rect.top
+            };
+        }
+
+        function getTouchPos(canvas, touch) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: touch.clientX - rect.left,
+                y: touch.clientY - rect.top
+            };
         }
 
         function startDrawing(e) {
             isDrawing = true;
-            const rect = canvas.getBoundingClientRect();
+            const pos = getMousePos(canvas, e);
             ctx.beginPath();
-            ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+            ctx.moveTo(pos.x, pos.y);
         }
 
         function draw(e) {
             if (!isDrawing) return;
-            
-            const rect = canvas.getBoundingClientRect();
+            const pos = getMousePos(canvas, e);
             ctx.lineWidth = 2;
             ctx.lineCap = 'round';
             ctx.strokeStyle = '#8b5cf6';
-            ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+            ctx.lineTo(pos.x, pos.y);
             ctx.stroke();
         }
 
@@ -885,14 +646,21 @@
         function handleTouch(e) {
             e.preventDefault();
             const touch = e.touches[0];
-            const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : 
-                                            e.type === 'touchmove' ? 'mousemove' : 'mouseup', {
-                clientX: touch.clientX,
-                clientY: touch.clientY
-            });
-            canvas.dispatchEvent(mouseEvent);
-        }
+            const pos = getTouchPos(canvas, touch);
 
+            if (e.type === 'touchstart') {
+                isDrawing = true;
+                ctx.beginPath();
+                ctx.moveTo(pos.x, pos.y);
+            } else if (e.type === 'touchmove' && isDrawing) {
+                 ctx.lineWidth = 2;
+                 ctx.lineCap = 'round';
+                 ctx.strokeStyle = '#8b5cf6';
+                 ctx.lineTo(pos.x, pos.y);
+                 ctx.stroke();
+            }
+        }
+        
         function clearSignature() {
             ctx.fillStyle = '#faf5ff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -900,32 +668,35 @@
 
         function closeModal() {
             document.getElementById('activityModal').classList.add('hidden');
-            document.getElementById('activityForm').reset();
-            clearSignature();
         }
 
-        // Form submission
-        document.getElementById('activityForm').addEventListener('submit', function(e) {
+        function handleActivityFormSubmit(e) {
             e.preventDefault();
             
-            // Show loading
+            const group = document.getElementById('selectedGroup').value;
+            const troop = document.getElementById('selectedTroop').value;
+
+            if (!group || !troop) {
+                Swal.fire('ข้อผิดพลาด', 'กรุณาเลือกกองและหมู่ก่อนบันทึก', 'warning');
+                return;
+            }
+            
             Swal.fire({
                 title: 'กำลังบันทึกข้อมูล...',
                 text: 'กรุณารอสักครู่',
                 allowOutsideClick: false,
                 showConfirmButton: false,
-                willOpen: () => {
-                    Swal.showLoading();
-                }
+                willOpen: () => Swal.showLoading()
             });
             
-            // Collect form data
             const formData = {
+                type: 'activity',
                 timestamp: new Date().toLocaleString('th-TH'),
                 grade: document.getElementById('gradeSelect').value,
                 time: document.getElementById('activityTime').value,
                 activity: document.getElementById('activityName').value,
-                groups: Array.from(document.querySelectorAll('input[name="groups"]:checked')).map(cb => cb.value),
+                group: group,
+                troop: troop,
                 rubricScores: {},
                 totalScore: document.getElementById('totalScore').value,
                 gradeLevel: document.getElementById('gradeLevel').value,
@@ -934,17 +705,14 @@
                 signature: canvas.toDataURL()
             };
             
-            // Collect rubric scores
             const rubricItems = document.querySelectorAll('[id^="rubric_"]');
             rubricItems.forEach((item, index) => {
                 formData.rubricScores[`criteria_${index}`] = item.value;
             });
             
-            // Send data using JSONP
             sendDataToGoogleSheets(formData);
-        });
+        }
 
-        // Student Management Functions
         function openStudentManagement() {
             document.getElementById('studentManagementModal').classList.remove('hidden');
         }
@@ -962,20 +730,12 @@
             
             if (groupSelect.value) {
                 for (let i = 1; i <= 4; i++) {
-                    const option = document.createElement('option');
-                    option.value = `หมู่${i}`;
-                    option.textContent = `หมู่ ${i}`;
-                    troopSelect.appendChild(option);
+                    troopSelect.add(new Option(`หมู่ ${i}`, `หมู่${i}`));
                 }
-                
-                // Enable the troop select
                 troopSelect.disabled = false;
             } else {
                 troopSelect.disabled = true;
             }
-            
-            // Hide student list when group changes
-            document.getElementById('studentAttendanceList').classList.add('hidden');
         }
 
         function updateManageTroopOptions() {
@@ -986,10 +746,7 @@
             
             if (groupSelect.value) {
                 for (let i = 1; i <= 4; i++) {
-                    const option = document.createElement('option');
-                    option.value = `หมู่${i}`;
-                    option.textContent = `หมู่ ${i}`;
-                    troopSelect.appendChild(option);
+                    troopSelect.add(new Option(`หมู่ ${i}`, `หมู่${i}`));
                 }
             }
         }
@@ -1002,64 +759,18 @@
             
             if (groupSelect.value) {
                 for (let i = 1; i <= 4; i++) {
-                    const option = document.createElement('option');
-                    option.value = `หมู่${i}`;
-                    option.textContent = `หมู่ ${i}`;
-                    troopSelect.appendChild(option);
+                    troopSelect.add(new Option(`หมู่ ${i}`, `หมู่${i}`));
                 }
-            }
-        }
-
-        function loadStudentList() {
-            const group = document.getElementById('selectedGroup').value;
-            const troop = document.getElementById('selectedTroop').value;
-            
-            if (group && troop && studentData[group] && studentData[group][troop]) {
-                const students = studentData[group][troop];
-                const container = document.getElementById('studentCheckList');
-                
-                let html = '';
-                students.forEach(student => {
-                    html += `
-                        <div class="flex items-center justify-between p-3 bg-white rounded-lg border border-purple-200">
-                            <div class="flex items-center space-x-3">
-                                <span class="font-medium text-gray-800">${student.firstName} ${student.lastName}</span>
-                                <span class="text-sm text-gray-500">(${student.id})</span>
-                            </div>
-                            <div class="flex space-x-2">
-                                <label class="flex items-center space-x-1 cursor-pointer">
-                                    <input type="radio" name="attendance_${student.id}" value="มา" class="text-green-600 focus:ring-green-500" checked>
-                                    <span class="text-sm text-green-600">มา</span>
-                                </label>
-                                <label class="flex items-center space-x-1 cursor-pointer">
-                                    <input type="radio" name="attendance_${student.id}" value="ลา" class="text-yellow-600 focus:ring-yellow-500">
-                                    <span class="text-sm text-yellow-600">ลา</span>
-                                </label>
-                                <label class="flex items-center space-x-1 cursor-pointer">
-                                    <input type="radio" name="attendance_${student.id}" value="ขาด" class="text-red-600 focus:ring-red-500">
-                                    <span class="text-sm text-red-600">ขาด</span>
-                                </label>
-                                <label class="flex items-center space-x-1 cursor-pointer">
-                                    <input type="radio" name="attendance_${student.id}" value="หนี" class="text-orange-600 focus:ring-orange-500">
-                                    <span class="text-sm text-orange-600">หนี</span>
-                                </label>
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                container.innerHTML = html;
-                document.getElementById('studentAttendanceList').classList.remove('hidden');
             }
         }
 
         function loadManageStudentList() {
             const group = document.getElementById('manageGroup').value;
             const troop = document.getElementById('manageTroop').value;
+            const container = document.getElementById('manageStudentList');
             
-            if (group && troop && studentData[group] && studentData[group][troop]) {
+            if (group && troop && studentData[group]?.[troop]) {
                 const students = studentData[group][troop];
-                const container = document.getElementById('manageStudentList');
                 
                 let html = `
                     <div class="bg-purple-50 rounded-lg p-4 mb-4">
@@ -1081,12 +792,8 @@
                                 </div>
                             </div>
                             <div class="flex space-x-2">
-                                <button onclick="editStudent('${group}', '${troop}', ${index})" class="px-3 py-1 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors">
-                                    ✏️ แก้ไข
-                                </button>
-                                <button onclick="deleteStudent('${group}', '${troop}', ${index})" class="px-3 py-1 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-colors">
-                                    🗑️ ลบ
-                                </button>
+                                <button onclick="editStudent('${group}', '${troop}', ${index})" class="px-3 py-1 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors">✏️ แก้ไข</button>
+                                <button onclick="deleteStudent('${group}', '${troop}', ${index})" class="px-3 py-1 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-colors">🗑️ ลบ</button>
                             </div>
                         </div>
                     `;
@@ -1095,7 +802,7 @@
                 html += '</div>';
                 container.innerHTML = html;
             } else {
-                document.getElementById('manageStudentList').innerHTML = `
+                container.innerHTML = `
                     <div class="text-center text-gray-500 py-8">
                         <span class="text-4xl block mb-2">👥</span>
                         <p>เลือกกองและหมู่เพื่อจัดการนักเรียน</p>
@@ -1109,12 +816,7 @@
             const troop = document.getElementById('manageTroop').value;
             
             if (!group || !troop) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'กรุณาเลือกกองและหมู่',
-                    text: 'เลือกกองและหมู่ก่อนเพิ่มนักเรียน',
-                    confirmButtonColor: '#8b5cf6'
-                });
+                Swal.fire('กรุณาเลือกกองและหมู่', 'เลือกกองและหมู่ก่อนเพิ่มนักเรียน', 'warning');
                 return;
             }
             
@@ -1127,6 +829,10 @@
         function hideStudentForm() {
             document.getElementById('studentForm').classList.add('hidden');
             editingStudent = null;
+        }
+        
+        function saveLocalStudentData() {
+            localStorage.setItem('scoutStudentData', JSON.stringify(studentData));
         }
 
         function editStudent(group, troop, index) {
@@ -1155,14 +861,9 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     studentData[group][troop].splice(index, 1);
+                    saveLocalStudentData();
                     loadManageStudentList();
-                    
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'ลบสำเร็จ',
-                        text: 'ลบข้อมูลนักเรียนเรียบร้อย',
-                        confirmButtonColor: '#8b5cf6'
-                    });
+                    Swal.fire('ลบสำเร็จ', 'ลบข้อมูลนักเรียนเรียบร้อย', 'success');
                 }
             });
         }
@@ -1175,67 +876,32 @@
             const studentId = document.getElementById('studentId').value.trim();
             
             if (!firstName || !lastName || !studentId) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'กรุณากรอกข้อมูลให้ครบ',
-                    confirmButtonColor: '#8b5cf6'
-                });
+                Swal.fire('กรุณากรอกข้อมูลให้ครบ', '', 'warning');
                 return;
             }
             
-            // Check for duplicate student ID
-            let isDuplicate = false;
-            for (const g in studentData) {
-                for (const t in studentData[g]) {
-                    const students = studentData[g][t];
-                    for (let i = 0; i < students.length; i++) {
-                        if (students[i].id === studentId) {
-                            // Allow same ID if editing the same student
-                            if (!editingStudent || editingStudent.group !== g || editingStudent.troop !== t || editingStudent.index !== i) {
-                                isDuplicate = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (isDuplicate) break;
-                }
-                if (isDuplicate) break;
-            }
-            
+            let isDuplicate = Object.values(studentData).flatMap(g => Object.values(g)).flat()
+                .some((s, i) => s.id === studentId && !(editingStudent && i === editingStudent.index));
+
             if (isDuplicate) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'เลขประจำตัวซ้ำ',
-                    text: 'เลขประจำตัวนี้มีอยู่แล้วในระบบ',
-                    confirmButtonColor: '#8b5cf6'
-                });
+                Swal.fire('เลขประจำตัวซ้ำ', 'เลขประจำตัวนี้มีอยู่แล้วในระบบ', 'error');
                 return;
             }
             
             const studentObj = { id: studentId, firstName, lastName };
             
             if (editingStudent) {
-                // Edit existing student
                 studentData[editingStudent.group][editingStudent.troop][editingStudent.index] = studentObj;
             } else {
-                // Add new student
-                if (!studentData[group]) studentData[group] = {};
-                if (!studentData[group][troop]) studentData[group][troop] = [];
                 studentData[group][troop].push(studentObj);
             }
-            
+
+            saveLocalStudentData();
             hideStudentForm();
             loadManageStudentList();
-            
-            Swal.fire({
-                icon: 'success',
-                title: editingStudent ? 'แก้ไขสำเร็จ' : 'เพิ่มสำเร็จ',
-                text: editingStudent ? 'แก้ไขข้อมูลนักเรียนเรียบร้อย' : 'เพิ่มนักเรียนใหม่เรียบร้อย',
-                confirmButtonColor: '#8b5cf6'
-            });
+            Swal.fire(editingStudent ? 'แก้ไขสำเร็จ' : 'เพิ่มสำเร็จ', '', 'success');
         }
 
-        // Attendance Functions
         function openAttendanceCheck() {
             document.getElementById('attendanceModal').classList.remove('hidden');
         }
@@ -1247,11 +913,10 @@
         function loadAttendanceStudentList() {
             const group = document.getElementById('attendanceGroup').value;
             const troop = document.getElementById('attendanceTroop').value;
+            const container = document.getElementById('attendanceStudentList');
             
-            if (group && troop && studentData[group] && studentData[group][troop]) {
+            if (group && troop && studentData[group]?.[troop]) {
                 const students = studentData[group][troop];
-                const container = document.getElementById('attendanceStudentList');
-                
                 let html = `
                     <div class="bg-purple-50 rounded-lg p-4 mb-4">
                         <h4 class="font-medium text-gray-800">${group} ${troop} - เช็คชื่อ (${students.length} คน)</h4>
@@ -1272,22 +937,10 @@
                                 </div>
                             </div>
                             <div class="flex space-x-3">
-                                <label class="flex items-center space-x-2 cursor-pointer">
-                                    <input type="radio" name="attendance_${student.id}" value="มา" class="text-green-600 focus:ring-green-500" checked>
-                                    <span class="text-sm text-green-600 font-medium">✅ มา</span>
-                                </label>
-                                <label class="flex items-center space-x-2 cursor-pointer">
-                                    <input type="radio" name="attendance_${student.id}" value="ลา" class="text-yellow-600 focus:ring-yellow-500">
-                                    <span class="text-sm text-yellow-600 font-medium">📋 ลา</span>
-                                </label>
-                                <label class="flex items-center space-x-2 cursor-pointer">
-                                    <input type="radio" name="attendance_${student.id}" value="ขาด" class="text-red-600 focus:ring-red-500">
-                                    <span class="text-sm text-red-600 font-medium">❌ ขาด</span>
-                                </label>
-                                <label class="flex items-center space-x-2 cursor-pointer">
-                                    <input type="radio" name="attendance_${student.id}" value="หนี" class="text-orange-600 focus:ring-orange-500">
-                                    <span class="text-sm text-orange-600 font-medium">🏃 หนี</span>
-                                </label>
+                                <label class="flex items-center space-x-2 cursor-pointer"><input type="radio" name="attendance_${student.id}" value="มา" class="text-green-600" checked><span class="text-sm">✅ มา</span></label>
+                                <label class="flex items-center space-x-2 cursor-pointer"><input type="radio" name="attendance_${student.id}" value="ลา" class="text-yellow-600"><span class="text-sm">📋 ลา</span></label>
+                                <label class="flex items-center space-x-2 cursor-pointer"><input type="radio" name="attendance_${student.id}" value="ขาด" class="text-red-600"><span class="text-sm">❌ ขาด</span></label>
+                                <label class="flex items-center space-x-2 cursor-pointer"><input type="radio" name="attendance_${student.id}" value="หนี" class="text-orange-600"><span class="text-sm">🏃 หนี</span></label>
                             </div>
                         </div>
                     `;
@@ -1296,12 +949,7 @@
                 html += '</div>';
                 container.innerHTML = html;
             } else {
-                document.getElementById('attendanceStudentList').innerHTML = `
-                    <div class="text-center text-gray-500 py-8">
-                        <span class="text-4xl block mb-2">✅</span>
-                        <p>เลือกกองและหมู่เพื่อเช็คชื่อ</p>
-                    </div>
-                `;
+                container.innerHTML = `<div class="text-center text-gray-500 py-8"><span class="text-4xl block mb-2">✅</span><p>เลือกกองและหมู่เพื่อเช็คชื่อ</p></div>`;
             }
         }
 
@@ -1312,40 +960,29 @@
             const troop = document.getElementById('attendanceTroop').value;
             
             if (!date || !activity || !group || !troop) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'กรุณากรอกข้อมูลให้ครบ',
-                    text: 'เลือกวันที่ กิจกรรม กอง และหมู่',
-                    confirmButtonColor: '#8b5cf6'
-                });
+                Swal.fire('กรุณากรอกข้อมูลให้ครบ', 'เลือกวันที่ กิจกรรม กอง และหมู่', 'warning');
                 return;
             }
             
             const students = studentData[group][troop];
-            const attendanceData = [];
+            if (!students || students.length === 0) {
+                 Swal.fire('ไม่มีนักเรียน', 'ไม่พบข้อมูลนักเรียนในกองและหมู่นี้', 'warning');
+                 return;
+            }
+
+            const attendanceData = students.map(student => ({
+                studentId: student.id,
+                studentName: `${student.firstName} ${student.lastName}`,
+                status: document.querySelector(`input[name="attendance_${student.id}"]:checked`).value
+            }));
             
-            students.forEach(student => {
-                const attendanceRadio = document.querySelector(`input[name="attendance_${student.id}"]:checked`);
-                if (attendanceRadio) {
-                    attendanceData.push({
-                        studentId: student.id,
-                        studentName: `${student.firstName} ${student.lastName}`,
-                        status: attendanceRadio.value
-                    });
-                }
-            });
-            
-            // Show loading
             Swal.fire({
                 title: 'กำลังบันทึกการเช็คชื่อ...',
                 allowOutsideClick: false,
                 showConfirmButton: false,
-                willOpen: () => {
-                    Swal.showLoading();
-                }
+                willOpen: () => Swal.showLoading()
             });
             
-            // Prepare attendance data for Google Sheets
             const attendanceRecord = {
                 type: 'attendance',
                 timestamp: new Date().toLocaleString('th-TH'),
@@ -1356,179 +993,122 @@
                 attendanceData: attendanceData
             };
             
-            // Send to Google Sheets
             sendDataToGoogleSheets(attendanceRecord);
         }
 
-        // Local storage for demo purposes
+        // --- Data Submission and Handling ---
+        
         let activityRecords = JSON.parse(localStorage.getItem('scoutActivityRecords') || '[]');
         let attendanceRecords = JSON.parse(localStorage.getItem('scoutAttendanceRecords') || '[]');
 
         function sendDataToGoogleSheets(data) {
-            // Google Apps Script URL
-            const scriptURL = 'https://script.google.com/macros/s/AKfycbz2r-M5INOk3j7Rgzg3oDLsTTqCVPtKdhVXr3lV6GJMFCPtuCFOm6qniADlOGl_wGoe/exec';
-            
-            // Send data to Google Sheets
-            fetch(scriptURL, {
+            fetch(SCRIPT_URL, {
                 method: 'POST',
-                mode: 'no-cors',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // Use text/plain for reliability with Apps Script
                 body: JSON.stringify(data)
             })
-            .then(() => {
-                // Also save locally as backup
-                if (data.type === 'attendance') {
-                    attendanceRecords.push(data);
-                    localStorage.setItem('scoutAttendanceRecords', JSON.stringify(attendanceRecords));
+            .then(res => res.json())
+            .then(result => {
+                if (result.status === 'success') {
+                    saveLocally(data);
+                    showSuccessMessage(data, result.message);
                 } else {
-                    activityRecords.push(data);
-                    localStorage.setItem('scoutActivityRecords', JSON.stringify(activityRecords));
+                    throw new Error(result.message);
                 }
-                
-                showSuccessMessage(data);
             })
-            .catch((error) => {
-                console.error('Error sending to Google Sheets:', error);
-                // Still save locally if Google Sheets fails
-                if (data.type === 'attendance') {
-                    attendanceRecords.push(data);
-                    localStorage.setItem('scoutAttendanceRecords', JSON.stringify(attendanceRecords));
-                } else {
-                    activityRecords.push(data);
-                    localStorage.setItem('scoutActivityRecords', JSON.stringify(activityRecords));
-                }
-                
-                showSuccessMessage(data, true);
+            .catch(error => {
+                console.error('Error:', error);
+                saveLocally(data, true); // Save as offline data
+                showErrorMessage(data, error.message);
             });
         }
         
-        function showSuccessMessage(data, isOffline = false) {
-            // Simulate processing time
-            setTimeout(() => {
-                try {
-                    if (data.type === 'attendance') {
-                        // Save attendance data
-                        attendanceRecords.push(data);
-                        localStorage.setItem('scoutAttendanceRecords', JSON.stringify(attendanceRecords));
-                        
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'บันทึกการเช็คชื่อสำเร็จ! ✅',
-                            html: `
-                                <div class="text-left">
-                                    <p><strong>วันที่:</strong> ${data.date}</p>
-                                    <p><strong>กิจกรรม:</strong> ${data.activity}</p>
-                                    <p><strong>กอง-หมู่:</strong> ${data.group} ${data.troop}</p>
-                                    <p><strong>จำนวนนักเรียน:</strong> ${data.attendanceData.length} คน</p>
-                                </div>
-                                <div class="mt-4 p-3 ${isOffline ? 'bg-yellow-50' : 'bg-green-50'} rounded-lg">
-                                    <p class="text-sm ${isOffline ? 'text-yellow-700' : 'text-green-700'}">
-                                        ${isOffline ? '⚠️ บันทึกในเครื่องเท่านั้น (ไม่มีอินเทอร์เน็ต)' : '☁️ บันทึกลง Google Sheets และในเครื่องแล้ว'}
-                                    </p>
-                                    <p class="text-xs ${isOffline ? 'text-yellow-600' : 'text-green-600'} mt-1">คลิก "ดูรายงาน" เพื่อดูข้อมูลที่บันทึก</p>
-                                </div>
-                            `,
-                            confirmButtonColor: '#10b981',
-                            confirmButtonText: 'ตกลง',
-                            showCancelButton: true,
-                            cancelButtonText: 'ดูรายงาน',
-                            cancelButtonColor: '#8b5cf6'
-                        }).then((result) => {
-                            if (result.dismiss === Swal.DismissReason.cancel) {
-                                showAttendanceReport();
-                            }
-                        });
-                        
-                        closeAttendanceCheck();
-                        
-                    } else {
-                        // Save activity data
-                        activityRecords.push(data);
-                        localStorage.setItem('scoutActivityRecords', JSON.stringify(activityRecords));
-                        
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'บันทึกกิจกรรมสำเร็จ! 🎉',
-                            html: `
-                                <div class="text-left">
-                                    <p><strong>เวลา:</strong> ${data.time}</p>
-                                    <p><strong>กิจกรรม:</strong> ${data.activity}</p>
-                                    <p><strong>คะแนนรวม:</strong> ${data.totalScore}/100</p>
-                                    <p><strong>ระดับ:</strong> ${data.gradeLevel}</p>
-                                </div>
-                                <div class="mt-4 p-3 ${isOffline ? 'bg-yellow-50' : 'bg-purple-50'} rounded-lg">
-                                    <p class="text-sm ${isOffline ? 'text-yellow-700' : 'text-purple-700'}">
-                                        ${isOffline ? '⚠️ บันทึกในเครื่องเท่านั้น (ไม่มีอินเทอร์เน็ต)' : '☁️ บันทึกลง Google Sheets และในเครื่องแล้ว'}
-                                    </p>
-                                    <p class="text-xs ${isOffline ? 'text-yellow-600' : 'text-purple-600'} mt-1">คลิก "ดูรายงาน" เพื่อดูข้อมูลที่บันทึก</p>
-                                </div>
-                            `,
-                            confirmButtonColor: '#8b5cf6',
-                            confirmButtonText: 'ตกลง',
-                            showCancelButton: true,
-                            cancelButtonText: 'ดูรายงาน',
-                            cancelButtonColor: '#10b981'
-                        }).then((result) => {
-                            if (result.dismiss === Swal.DismissReason.cancel) {
-                                showActivityReport();
-                            }
-                        });
-                        
-                        closeModal();
-                    }
-                    
-                } catch (error) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'เกิดข้อผิดพลาด',
-                        text: 'ไม่สามารถบันทึกข้อมูลได้: ' + error.message,
-                        confirmButtonColor: '#ef4444'
-                    });
-                }
-            }, 1500);
+        function saveLocally(data, isOffline = false) {
+             if (isOffline) data.offline = true;
+
+             if (data.type === 'attendance') {
+                attendanceRecords.push(data);
+                localStorage.setItem('scoutAttendanceRecords', JSON.stringify(attendanceRecords));
+            } else {
+                activityRecords.push(data);
+                localStorage.setItem('scoutActivityRecords', JSON.stringify(activityRecords));
+            }
         }
+
+        function showSuccessMessage(data, serverMessage) {
+            const isAttendance = data.type === 'attendance';
+            const title = isAttendance ? 'บันทึกการเช็คชื่อสำเร็จ! ✅' : 'บันทึกกิจกรรมสำเร็จ! 🎉';
+            
+            Swal.fire({
+                icon: 'success',
+                title: title,
+                html: `
+                    <p class="text-sm">${serverMessage}</p>
+                    <div class="mt-4 p-3 bg-green-50 rounded-lg">
+                        <p class="text-sm text-green-700">☁️ บันทึกลง Google Sheets เรียบร้อย</p>
+                    </div>
+                `,
+                confirmButtonColor: isAttendance ? '#10b981' : '#8b5cf6'
+            });
+
+            if (isAttendance) {
+                closeAttendanceCheck();
+            } else {
+                closeModal();
+            }
+        }
+        
+        function showErrorMessage(data, errorMessage) {
+            const isAttendance = data.type === 'attendance';
+            const title = 'เกิดข้อผิดพลาด!';
+            
+            Swal.fire({
+                icon: 'error',
+                title: title,
+                html: `
+                    <p class="text-sm">ไม่สามารถบันทึกข้อมูลไปยัง Google Sheets ได้</p>
+                    <p class="text-xs text-gray-500 mt-1">(${errorMessage})</p>
+                    <div class="mt-4 p-3 bg-yellow-50 rounded-lg">
+                        <p class="text-sm text-yellow-700">⚠️ <strong>ข้อมูลถูกบันทึกไว้ในเครื่องของคุณแล้ว</strong></p>
+                        <p class="text-xs text-yellow-600 mt-1">คุณยังสามารถดูรายงานได้จากข้อมูลที่บันทึกไว้</p>
+                    </div>
+                `,
+                confirmButtonColor: '#ef4444'
+            });
+             if (isAttendance) {
+                closeAttendanceCheck();
+            } else {
+                closeModal();
+            }
+        }
+
+        // --- Reporting Functions ---
 
         function showActivityReport() {
             if (activityRecords.length === 0) {
-                Swal.fire({
-                    icon: 'info',
-                    title: 'ไม่มีข้อมูลกิจกรรม',
-                    text: 'ยังไม่มีการบันทึกกิจกรรมในระบบ',
-                    confirmButtonColor: '#8b5cf6'
-                });
+                Swal.fire('ไม่มีข้อมูลกิจกรรม', 'ยังไม่มีการบันทึกกิจกรรมในระบบ', 'info');
                 return;
             }
-
-            let reportHtml = `
-                <div class="max-h-96 overflow-y-auto text-left">
-                    <h4 class="font-bold text-lg mb-4 text-purple-800">📊 รายงานกิจกรรม (${activityRecords.length} รายการ)</h4>
-            `;
-
-            activityRecords.forEach((record, index) => {
-                reportHtml += `
-                    <div class="mb-4 p-4 border border-purple-200 rounded-lg bg-purple-50">
-                        <div class="flex justify-between items-start mb-2">
-                            <h5 class="font-semibold text-purple-800">#${index + 1} ${record.activity}</h5>
-                            <span class="text-xs text-gray-500">${record.timestamp}</span>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2 text-sm">
-                            <div><strong>เวลา:</strong> ${record.time}</div>
-                            <div><strong>ระดับ:</strong> ${record.grade}</div>
-                            <div><strong>คะแนน:</strong> ${record.totalScore}/100</div>
-                            <div><strong>เกรด:</strong> ${record.gradeLevel}</div>
-                        </div>
-                        ${record.comments ? `<div class="mt-2 text-sm"><strong>ความคิดเห็น:</strong> ${record.comments}</div>` : ''}
+            const reportHtml = activityRecords.map((record, index) => `
+                <div class="mb-4 p-4 border rounded-lg ${record.offline ? 'border-yellow-300 bg-yellow-50' : 'border-purple-200 bg-purple-50'}">
+                    <div class="flex justify-between items-start mb-2">
+                        <h5 class="font-semibold text-purple-800">#${index + 1} ${record.activity}</h5>
+                        <span class="text-xs text-gray-500">${record.timestamp}</span>
                     </div>
-                `;
-            });
-
-            reportHtml += '</div>';
+                    ${record.offline ? '<p class="text-xs text-yellow-700 mb-2">⚠️ บันทึกในเครื่องเท่านั้น</p>' : ''}
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div><strong>กอง-หมู่:</strong> ${record.group}-${record.troop}</div>
+                        <div><strong>ระดับ:</strong> ${record.grade}</div>
+                        <div><strong>คะแนน:</strong> ${record.totalScore}/100</div>
+                        <div><strong>เกรด:</strong> ${record.gradeLevel}</div>
+                    </div>
+                    ${record.comments ? `<div class="mt-2 text-sm"><strong>ความคิดเห็น:</strong> ${record.comments}</div>` : ''}
+                </div>
+            `).join('');
 
             Swal.fire({
-                title: 'รายงานกิจกรรม',
-                html: reportHtml,
+                title: `📊 รายงานกิจกรรม (${activityRecords.length} รายการ)`,
+                html: `<div class="max-h-96 overflow-y-auto text-left">${reportHtml}</div>`,
                 width: '800px',
                 confirmButtonColor: '#8b5cf6',
                 confirmButtonText: 'ปิด',
@@ -1536,40 +1116,27 @@
                 cancelButtonText: '🗑️ ล้างข้อมูล',
                 cancelButtonColor: '#ef4444'
             }).then((result) => {
-                if (result.dismiss === Swal.DismissReason.cancel) {
-                    confirmClearData('activity');
-                }
+                if (result.dismiss === Swal.DismissReason.cancel) confirmClearData('activity');
             });
         }
 
         function showAttendanceReport() {
             if (attendanceRecords.length === 0) {
-                Swal.fire({
-                    icon: 'info',
-                    title: 'ไม่มีข้อมูลการเช็คชื่อ',
-                    text: 'ยังไม่มีการบันทึกการเช็คชื่อในระบบ',
-                    confirmButtonColor: '#10b981'
-                });
+                Swal.fire('ไม่มีข้อมูลการเช็คชื่อ', 'ยังไม่มีการบันทึกการเช็คชื่อ', 'info');
                 return;
             }
-
-            let reportHtml = `
-                <div class="max-h-96 overflow-y-auto text-left">
-                    <h4 class="font-bold text-lg mb-4 text-green-800">✅ รายงานการเช็คชื่อ (${attendanceRecords.length} ครั้ง)</h4>
-            `;
-
-            attendanceRecords.forEach((record, index) => {
+            const reportHtml = attendanceRecords.map((record, index) => {
                 const summary = record.attendanceData.reduce((acc, student) => {
                     acc[student.status] = (acc[student.status] || 0) + 1;
                     return acc;
                 }, {});
-
-                reportHtml += `
-                    <div class="mb-4 p-4 border border-green-200 rounded-lg bg-green-50">
+                return `
+                    <div class="mb-4 p-4 border rounded-lg ${record.offline ? 'border-yellow-300 bg-yellow-50' : 'border-green-200 bg-green-50'}">
                         <div class="flex justify-between items-start mb-2">
                             <h5 class="font-semibold text-green-800">#${index + 1} ${record.activity}</h5>
                             <span class="text-xs text-gray-500">${record.timestamp}</span>
                         </div>
+                         ${record.offline ? '<p class="text-xs text-yellow-700 mb-2">⚠️ บันทึกในเครื่องเท่านั้น</p>' : ''}
                         <div class="grid grid-cols-2 gap-2 text-sm mb-2">
                             <div><strong>วันที่:</strong> ${record.date}</div>
                             <div><strong>กอง-หมู่:</strong> ${record.group} ${record.troop}</div>
@@ -1582,13 +1149,11 @@
                         </div>
                     </div>
                 `;
-            });
-
-            reportHtml += '</div>';
+            }).join('');
 
             Swal.fire({
-                title: 'รายงานการเช็คชื่อ',
-                html: reportHtml,
+                title: `✅ รายงานการเช็คชื่อ (${attendanceRecords.length} ครั้ง)`,
+                html: `<div class="max-h-96 overflow-y-auto text-left">${reportHtml}</div>`,
                 width: '800px',
                 confirmButtonColor: '#10b981',
                 confirmButtonText: 'ปิด',
@@ -1596,23 +1161,17 @@
                 cancelButtonText: '🗑️ ล้างข้อมูล',
                 cancelButtonColor: '#ef4444'
             }).then((result) => {
-                if (result.dismiss === Swal.DismissReason.cancel) {
-                    confirmClearData('attendance');
-                }
+                if (result.dismiss === Swal.DismissReason.cancel) confirmClearData('attendance');
             });
         }
 
         function confirmClearData(type) {
-            const title = type === 'activity' ? 'ล้างข้อมูลกิจกรรม' : 'ล้างข้อมูลการเช็คชื่อ';
-            const text = type === 'activity' ? 'ข้อมูลกิจกรรมทั้งหมดจะถูกลบ' : 'ข้อมูลการเช็คชื่อทั้งหมดจะถูกลบ';
-            
             Swal.fire({
-                title: title,
-                text: text,
+                title: `ยืนยันการล้างข้อมูล`,
+                text: `ข้อมูล${type === 'activity' ? 'กิจกรรม' : 'การเช็คชื่อ'}ทั้งหมดที่บันทึกในเครื่องจะถูกลบ`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#ef4444',
-                cancelButtonColor: '#8b5cf6',
                 confirmButtonText: 'ลบทั้งหมด',
                 cancelButtonText: 'ยกเลิก'
             }).then((result) => {
@@ -1624,16 +1183,10 @@
                         attendanceRecords = [];
                         localStorage.removeItem('scoutAttendanceRecords');
                     }
-                    
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'ล้างข้อมูลสำเร็จ',
-                        text: 'ข้อมูลทั้งหมดถูกลบแล้ว',
-                        confirmButtonColor: '#10b981'
-                    });
+                    Swal.fire('ล้างข้อมูลสำเร็จ', '', 'success');
                 }
             });
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9881d3b9a1ab1d37',t:'MTc1OTM4MzIyOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>

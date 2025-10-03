@@ -13,6 +13,7 @@
             font-family: 'Prompt', sans-serif;
         }
         .gradient-bg {
+            
             background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 50%, #ddd6fe 100%);
         }
         .card-shadow {
@@ -788,6 +789,54 @@
             updateTroopOptions('selectedGroup', 'selectedTroop');
             document.getElementById('selectedTroop').disabled = !document.getElementById('selectedGroup').value;
         }
+
+        function loadStudentList() {
+    const group = document.getElementById('selectedGroup').value;
+    const troop = document.getElementById('selectedTroop').value;
+    const container = document.getElementById('studentCheckList');
+    const wrapper = document.getElementById('studentAttendanceList'); // อ้างอิงถึงกล่องแม่
+    
+    // ตรวจสอบว่ามีข้อมูลนักเรียนสำหรับกองและหมู่นี้หรือไม่
+    if (group && troop && studentData[group] && studentData[group][troop] && studentData[group][troop].length > 0) {
+        const students = studentData[group][troop];
+        
+        let html = '';
+        students.forEach(student => {
+            html += `
+                <div class="flex items-center justify-between p-3 bg-white rounded-lg border border-purple-200">
+                    <div class="flex items-center space-x-3">
+                        <span class="font-medium text-gray-800">${student.firstName} ${student.lastName}</span>
+                        <span class="text-sm text-gray-500">(${student.id})</span>
+                    </div>
+                    <div class="flex space-x-2">
+                        <label class="flex items-center space-x-1 cursor-pointer">
+                            <input type="radio" name="activity_attendance_${student.id}" value="มา" class="text-green-600 focus:ring-green-500" checked>
+                            <span class="text-sm text-green-600">มา</span>
+                        </label>
+                        <label class="flex items-center space-x-1 cursor-pointer">
+                            <input type="radio" name="activity_attendance_${student.id}" value="ลา" class="text-yellow-600 focus:ring-yellow-500">
+                            <span class="text-sm text-yellow-600">ลา</span>
+                        </label>
+                        <label class="flex items-center space-x-1 cursor-pointer">
+                            <input type="radio" name="activity_attendance_${student.id}" value="ขาด" class="text-red-600 focus:ring-red-500">
+                            <span class="text-sm text-red-600">ขาด</span>
+                        </label>
+                    </div>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
+
+        // ทำให้กล่องแสดงรายชื่อนักเรียนปรากฏขึ้น
+        wrapper.classList.remove('hidden');
+
+    } else {
+        // ถ้าไม่มีนักเรียน หรือยังไม่ได้เลือก ให้ซ่อนกล่อง
+        container.innerHTML = ''; // ล้างข้อมูลเก่าออก
+        wrapper.classList.add('hidden');
+    }
+}
 
         // --- MODAL & FORM VISIBILITY ---
         function openStudentManagement() { document.getElementById('studentManagementModal').classList.remove('hidden'); }

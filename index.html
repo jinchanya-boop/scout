@@ -301,9 +301,19 @@
                             </div>
                             <div>
                                 <label class="block text-xs text-gray-600 mb-1">หมู่</label>
-                                <select id="selectedTroop" class="w-full px-3 py-2 rounded-lg border border-purple-200 focus:ring-2 focus:ring-purple-500" disabled>
+                                <select id="selectedTroop" onchange="loadStudentList()" class="w-full px-3 py-2 rounded-lg border border-purple-200 focus:ring-2 focus:ring-purple-500" disabled>
                                     <option value="">เลือกหมู่</option>
                                 </select>
+                            </div>
+                        </div>
+                        
+                        <div id="studentAttendanceList" class="hidden">
+                            <div class="bg-purple-50 rounded-lg p-4">
+                                <h4 class="font-medium text-gray-800 mb-3 flex items-center">
+                                    <span class="mr-2">📋</span>รายชื่อนักเรียน - เช็คชื่อ
+                                </h4>
+                                <div id="studentCheckList" class="space-y-2">
+                                    </div>
                             </div>
                         </div>
                     </div>

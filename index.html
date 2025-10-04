@@ -431,7 +431,7 @@
         // #############################################################################
         
         // !!! สำคัญ: แก้ไข URL นี้เป็น URL ของ Web App ที่คุณได้จากการ Deploy !!!
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbymqjN9BQZUmVlIpPJbnmsplPGhyJ5RMAFUMS2Vxk4Nc4CIPgw3XwQV9_ajHNqdzd8I/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwtAwOLjmF4I28cuUAd3gI1sM580bglnnjQ6VH-raXOcIeqYWR46edy5Ye22V2DbZ7n/exec';
         
         // #############################################################################
         // #                            GLOBAL VARIABLES                               #
@@ -645,38 +645,43 @@
         // #############################################################################
         
         async function saveActivityRecord() {
-            Swal.fire({ title: 'กำลังบันทึกกิจกรรม...', allowOutsideClick: false, showConfirmButton: false, willOpen: () => Swal.showLoading() });
-            
-            const rubricScores = {};
-            document.querySelectorAll('[id^="rubric_"]').forEach((item, index) => {
-                rubricScores[`criteria_${index}`] = item.value;
-            });
+    Swal.fire({ title: 'กำลังบันทึกกิจกรรม...', allowOutsideClick: false, showConfirmButton: false, willOpen: () => Swal.showLoading() });
+    
+    const rubricScores = {};
+    document.querySelectorAll('[id^="rubric_"]').forEach((item, index) => {
+        rubricScores[`criteria_${index}`] = item.value;
+    });
 
-            const payload = {
-                type: 'activity',
-                timestamp: new Date().toLocaleString('th-TH'),
-                grade: document.getElementById('gradeSelect').value,
-                time: document.getElementById('activityTime').value,
-                activity: document.getElementById('activityName').value,
-                selectedGroup: document.getElementById('selectedGroup').value,
-                selectedTroop: document.getElementById('selectedTroop').value,
-                totalScore: document.getElementById('totalScore').value,
-                gradeLevel: document.getElementById('gradeLevel').value,
-                comments: document.getElementById('comments').value,
-                notes: document.getElementById('notes').value,
-                signature: canvas.toDataURL(),
-                rubricScores
-            };
+    const payload = {
+        type: 'activity',
+        timestamp: new Date().toLocaleString('th-TH'),
+        grade: document.getElementById('gradeSelect').value,
+        time: document.getElementById('activityTime').value,
+        activity: document.getElementById('activityName').value,
+        selectedGroup: document.getElementById('selectedGroup').value,
+        selectedTroop: document.getElementById('selectedTroop').value,
+        totalScore: document.getElementById('totalScore').value,
+        gradeLevel: document.getElementById('gradeLevel').value,
+        comments: document.getElementById('comments').value,
+        notes: document.getElementById('notes').value,
+        signature: canvas.toDataURL(),
+        rubricScores,
+        // --- ส่วนที่เพิ่มเข้ามา ---
+        summaryPresent: document.getElementById('summaryPresent').innerText,
+        summaryLeave: document.getElementById('summaryLeave').innerText,
+        summaryAbsent: document.getElementById('summaryAbsent').innerText,
+        summarySkipped: document.getElementById('summarySkipped').innerText
+    };
 
-            try {
-                await postData(payload);
-                saveDataLocally(payload);
-                showSuccessMessage(payload, false);
-            } catch (error) {
-                saveDataLocally(payload);
-                showSuccessMessage(payload, true);
-            }
-        }
+    try {
+        await postData(payload);
+        saveDataLocally(payload);
+        showSuccessMessage(payload, false);
+    } catch (error) {
+        saveDataLocally(payload);
+        showSuccessMessage(payload, true);
+    }
+}
         
         async function saveAttendance() {
             const date = document.getElementById('attendanceDate').value;

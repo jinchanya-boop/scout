@@ -419,7 +419,7 @@
         // #############################################################################
         
         // !!! สำคัญ: แก้ไข URL นี้เป็น URL ของ Web App ที่คุณได้จากการ Deploy !!!
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxDkIxJFQTtoURVVYSQtCisuoLVa8rp08RCO0P3gO2bL--cyL0vaLeQVBt900vwoOEO/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym799BriBjEJagH2UDJ1CXkt93TCEBMEmjqGGKtchqk_mrackLR0jg6z9nKrwr9oVV/exec'
         
         // #############################################################################
         // #                            GLOBAL VARIABLES                               #
@@ -672,53 +672,46 @@
 }
         
         async function saveAttendance() {
-        const date = document.getElementById('attendanceDate').value;
-        const activity = document.getElementById('attendanceActivity').value;
-        const group = document.getElementById('attendanceGroup').value;
-        const troop = document.getElementById('attendanceTroop').value;
-        
-        if (!date || !activity || !group || !troop) {
-            Swal.fire({ icon: 'warning', title: 'กรุณากรอกข้อมูลให้ครบ', confirmButtonColor: '#8b5cf6' });
-            return;
-        }
-        
-        // ---- จุดที่แก้ไข ----
-        // 1. เพิ่มบรรทัดนี้เพื่ออ่านค่า "ระดับชั้น"
-        const grade = document.getElementById('attendanceGrade').value; 
-        
-        // 2. ใช้ [grade] ในการค้นหานักเรียนให้ถูกต้อง
-        const students = studentData[grade]?.[group]?.[troop] || [];
-        // ---- จบส่วนที่แก้ไข ----
+    const date = document.getElementById('attendanceDate').value;
+    const activity = document.getElementById('attendanceActivity').value;
+    const group = document.getElementById('attendanceGroup').value;
+    const troop = document.getElementById('attendanceTroop').value;
+    const grade = document.getElementById('attendanceGrade').value; // <-- เราอ่านค่า grade มาแล้ว
 
-        if (students.length === 0) {
-            Swal.fire({ icon: 'info', title: 'ไม่มีนักเรียนในกลุ่มนี้', text: 'ไม่สามารถบันทึกข้อมูลได้เนื่องจากไม่มีรายชื่อนักเรียน', confirmButtonColor: '#8b5cf6' });
-            return;
-        }
+    if (!date || !activity || !grade || !group || !troop) { // <-- เพิ่ม grade ในการเช็คค่าว่าง
+        Swal.fire({ icon: 'warning', title: 'กรุณากรอกข้อมูลให้ครบ', confirmButtonColor: '#8b5cf6' });
+        return;
+    }
 
-        const attendanceData = students.map(student => ({
-            studentId: student.id,
-            studentName: `${student.firstName} ${student.lastName}`,
-            status: document.querySelector(`input[name="attendance_${student.id}"]:checked`)?.value || 'ไม่ระบุ'
-        }));
-        
-        const payload = { type: 'attendance', timestamp: new Date().toLocaleString('th-TH'), date, activity, group, troop, attendanceData };
-        
-        Swal.fire({ title: 'กำลังบันทึกการเช็คชื่อ...', allowOutsideClick: false, showConfirmButton: false, willOpen: () => Swal.showLoading() });
+    const students = studentData[grade]?.[group]?.[troop] || [];
 
-        try {
-            await postData(payload);
-            // บันทึกข้อมูลลง Local Storage (ถ้าต้องการ) และแสดงข้อความสำเร็จ
-            const records = JSON.parse(localStorage.getItem('scoutAttendanceRecords') || '[]');
-            records.push(payload);
-            localStorage.setItem('scoutAttendanceRecords', JSON.stringify(records));
+    if (students.length === 0) {
+        Swal.fire({ icon: 'info', title: 'ไม่มีนักเรียนในกลุ่มนี้', confirmButtonColor: '#8b5cf6' });
+        return;
+    }
 
-            closeAttendanceCheck();
-            Swal.fire({
-                icon: 'success', 
-                title: 'บันทึกการเช็คชื่อสำเร็จ!',
-                html: `<div class="text-left"><p><strong>วันที่:</strong> ${payload.date}</p><p><strong>กิจกรรม:</strong> ${payload.activity}</p><p><strong>กอง-หมู่:</strong> ${payload.group} ${payload.troop}</p></div><div class="mt-4 p-3 bg-green-100 rounded-lg text-sm">☁️ บันทึกลง Google Sheets แล้ว</div>`,
-                confirmButtonColor: '#8b5cf6'
-            });
+    const attendanceData = students.map(student => ({
+        studentId: student.id,
+        studentName: `${student.firstName} ${student.lastName}`,
+        status: document.querySelector(`input[name="attendance_${student.id}"]:checked`)?.value || 'ไม่ระบุ'
+    }));
+
+    // ----> เพิ่ม grade เข้าไปใน payload ที่จะส่ง <----
+    const payload = { type: 'attendance', timestamp: new Date().toLocaleString('th-TH'), date, activity, grade, group, troop, attendanceData };
+
+    Swal.fire({ title: 'กำลังบันทึกการเช็คชื่อ...', allowOutsideClick: false, showConfirmButton: false, willOpen: () => Swal.showLoading() });
+
+    try {
+        await postData(payload);
+        // ... (โค้ดส่วนที่เหลือเหมือนเดิม ไม่ต้องแก้ไข) ...
+        closeAttendanceCheck();
+        Swal.fire({
+            icon: 'success', 
+            title: 'บันทึกการเช็คชื่อสำเร็จ!',
+            html: `<div class="text-left"><p><strong>กลุ่ม:</strong> ${payload.grade} / ${payload.group} / ${payload.troop}</p></div><div class="mt-4 p-3 bg-green-100 rounded-lg text-sm">☁️ บันทึกลง Google Sheets แล้ว</div>`,
+            confirmButtonColor: '#8b5cf6'
+        });
+  
 
         } catch (error) {
             // กรณีส่งข้อมูลไม่สำเร็จ ให้บันทึกลง Local Storage อย่างเดียว
@@ -1243,65 +1236,47 @@ function deleteStudent(grade, group, troop, index) {
 }
 
 async function showAttendanceReport() {
-    Swal.fire({
-        title: 'กำลังโหลดรายงานสรุป...',
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading()
-    });
+    Swal.fire({ title: 'กำลังโหลดรายงานสรุป...', didOpen: () => Swal.showLoading() });
 
     try {
         const response = await fetch(SCRIPT_URL + '?action=getAttendanceSummary');
         const summary = await response.json();
 
         if (Object.keys(summary).length === 0) {
-            return Swal.fire({ icon: 'info', title: 'ไม่มีข้อมูลการเช็คชื่อ', confirmButtonColor: '#10b981' });
+            return Swal.fire({ icon: 'info', title: 'ไม่มีข้อมูลการเช็คชื่อ' });
         }
 
-        let reportHtml = `<div class="max-h-96 overflow-y-auto text-left space-y-4">`;
-        const statusColors = { 'มา': 'text-green-600', 'ลา': 'text-yellow-600', 'ขาด': 'text-red-600', 'หนี': 'text-orange-600' };
+        let reportHtml = `<div class="max-h-[60vh] overflow-y-auto text-left space-y-2">`;
+        const statusOrder = ['มา', 'ลา', 'ขาด', 'หนี'];
 
-        for (const groupName in summary) {
-            const groupData = summary[groupName];
-            let groupStatusHtml = Object.entries(groupData.statuses).map(([status, count]) => 
-                `<span class="${statusColors[status] || 'text-gray-600'}">${status}: ${count}</span>`
-            ).join(' | ');
+        for (const grade in summary) {
+            for (const group in summary[grade]) {
+                for (const troop in summary[grade][group]) {
+                    const data = summary[grade][group][troop];
+                    let statusText = statusOrder
+                        .filter(status => data[status])
+                        .map(status => `${status} ${data[status]}`)
+                        .join(', ');
 
-            reportHtml += `
-                <details class="bg-green-50 rounded-lg border border-green-200">
-                    <summary class="p-4 font-semibold text-lg text-green-800 cursor-pointer">
-                       ${groupName} <span class="text-sm font-normal">(${groupStatusHtml})</span>
-                    </summary>
-                    <div class="p-4 border-t border-green-200 space-y-2">`;
-
-            for (const troopName in groupData.troops) {
-                const troopData = groupData.troops[troopName];
-                let troopStatusHtml = Object.entries(troopData.statuses).map(([status, count]) => 
-                    `<span class="text-xs ${statusColors[status] || 'text-gray-600'}">${status}: ${count}</span>`
-                ).join(', ');
-
-                reportHtml += `
-                    <div class="flex justify-between items-center p-2 bg-white rounded">
-                        <span class="text-gray-700">${troopName}</span>
-                        <span class="font-medium">${troopStatusHtml}</span>
-                    </div>`;
+                    reportHtml += `
+                        <div class="p-3 bg-green-50 border border-green-200 rounded-lg">
+                            <div class="font-semibold text-green-800">${grade} ${group} ${troop}</div>
+                            <div class="text-sm text-gray-600">ทั้งหมด ${data.total} คน: ${statusText}</div>
+                        </div>`;
+                }
             }
-
-            reportHtml += `</div></details>`;
         }
-
-        reportHtml += '</div>';
+        reportHtml += `</div>`;
 
         Swal.fire({
             title: '✅ รายงานสรุปการเช็คชื่อ',
             html: reportHtml,
-            width: '800px',
-            confirmButtonText: 'ปิด',
-            confirmButtonColor: '#10b981'
+            width: '600px',
+            confirmButtonText: 'ปิด'
         });
 
     } catch (error) {
         Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถโหลดรายงานได้' });
-        console.error(error);
     }
 }
 

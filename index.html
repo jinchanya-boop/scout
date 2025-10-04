@@ -1236,49 +1236,56 @@ function deleteStudent(grade, group, troop, index) {
 }
 
 async function showAttendanceReport() {
-    Swal.fire({ title: 'กำลังโหลดรายงานสรุป...', didOpen: () => Swal.showLoading() });
+        Swal.fire({ title: 'กำลังโหลดรายงานสรุป...', didOpen: () => Swal.showLoading() });
 
-    try {
-        const response = await fetch(SCRIPT_URL + '?action=getAttendanceSummary');
-        const summary = await response.json();
+        try {
+            const response = await fetch(SCRIPT_URL + '?action=getAttendanceSummary');
+            const summary = await response.json();
 
-        if (Object.keys(summary).length === 0) {
-            return Swal.fire({ icon: 'info', title: 'ไม่มีข้อมูลการเช็คชื่อ' });
-        }
+            if (Object.keys(summary).length === 0) {
+                return Swal.fire({ icon: 'info', title: 'ไม่มีข้อมูลการเช็คชื่อ' });
+            }
 
-        let reportHtml = `<div class="max-h-[60vh] overflow-y-auto text-left space-y-2">`;
-        const statusOrder = ['มา', 'ลา', 'ขาด', 'หนี'];
+            let reportHtml = `<div class="max-h-[60vh] overflow-y-auto text-left space-y-2">`;
+            const statusOrder = ['มา', 'ลา', 'ขาด', 'หนี'];
 
-        for (const grade in summary) {
-            for (const group in summary[grade]) {
-                for (const troop in summary[grade][group]) {
-                    const data = summary[grade][group][troop];
-                    let statusText = statusOrder
-                        .filter(status => data[status])
-                        .map(status => `${status} ${data[status]}`)
-                        .join(', ');
+            for (const grade in summary) {
+                for (const group in summary[grade]) {
+                    for (const troop in summary[grade][group]) {
+                        const data = summary[grade][group][troop];
 
-                    reportHtml += `
-                        <div class="p-3 bg-green-50 border border-green-200 rounded-lg">
-                            <div class="font-semibold text-green-800">${grade} ${group} ${troop}</div>
-                            <div class="text-sm text-gray-600">ทั้งหมด ${data.total} คน: ${statusText}</div>
-                        </div>`;
+                        // ----> [จุดที่เพิ่มเข้ามา] <----
+                        // ดึงจำนวนนักเรียนทั้งหมดที่ลงทะเบียนในหมู่นี้ จากข้อมูลที่เรามีอยู่แล้ว
+                        const totalEnrolled = studentData[grade]?.[group]?.[troop]?.length || 0;
+
+                        let statusText = statusOrder
+                            .filter(status => data[status])
+                            .map(status => `${status} ${data[status]}`)
+                            .join(', ');
+                        
+                        // ----> [จุดที่แก้ไข] <----
+                        // เปลี่ยนการแสดงผลให้รวมจำนวนนักเรียนทั้งหมดเข้ามาด้วย
+                        reportHtml += `
+                            <div class="p-3 bg-green-50 border border-green-200 rounded-lg">
+                                <div class="font-semibold text-green-800">${grade} ${group} ${troop}</div>
+                                <div class="text-sm text-gray-600">นักเรียนทั้งหมด ${totalEnrolled} คน: ${statusText}</div>
+                            </div>`;
+                    }
                 }
             }
+            reportHtml += `</div>`;
+
+            Swal.fire({
+                title: '✅ รายงานสรุปการเช็คชื่อ',
+                html: reportHtml,
+                width: '600px',
+                confirmButtonText: 'ปิด'
+            });
+
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถโหลดรายงานได้' });
         }
-        reportHtml += `</div>`;
-
-        Swal.fire({
-            title: '✅ รายงานสรุปการเช็คชื่อ',
-            html: reportHtml,
-            width: '600px',
-            confirmButtonText: 'ปิด'
-        });
-
-    } catch (error) {
-        Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถโหลดรายงานได้' });
     }
-}
 
         function confirmClearData(type) {
             Swal.fire({

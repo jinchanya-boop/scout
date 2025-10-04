@@ -419,7 +419,7 @@
         // #############################################################################
         
         // !!! สำคัญ: แก้ไข URL นี้เป็น URL ของ Web App ที่คุณได้จากการ Deploy !!!
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxm8uKj_KJVYdI8eiC6Uiadkc5d1DCy8YB2DxnMhM8I2-NRY77EPm2fleDSe7JilSPo/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxDkIxJFQTtoURVVYSQtCisuoLVa8rp08RCO0P3gO2bL--cyL0vaLeQVBt900vwoOEO/exec';
         
         // #############################################################################
         // #                            GLOBAL VARIABLES                               #
@@ -1150,32 +1150,126 @@ function deleteStudent(grade, group, troop, index) {
             }
         }
         
-        function showActivityReport() {
-            if (activityRecords.length === 0) {
-                return Swal.fire({ icon: 'info', title: 'ไม่มีข้อมูลกิจกรรม', confirmButtonColor: '#8b5cf6' });
-            }
-            let reportHtml = `<div class="max-h-96 overflow-y-auto text-left"><h4 class="font-bold text-lg mb-4 text-purple-800">📊 รายงานกิจกรรม (${activityRecords.length} รายการ)</h4>`;
-            activityRecords.forEach((r, i) => {
-                reportHtml += `<div class="mb-4 p-4 border rounded-lg bg-purple-50"><div class="flex justify-between items-start mb-2"><h5 class="font-semibold">#${i + 1} ${r.activity}</h5><span class="text-xs">${r.timestamp}</span></div><div class="grid grid-cols-2 gap-2 text-sm"><div><strong>เวลา:</strong> ${r.time}</div><div><strong>คะแนน:</strong> ${r.totalScore}/100</div></div></div>`;
-            });
-            reportHtml += '</div>';
-            Swal.fire({ title: 'รายงานกิจกรรม', html: reportHtml, width: '800px', confirmButtonText: 'ปิด', showCancelButton: true, cancelButtonText: '🗑️ ล้างข้อมูล', cancelButtonColor: '#ef4444' })
-               .then(result => { if (result.dismiss === Swal.DismissReason.cancel) confirmClearData('activity'); });
+        async function showActivityReport() {
+    Swal.fire({
+        title: 'กำลังโหลดรายงานสรุป...',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+    });
+
+    try {
+        const response = await fetch(SCRIPT_URL + '?action=getActivitySummary');
+        const summary = await response.json();
+
+        if (Object.keys(summary).length === 0) {
+            return Swal.fire({ icon: 'info', title: 'ไม่มีข้อมูลกิจกรรม', confirmButtonColor: '#8b5cf6' });
         }
 
-        function showAttendanceReport() {
-            if (attendanceRecords.length === 0) {
-                return Swal.fire({ icon: 'info', title: 'ไม่มีข้อมูลการเช็คชื่อ', confirmButtonColor: '#10b981' });
+        let reportHtml = `<div class="max-h-96 overflow-y-auto text-left space-y-4">`;
+
+        for (const groupName in summary) {
+            const groupData = summary[groupName];
+            const groupAvg = (groupData.totalScore / groupData.count).toFixed(2);
+
+            reportHtml += `
+                <details class="bg-purple-50 rounded-lg border border-purple-200">
+                    <summary class="p-4 font-semibold text-lg text-purple-800 cursor-pointer flex justify-between">
+                        <span>${groupName}</span>
+                        <span>คะแนนเฉลี่ย: ${groupAvg}</span>
+                    </summary>
+                    <div class="p-4 border-t border-purple-200 space-y-2">`;
+
+            for (const troopName in groupData.troops) {
+                const troopData = groupData.troops[troopName];
+                const troopAvg = (troopData.totalScore / troopData.count).toFixed(2);
+                reportHtml += `
+                    <div class="flex justify-between items-center p-2 bg-white rounded">
+                        <span class="text-gray-700">${troopName}</span>
+                        <span class="font-medium">เฉลี่ย: ${troopAvg} (${troopData.count} กิจกรรม)</span>
+                    </div>`;
             }
-            let reportHtml = `<div class="max-h-96 overflow-y-auto text-left"><h4 class="font-bold text-lg mb-4 text-green-800">✅ รายงานการเช็คชื่อ (${attendanceRecords.length} ครั้ง)</h4>`;
-            attendanceRecords.forEach((r, i) => {
-                const summary = r.attendanceData.reduce((acc, s) => { acc[s.status] = (acc[s.status] || 0) + 1; return acc; }, {});
-                reportHtml += `<div class="mb-4 p-4 border rounded-lg bg-green-50"><div class="flex justify-between items-start mb-2"><h5 class="font-semibold">#${i + 1} ${r.activity}</h5><span class="text-xs">${r.timestamp}</span></div><div class="grid grid-cols-2 gap-2 text-sm mb-2"><div><strong>วันที่:</strong> ${r.date}</div><div><strong>กอง-หมู่:</strong> ${r.group} ${r.troop}</div></div><div class="flex flex-wrap gap-x-4 text-sm"><span class="text-green-600">✅ มา: ${summary.มา || 0}</span><span class="text-yellow-600">📋 ลา: ${summary.ลา || 0}</span><span class="text-red-600">❌ ขาด: ${summary.ขาด || 0}</span><span class="text-orange-600">🏃 หนี: ${summary.หนี || 0}</span></div></div>`;
-            });
-            reportHtml += '</div>';
-            Swal.fire({ title: 'รายงานการเช็คชื่อ', html: reportHtml, width: '800px', confirmButtonText: 'ปิด', showCancelButton: true, cancelButtonText: '🗑️ ล้างข้อมูล', cancelButtonColor: '#ef4444' })
-               .then(result => { if (result.dismiss === Swal.DismissReason.cancel) confirmClearData('attendance'); });
+
+            reportHtml += `</div></details>`;
         }
+
+        reportHtml += '</div>';
+
+        Swal.fire({
+            title: '📊 รายงานสรุปกิจกรรม',
+            html: reportHtml,
+            width: '800px',
+            confirmButtonText: 'ปิด',
+            confirmButtonColor: '#8b5cf6'
+        });
+
+    } catch (error) {
+        Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถโหลดรายงานได้' });
+        console.error(error);
+    }
+}
+
+async function showAttendanceReport() {
+    Swal.fire({
+        title: 'กำลังโหลดรายงานสรุป...',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+    });
+
+    try {
+        const response = await fetch(SCRIPT_URL + '?action=getAttendanceSummary');
+        const summary = await response.json();
+
+        if (Object.keys(summary).length === 0) {
+            return Swal.fire({ icon: 'info', title: 'ไม่มีข้อมูลการเช็คชื่อ', confirmButtonColor: '#10b981' });
+        }
+
+        let reportHtml = `<div class="max-h-96 overflow-y-auto text-left space-y-4">`;
+        const statusColors = { 'มา': 'text-green-600', 'ลา': 'text-yellow-600', 'ขาด': 'text-red-600', 'หนี': 'text-orange-600' };
+
+        for (const groupName in summary) {
+            const groupData = summary[groupName];
+            let groupStatusHtml = Object.entries(groupData.statuses).map(([status, count]) => 
+                `<span class="${statusColors[status] || 'text-gray-600'}">${status}: ${count}</span>`
+            ).join(' | ');
+
+            reportHtml += `
+                <details class="bg-green-50 rounded-lg border border-green-200">
+                    <summary class="p-4 font-semibold text-lg text-green-800 cursor-pointer">
+                       ${groupName} <span class="text-sm font-normal">(${groupStatusHtml})</span>
+                    </summary>
+                    <div class="p-4 border-t border-green-200 space-y-2">`;
+
+            for (const troopName in groupData.troops) {
+                const troopData = groupData.troops[troopName];
+                let troopStatusHtml = Object.entries(troopData.statuses).map(([status, count]) => 
+                    `<span class="text-xs ${statusColors[status] || 'text-gray-600'}">${status}: ${count}</span>`
+                ).join(', ');
+
+                reportHtml += `
+                    <div class="flex justify-between items-center p-2 bg-white rounded">
+                        <span class="text-gray-700">${troopName}</span>
+                        <span class="font-medium">${troopStatusHtml}</span>
+                    </div>`;
+            }
+
+            reportHtml += `</div></details>`;
+        }
+
+        reportHtml += '</div>';
+
+        Swal.fire({
+            title: '✅ รายงานสรุปการเช็คชื่อ',
+            html: reportHtml,
+            width: '800px',
+            confirmButtonText: 'ปิด',
+            confirmButtonColor: '#10b981'
+        });
+
+    } catch (error) {
+        Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถโหลดรายงานได้' });
+        console.error(error);
+    }
+}
 
         function confirmClearData(type) {
             Swal.fire({

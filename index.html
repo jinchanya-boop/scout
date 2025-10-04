@@ -672,36 +672,70 @@
 }
         
         async function saveAttendance() {
-            const date = document.getElementById('attendanceDate').value;
-            const activity = document.getElementById('attendanceActivity').value;
-            const group = document.getElementById('attendanceGroup').value;
-            const troop = document.getElementById('attendanceTroop').value;
-            
-            if (!date || !activity || !group || !troop) {
-                Swal.fire({ icon: 'warning', title: 'กรุณากรอกข้อมูลให้ครบ', confirmButtonColor: '#8b5cf6' });
-                return;
-            }
-            
-            const students = studentData[group]?.[troop] || [];
-            const attendanceData = students.map(student => ({
-                studentId: student.id,
-                studentName: `${student.firstName} ${student.lastName}`,
-                status: document.querySelector(`input[name="attendance_${student.id}"]:checked`)?.value || 'ไม่ระบุ'
-            }));
-            
-            const payload = { type: 'attendance', timestamp: new Date().toLocaleString('th-TH'), date, activity, group, troop, attendanceData };
-            
-            Swal.fire({ title: 'กำลังบันทึกการเช็คชื่อ...', allowOutsideClick: false, showConfirmButton: false, willOpen: () => Swal.showLoading() });
-
-            try {
-                await postData(payload);
-                saveDataLocally(payload);
-                showSuccessMessage(payload, false);
-            } catch (error) {
-                saveDataLocally(payload);
-                showSuccessMessage(payload, true);
-            }
+        const date = document.getElementById('attendanceDate').value;
+        const activity = document.getElementById('attendanceActivity').value;
+        const group = document.getElementById('attendanceGroup').value;
+        const troop = document.getElementById('attendanceTroop').value;
+        
+        if (!date || !activity || !group || !troop) {
+            Swal.fire({ icon: 'warning', title: 'กรุณากรอกข้อมูลให้ครบ', confirmButtonColor: '#8b5cf6' });
+            return;
         }
+        
+        // ---- จุดที่แก้ไข ----
+        // 1. เพิ่มบรรทัดนี้เพื่ออ่านค่า "ระดับชั้น"
+        const grade = document.getElementById('attendanceGrade').value; 
+        
+        // 2. ใช้ [grade] ในการค้นหานักเรียนให้ถูกต้อง
+        const students = studentData[grade]?.[group]?.[troop] || [];
+        // ---- จบส่วนที่แก้ไข ----
+
+        if (students.length === 0) {
+            Swal.fire({ icon: 'info', title: 'ไม่มีนักเรียนในกลุ่มนี้', text: 'ไม่สามารถบันทึกข้อมูลได้เนื่องจากไม่มีรายชื่อนักเรียน', confirmButtonColor: '#8b5cf6' });
+            return;
+        }
+
+        const attendanceData = students.map(student => ({
+            studentId: student.id,
+            studentName: `${student.firstName} ${student.lastName}`,
+            status: document.querySelector(`input[name="attendance_${student.id}"]:checked`)?.value || 'ไม่ระบุ'
+        }));
+        
+        const payload = { type: 'attendance', timestamp: new Date().toLocaleString('th-TH'), date, activity, group, troop, attendanceData };
+        
+        Swal.fire({ title: 'กำลังบันทึกการเช็คชื่อ...', allowOutsideClick: false, showConfirmButton: false, willOpen: () => Swal.showLoading() });
+
+        try {
+            await postData(payload);
+            // บันทึกข้อมูลลง Local Storage (ถ้าต้องการ) และแสดงข้อความสำเร็จ
+            const records = JSON.parse(localStorage.getItem('scoutAttendanceRecords') || '[]');
+            records.push(payload);
+            localStorage.setItem('scoutAttendanceRecords', JSON.stringify(records));
+
+            closeAttendanceCheck();
+            Swal.fire({
+                icon: 'success', 
+                title: 'บันทึกการเช็คชื่อสำเร็จ!',
+                html: `<div class="text-left"><p><strong>วันที่:</strong> ${payload.date}</p><p><strong>กิจกรรม:</strong> ${payload.activity}</p><p><strong>กอง-หมู่:</strong> ${payload.group} ${payload.troop}</p></div><div class="mt-4 p-3 bg-green-100 rounded-lg text-sm">☁️ บันทึกลง Google Sheets แล้ว</div>`,
+                confirmButtonColor: '#8b5cf6'
+            });
+
+        } catch (error) {
+            // กรณีส่งข้อมูลไม่สำเร็จ ให้บันทึกลง Local Storage อย่างเดียว
+            const records = JSON.parse(localStorage.getItem('scoutAttendanceRecords') || '[]');
+            records.push(payload);
+            localStorage.setItem('scoutAttendanceRecords', JSON.stringify(records));
+
+            closeAttendanceCheck();
+            Swal.fire({
+                icon: 'warning', 
+                title: 'บันทึกในเครื่องสำเร็จ',
+                html: `<p>ไม่สามารถเชื่อมต่อกับ Google Sheets ได้ในขณะนี้ ข้อมูลการเช็คชื่อถูกบันทึกไว้ในเครื่องของคุณแล้ว</p><div class="mt-4 p-3 bg-yellow-100 rounded-lg text-sm">⚠️ บันทึกในเครื่องเท่านั้น</div>`,
+                confirmButtonColor: '#8b5cf6'
+            });
+            console.error('Failed to save attendance to Sheet:', error);
+        }
+    }
         
         // #############################################################################
         // #                             UI & DISPLAY                                  #

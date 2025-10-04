@@ -305,25 +305,46 @@
                     </div>
 
                     <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">👥 เลือกกองและหมู่</label>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <label class="block text-xs text-gray-600 mb-1">กอง</label>
-                                <select id="selectedGroup" onchange="updateActivityTroopOptions()" class="w-full px-3 py-2 rounded-lg border border-purple-200 focus:ring-2 focus:ring-purple-500">
-                                    <option value="">เลือกกอง</option>
-                                    <option value="กอง1">กอง 1</option>
-                                    <option value="กอง2">กอง 2</option>
-                                    <option value="กอง3">กอง 3</option>
-                                    <option value="กอง4">กอง 4</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs text-gray-600 mb-1">หมู่</label>
-                                <select id="selectedTroop" onchange="loadStudentList()" class="w-full px-3 py-2 rounded-lg border border-purple-200 focus:ring-2 focus:ring-purple-500" disabled>
-                                    <option value="">เลือกหมู่</option>
-                                </select>
-                            </div>
-                        </div>
+    <label class="block text-sm font-medium text-gray-700 mb-2">👥 เลือกระดับชั้น, กอง และหมู่</label>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div>
+            <label class="block text-xs text-gray-600 mb-1">ระดับชั้น</label>
+            <select id="activityGrade" onchange="loadStudentList()" class="w-full px-3 py-2 rounded-lg border border-purple-200 focus:ring-2 focus:ring-purple-500">
+                <option value="">เลือกระดับชั้น</option>
+                <option value="ม.1">ม.1</option>
+                <option value="ม.2">ม.2</option>
+                <option value="ม.3">ม.3</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs text-gray-600 mb-1">กอง</label>
+            <select id="selectedGroup" onchange="updateActivityTroopOptions()" class="w-full px-3 py-2 rounded-lg border border-purple-200 focus:ring-2 focus:ring-purple-500">
+                <option value="">เลือกกอง</option>
+                <option value="กอง1">กอง 1</option>
+                <option value="กอง2">กอง 2</option>
+                <option value="กอง3">กอง 3</option>
+                <option value="กอง4">กอง 4</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs text-gray-600 mb-1">หมู่</label>
+            <select id="selectedTroop" onchange="loadStudentList()" class="w-full px-3 py-2 rounded-lg border border-purple-200 focus:ring-2 focus:ring-purple-500" disabled>
+                <option value="">เลือกหมู่</option>
+            </select>
+        </div>
+    </div>
+    
+    <div id="studentAttendanceList" class="hidden">
+        <div class="bg-purple-50 rounded-lg p-4">
+            <h4 class="font-medium text-gray-800 mb-3 flex items-center">
+                <span class="mr-2">📋</span>รายชื่อนักเรียน - เช็คชื่อ
+            </h4>
+            <div id="studentCheckList" class="space-y-2">
+                </div>
+        </div>
+    </div>
+</div>
                         
                         <div id="studentAttendanceList" class="hidden">
                             <div class="bg-purple-50 rounded-lg p-4">
@@ -932,49 +953,51 @@ function deleteStudent(grade, group, troop, index) {
         }
 
         function loadStudentList() {
+    const grade = document.getElementById('activityGrade').value; // <-- อ่านค่าระดับชั้นจาก id ใหม่
     const group = document.getElementById('selectedGroup').value;
     const troop = document.getElementById('selectedTroop').value;
     const container = document.getElementById('studentCheckList');
-    const wrapper = document.getElementById('studentAttendanceList'); // อ้างอิงถึงกล่องแม่
+    const wrapper = document.getElementById('studentAttendanceList');
+
+    // ค้นหาข้อมูลนักเรียนจาก ระดับชั้น > กอง > หมู่
+    const students = studentData[grade]?.[group]?.[troop] || [];
     
-    // ตรวจสอบว่ามีข้อมูลนักเรียนสำหรับกองและหมู่นี้หรือไม่
-    if (group && troop && studentData[group] && studentData[group][troop] && studentData[group][troop].length > 0) {
-        const students = studentData[group][troop];
-        
+    if (grade && group && troop) {
         let html = '';
-        students.forEach(student => {
-            html += `
-                <div class="flex items-center justify-between p-3 bg-white rounded-lg border border-purple-200">
-                    <div class="flex items-center space-x-3">
-                        <span class="font-medium text-gray-800">${student.firstName} ${student.lastName}</span>
-                        <span class="text-sm text-gray-500">(${student.id})</span>
+        if (students.length > 0) {
+            students.forEach(student => {
+                html += `
+                    <div class="flex items-center justify-between p-3 bg-white rounded-lg border border-purple-200">
+                        <div class="flex items-center space-x-3">
+                            <span class="font-medium text-gray-800">${student.firstName} ${student.lastName}</span>
+                            <span class="text-sm text-gray-500">(${student.id})</span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <label class="flex items-center space-x-1 cursor-pointer">
+                                <input type="radio" name="activity_attendance_${student.id}" value="มา" class="text-green-600" checked>
+                                <span class="text-sm">มา</span>
+                            </label>
+                            <label class="flex items-center space-x-1 cursor-pointer">
+                                <input type="radio" name="activity_attendance_${student.id}" value="ลา" class="text-yellow-600">
+                                <span class="text-sm">ลา</span>
+                            </label>
+                            <label class="flex items-center space-x-1 cursor-pointer">
+                                <input type="radio" name="activity_attendance_${student.id}" value="ขาด" class="text-red-600">
+                                <span class="text-sm">ขาด</span>
+                            </label>
+                        </div>
                     </div>
-                    <div class="flex space-x-2">
-                        <label class="flex items-center space-x-1 cursor-pointer">
-                            <input type="radio" name="activity_attendance_${student.id}" value="มา" class="text-green-600 focus:ring-green-500" checked>
-                            <span class="text-sm text-green-600">มา</span>
-                        </label>
-                        <label class="flex items-center space-x-1 cursor-pointer">
-                            <input type="radio" name="activity_attendance_${student.id}" value="ลา" class="text-yellow-600 focus:ring-yellow-500">
-                            <span class="text-sm text-yellow-600">ลา</span>
-                        </label>
-                        <label class="flex items-center space-x-1 cursor-pointer">
-                            <input type="radio" name="activity_attendance_${student.id}" value="ขาด" class="text-red-600 focus:ring-red-500">
-                            <span class="text-sm text-red-600">ขาด</span>
-                        </label>
-                    </div>
-                </div>
-            `;
-        });
+                `;
+            });
+        } else {
+            html = `<p class="text-center text-gray-500 py-2">-- ไม่มีข้อมูลนักเรียนในกลุ่มนี้ --</p>`;
+        }
         
         container.innerHTML = html;
-
-        // ทำให้กล่องแสดงรายชื่อนักเรียนปรากฏขึ้น
         wrapper.classList.remove('hidden');
 
     } else {
-        // ถ้าไม่มีนักเรียน หรือยังไม่ได้เลือก ให้ซ่อนกล่อง
-        container.innerHTML = ''; // ล้างข้อมูลเก่าออก
+        container.innerHTML = ''; 
         wrapper.classList.add('hidden');
     }
 }

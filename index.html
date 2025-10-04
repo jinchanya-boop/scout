@@ -233,6 +233,15 @@
                     </div>
                 </div>
 
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">ระดับชั้น</label>
+                    <select id="attendanceGrade" onchange="loadAttendanceStudentList()" class="w-full px-3 py-2 rounded-lg border border-purple-200 focus:ring-2 focus:ring-purple-500">
+                        <option value="">เลือกระดับชั้น</option>
+                        <option value="ม.1">ม.1</option>
+                        <option value="ม.2">ม.2</option>
+                        <option value="ม.3">ม.3</option>
+                    </select>
+                </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">กอง</label>
@@ -854,41 +863,52 @@ function deleteStudent(grade, group, troop, index) {
 }
         
         function loadAttendanceStudentList() {
-            const group = document.getElementById('attendanceGroup').value;
-            const troop = document.getElementById('attendanceTroop').value;
-            const container = document.getElementById('attendanceStudentList');
-            const students = studentData[group]?.[troop] || [];
-            
-            if (group && troop) {
-                let html = `
-                    <div class="bg-purple-50 rounded-lg p-4 mb-4"><h4 class="font-medium text-gray-800">${group} ${troop} - เช็คชื่อ (${students.length} คน)</h4></div>
-                    <div class="space-y-3">`;
-                
-                students.forEach(student => {
-                    html += `
-                        <div class="flex items-center justify-between p-4 bg-white rounded-lg border border-purple-200">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center"><span class="text-purple-600 font-medium">${student.firstName.charAt(0)}</span></div>
-                                <div>
-                                    <div class="font-medium text-gray-800">${student.firstName} ${student.lastName}</div>
-                                    <div class="text-sm text-gray-500">เลขประจำตัว: ${student.id}</div>
-                                </div>
+    const grade = document.getElementById('attendanceGrade').value; //  <-- อ่านค่าระดับชั้น
+    const group = document.getElementById('attendanceGroup').value;
+    const troop = document.getElementById('attendanceTroop').value;
+    const container = document.getElementById('attendanceStudentList');
+
+    // ใช้ optional chaining (?.) เพื่อค้นหาข้อมูลนักเรียนจาก ระดับชั้น > กอง > หมู่
+    const students = studentData[grade]?.[group]?.[troop] || [];
+    
+    if (grade && group && troop) {
+        let html = `
+            <div class="bg-purple-50 rounded-lg p-4 mb-4">
+                <h4 class="font-medium text-gray-800">${grade} / ${group} / ${troop} - เช็คชื่อ (${students.length} คน)</h4>
+            </div>
+            <div class="space-y-3">`;
+        
+        if (students.length > 0) {
+            students.forEach(student => {
+                html += `
+                    <div class="flex items-center justify-between p-4 bg-white rounded-lg border border-purple-200">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                                <span class="text-purple-600 font-medium">${student.firstName.charAt(0)}</span>
                             </div>
-                            <div class="flex flex-wrap gap-x-3 gap-y-2">
-                                <label class="flex items-center space-x-2 cursor-pointer"><input type="radio" name="attendance_${student.id}" value="มา" class="text-green-600 focus:ring-green-500" checked><span class="text-sm font-medium">✅ มา</span></label>
-                                <label class="flex items-center space-x-2 cursor-pointer"><input type="radio" name="attendance_${student.id}" value="ลา" class="text-yellow-600 focus:ring-yellow-500"><span class="text-sm font-medium">📋 ลา</span></label>
-                                <label class="flex items-center space-x-2 cursor-pointer"><input type="radio" name="attendance_${student.id}" value="ขาด" class="text-red-600 focus:ring-red-500"><span class="text-sm font-medium">❌ ขาด</span></label>
-                                <label class="flex items-center space-x-2 cursor-pointer"><input type="radio" name="attendance_${student.id}" value="หนี" class="text-orange-600 focus:ring-orange-500"><span class="text-sm font-medium">🏃 หนี</span></label>
+                            <div>
+                                <div class="font-medium text-gray-800">${student.firstName} ${student.lastName}</div>
+                                <div class="text-sm text-gray-500">เลขประจำตัว: ${student.id}</div>
                             </div>
-                        </div>`;
-                });
-                
-                html += '</div>';
-                container.innerHTML = html;
-            } else {
-                container.innerHTML = `<div class="text-center text-gray-500 py-8"><span class="text-4xl block mb-2">✅</span><p>เลือกกองและหมู่เพื่อเช็คชื่อ</p></div>`;
-            }
+                        </div>
+                        <div class="flex flex-wrap gap-x-3 gap-y-2">
+                            <label class="flex items-center space-x-2 cursor-pointer"><input type="radio" name="attendance_${student.id}" value="มา" class="text-green-600" checked><span class="text-sm font-medium">✅ มา</span></label>
+                            <label class="flex items-center space-x-2 cursor-pointer"><input type="radio" name="attendance_${student.id}" value="ลา" class="text-yellow-600"><span class="text-sm font-medium">📋 ลา</span></label>
+                            <label class="flex items-center space-x-2 cursor-pointer"><input type="radio" name="attendance_${student.id}" value="ขาด" class="text-red-600"><span class="text-sm font-medium">❌ ขาด</span></label>
+                            <label class="flex items-center space-x-2 cursor-pointer"><input type="radio" name="attendance_${student.id}" value="หนี" class="text-orange-600"><span class="text-sm font-medium">🏃 หนี</span></label>
+                        </div>
+                    </div>`;
+            });
+        } else {
+             html += `<p class="text-center text-gray-500 py-4">-- ไม่มีข้อมูลนักเรียนในกลุ่มนี้ --</p>`;
         }
+        
+        html += '</div>';
+        container.innerHTML = html;
+    } else {
+        container.innerHTML = `<div class="text-center text-gray-500 py-8"><span class="text-4xl block mb-2">✅</span><p>กรุณาเลือกระดับชั้น, กอง และหมู่เพื่อเช็คชื่อ</p></div>`;
+    }
+}
         
         // #############################################################################
         // #                           UTILITY FUNCTIONS                               #

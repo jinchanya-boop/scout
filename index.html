@@ -353,115 +353,125 @@
         }
 
         function renderDashboardCharts() {
-            if (!attendanceSummaryData || !activitySummaryData) {
-                console.log("ข้อมูลยังไม่พร้อมสำหรับสร้างกราฟ");
-                return;
+    if (!attendanceSummaryData || !activitySummaryData) {
+        console.log("ข้อมูลยังไม่พร้อมสำหรับสร้างกราฟ");
+        return;
+    }
+
+    const gradeFilterValue = document.getElementById('dashboardGradeFilter').value;
+    const gradeMapping = {
+        "ม.1": "m1",
+        "ม.2": "m2",
+        "ม.3": "m3",
+        "all": "all"
+    };
+    const selectedGrade = gradeMapping[gradeFilterValue];
+
+    // --- 1. สร้างข้อมูลสำหรับกราฟเช็คชื่อ ---
+    const attendanceLabels = [];
+    const attendanceData = {
+        present: [],
+        leave: [],
+        absent: [],
+        skipped: []
+    };
+
+    for (const gradeKey in attendanceSummaryData) {
+        if (selectedGrade !== 'all' && gradeKey !== selectedGrade) continue;
+
+        for (const group in attendanceSummaryData[gradeKey]) {
+            for (const troop in attendanceSummaryData[gradeKey][group]) {
+                const troopData = attendanceSummaryData[gradeKey][group][troop];
+                const displayGrade = gradeKey.replace('m', 'ม.'); 
+                const label = `${displayGrade}/${group}/${troop}`;
+
+                attendanceLabels.push(label);
+                attendanceData.present.push(troopData['มา'] || 0);
+                attendanceData.leave.push(troopData['ลา'] || 0);
+                attendanceData.absent.push(troopData['ขาด'] || 0);
+                attendanceData.skipped.push(troopData['หนี'] || 0);
             }
-
-            const selectedGrade = document.getElementById('dashboardGradeFilter').value;
-
-            // --- 1. สร้างข้อมูลสำหรับกราฟเช็คชื่อ ---
-            const attendanceLabels = [];
-            const attendanceData = {
-                present: [],
-                leave: [],
-                absent: [],
-                skipped: []
-            };
-
-            for (const grade in attendanceSummaryData) {
-                if (selectedGrade !== 'all' && grade !== selectedGrade) continue;
-
-                for (const group in attendanceSummaryData[grade]) {
-                    for (const troop in attendanceSummaryData[grade][group]) {
-                        const label = `${grade}/${group}/${troop}`;
-                        const data = attendanceSummaryData[grade][group][troop];
-                        attendanceLabels.push(label);
-                        attendanceData.present.push(data['มา'] || 0);
-                        attendanceData.leave.push(data['ลา'] || 0);
-                        attendanceData.absent.push(data['ขาด'] || 0);
-                        attendanceData.skipped.push(data['หนี'] || 0);
-                    }
-                }
-            }
-            
-            // --- 2. สร้างข้อมูลสำหรับกราฟคะแนนเฉลี่ย ---
-            const scoreLabels = [];
-            const scoreData = [];
-
-            for (const grade in activitySummaryData) {
-                 if (selectedGrade !== 'all' && grade !== selectedGrade) continue;
-                for (const group in activitySummaryData[grade].groups) {
-                     for (const troop in activitySummaryData[grade].groups[group].troops) {
-                        const label = `${grade}/${group}/${troop}`;
-                        const data = activitySummaryData[grade].groups[group].troops[troop];
-                        const avgScore = data.count > 0 ? (data.totalScore / data.count).toFixed(2) : 0;
-                        scoreLabels.push(label);
-                        scoreData.push(avgScore);
-                    }
-                }
-            }
-
-            // --- 3. ทำลายกราฟเก่า (ถ้ามี) ก่อนสร้างใหม่ ---
-            if (attendanceChartInstance) {
-                attendanceChartInstance.destroy();
-            }
-            if (scoreChartInstance) {
-                scoreChartInstance.destroy();
-            }
-
-            // --- 4. สร้างกราฟเช็คชื่อ ---
-            const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
-            attendanceChartInstance = new Chart(attendanceCtx, {
-                type: 'bar',
-                data: {
-                    labels: attendanceLabels,
-                    datasets: [
-                        { label: 'มา', data: attendanceData.present, backgroundColor: '#10B981' },
-                        { label: 'ลา', data: attendanceData.leave, backgroundColor: '#F59E0B' },
-                        { label: 'ขาด', data: attendanceData.absent, backgroundColor: '#EF4444' },
-                        { label: 'หนี', data: attendanceData.skipped, backgroundColor: '#F97316' }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        x: { stacked: true },
-                        y: { stacked: true, beginAtZero: true }
-                    },
-                    plugins: {
-                        title: { display: true, text: 'สรุปการเช็คชื่อ' },
-                        tooltip: { mode: 'index' }
-                    }
-                }
-            });
-
-            // --- 5. สร้างกราฟคะแนน ---
-            const scoreCtx = document.getElementById('scoreChart').getContext('2d');
-            scoreChartInstance = new Chart(scoreCtx, {
-                type: 'bar',
-                data: {
-                    labels: scoreLabels,
-                    datasets: [{
-                        label: 'คะแนนเฉลี่ย',
-                        data: scoreData,
-                        backgroundColor: 'rgba(139, 92, 246, 0.6)',
-                        borderColor: 'rgba(139, 92, 246, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: { beginAtZero: true, max: 100 }
-                    },
-                     plugins: {
-                        title: { display: true, text: 'คะแนนเฉลี่ยกิจกรรมแต่ละหมู่' }
-                    }
-                }
-            });
         }
+    }
+    
+    // --- 2. สร้างข้อมูลสำหรับกราฟคะแนนเฉลี่ย ---
+    const scoreLabels = [];
+    const scoreData = [];
 
+    for (const gradeKey in activitySummaryData) {
+        if (selectedGrade !== 'all' && gradeKey !== selectedGrade) continue;
+        
+        for (const group in activitySummaryData[gradeKey].groups) {
+             for (const troop in activitySummaryData[gradeKey].groups[group].troops) {
+                const troopData = activitySummaryData[gradeKey].groups[group].troops[troop];
+                const displayGrade = gradeKey.replace('m', 'ม.');
+                const label = `${displayGrade}/${group}/${troop}`;
+                const avgScore = troopData.count > 0 ? (troopData.totalScore / troopData.count).toFixed(2) : 0;
+                scoreLabels.push(label);
+                scoreData.push(avgScore);
+            }
+        }
+    }
+
+    // --- 3. ทำลายกราฟเก่า (ถ้ามี) ก่อนสร้างใหม่ ---
+    if (attendanceChartInstance) {
+        attendanceChartInstance.destroy();
+    }
+    if (scoreChartInstance) {
+        scoreChartInstance.destroy();
+    }
+
+    // --- 4. สร้างกราฟเช็คชื่อ ---
+    const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
+    attendanceChartInstance = new Chart(attendanceCtx, {
+        type: 'bar',
+        data: {
+            labels: attendanceLabels,
+            datasets: [
+                { label: 'มา', data: attendanceData.present, backgroundColor: '#10B981' },
+                { label: 'ลา', data: attendanceData.leave, backgroundColor: '#F59E0B' },
+                { label: 'ขาด', data: attendanceData.absent, backgroundColor: '#EF4444' },
+                { label: 'หนี', data: attendanceData.skipped, backgroundColor: '#F97316' }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { stacked: true },
+                y: { stacked: true, beginAtZero: true }
+            },
+            plugins: {
+                title: { display: true, text: 'สรุปการเช็คชื่อ (รายครั้ง)' },
+                tooltip: { mode: 'index' }
+            }
+        }
+    });
+
+    // --- 5. สร้างกราฟคะแนน ---
+    const scoreCtx = document.getElementById('scoreChart').getContext('2d');
+    scoreChartInstance = new Chart(scoreCtx, {
+        type: 'bar',
+        data: {
+            labels: scoreLabels,
+            datasets: [{
+                label: 'คะแนนเฉลี่ย',
+                data: scoreData,
+                backgroundColor: 'rgba(139, 92, 246, 0.6)',
+                borderColor: 'rgba(139, 92, 246, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true, max: 100 }
+            },
+             plugins: {
+                title: { display: true, text: 'คะแนนเฉลี่ยกิจกรรมแต่ละหมู่' }
+            }
+        }
+    });
+}
 
         
         // #############################################################################

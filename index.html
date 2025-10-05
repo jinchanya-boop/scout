@@ -419,7 +419,7 @@
         // #############################################################################
         
         // !!! สำคัญ: แก้ไข URL นี้เป็น URL ของ Web App ที่คุณได้จากการ Deploy !!!
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyPxYxHrgPa8JRM6Wfx4PT1mdtCHvkSppKnUzYxIdUdySu5o57Zl2wQXi5RlJGDLE4F/exec'
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx_V2hmixpjY3JEv_u1yLThuAWyj5jiUL5mg8bT0Nafc7r5nT2onTOLB_zjIHzOumOV/exec'
         
         // #############################################################################
         // #                            GLOBAL VARIABLES                               #
@@ -1192,47 +1192,64 @@ function deleteStudent(grade, group, troop, index) {
             return Swal.fire({ icon: 'info', title: 'ไม่มีข้อมูลกิจกรรม', confirmButtonColor: '#8b5cf6' });
         }
 
-        let reportHtml = `<div class="max-h-[70vh] overflow-y-auto text-left space-y-4">`;
-
-        for (const groupName in summary) {
-            const groupData = summary[groupName];
-            const groupAvg = (groupData.totalScore / groupData.count).toFixed(2);
+        let reportHtml = `<div class="max-h-[70vh] overflow-y-auto text-left space-y-2">`;
+        
+        // Loop ชั้นนอกสุด: ระดับชั้น
+        for (const gradeName in summary) {
+            const gradeData = summary[gradeName];
+            const gradeAvg = (gradeData.totalScore / gradeData.count).toFixed(2);
 
             reportHtml += `
-                <details class="bg-purple-50 rounded-lg border border-purple-200 overflow-hidden">
-                    <summary class="p-4 font-semibold text-lg text-purple-800 cursor-pointer flex justify-between hover:bg-purple-100">
-                        <span>${groupName}</span>
-                        <span>คะแนนเฉลี่ยรวม: ${groupAvg}</span>
+                <details class="bg-gray-100 rounded-xl border border-gray-300 overflow-hidden">
+                    <summary class="p-4 font-bold text-xl text-gray-800 cursor-pointer flex justify-between hover:bg-gray-200">
+                        <span>${gradeName.toUpperCase()}</span>
+                        <span>คะแนนเฉลี่ยรวม: ${gradeAvg}</span>
                     </summary>
-                    <div class="px-4 py-2 border-t border-purple-200 space-y-2">`;
+                    <div class="px-4 py-2 border-t border-gray-300 space-y-3">`;
 
-            for (const troopName in groupData.troops) {
-                const troopData = groupData.troops[troopName];
-                const troopAvg = (troopData.totalScore / troopData.count).toFixed(2);
-
-                // ---- [จุดที่แก้ไข] สร้าง list ของกิจกรรมย่อย ----
-                const activitiesHtml = troopData.activities.map(act => `
-                    <div class="flex justify-between text-sm py-1 pl-4 text-gray-600">
-                        <span>- ${act.name}</span>
-                        <span>${act.score} คะแนน</span>
-                    </div>
-                `).join('');
-
+            // Loop ชั้นกลาง: กอง
+            for (const groupName in gradeData.groups) {
+                const groupData = gradeData.groups[groupName];
+                const groupAvg = (groupData.totalScore / groupData.count).toFixed(2);
+                
                 reportHtml += `
-                    <details class="bg-white rounded-md border my-2">
-                        <summary class="p-2 font-medium cursor-pointer flex justify-between text-gray-800">
-                            <span>${troopName}</span>
-                            <span class="text-sm">เฉลี่ย: ${troopAvg} (${troopData.count} กิจกรรม)</span>
+                    <details class="bg-purple-50 rounded-lg border border-purple-200">
+                        <summary class="p-3 font-semibold text-lg text-purple-800 cursor-pointer flex justify-between hover:bg-purple-100">
+                            <span>${groupName}</span>
+                            <span>เฉลี่ย: ${groupAvg}</span>
                         </summary>
-                        <div class="px-2 pb-1 border-t">${activitiesHtml}</div>
-                    </details>`;
-            }
+                        <div class="p-3 border-t border-purple-200 space-y-2">`;
+                
+                // Loop ชั้นในสุด: หมู่
+                for (const troopName in groupData.troops) {
+                    const troopData = groupData.troops[troopName];
+                    const troopAvg = (troopData.totalScore / troopData.count).toFixed(2);
+                    
+                    const activitiesHtml = troopData.activities.map(act => `
+                        <div class="flex justify-between text-sm py-1 pl-4 text-gray-600">
+                            <span>- ${act.name}</span>
+                            <span>${act.score} คะแนน</span>
+                        </div>
+                    `).join('');
 
+                    reportHtml += `
+                        <details class="bg-white rounded-md border">
+                            <summary class="p-2 font-medium cursor-pointer flex justify-between text-gray-800 text-base">
+                                <span>${troopName}</span>
+                                <span class="text-sm">เฉลี่ย: ${troopAvg} (${troopData.count} กิจกรรม)</span>
+                            </summary>
+                            <div class="px-2 pb-1 border-t">${activitiesHtml}</div>
+                        </details>`;
+                }
+                
+                reportHtml += `</div></details>`;
+            }
+            
             reportHtml += `</div></details>`;
         }
-
+        
         reportHtml += '</div>';
-
+        
         Swal.fire({
             title: '📊 รายงานสรุปกิจกรรม',
             html: reportHtml,

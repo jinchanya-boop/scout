@@ -199,7 +199,54 @@
         container.innerHTML=html;wrapper.classList.remove('hidden');summary.classList.remove('hidden');updateAttendanceSummary();}else{container.innerHTML='';wrapper.classList.add('hidden');summary.classList.add('hidden');}}
         function updateAttendanceSummary(){const container=document.getElementById('studentCheckList');if(!container)return;const present=container.querySelectorAll('input[value="มา"]:checked').length;const leave=container.querySelectorAll('input[value="ลา"]:checked').length;const absent=container.querySelectorAll('input[value="ขาด"]:checked').length;const skipped=container.querySelectorAll('input[value="หนี"]:checked').length;document.getElementById('summaryPresent').innerText=present;document.getElementById('summaryLeave').innerText=leave;document.getElementById('summaryAbsent').innerText=absent;document.getElementById('summarySkipped').innerText=skipped;}
         async function saveActivityRecord() {
-    Swal.fire({ title: 'กำลังบันทึกกิจกรรม...', willOpen: () => Swal.showLoading(), showConfirmButton: false, allowOutsideClick: false });
+    // 🟢 [ปรับปรุง] เปลี่ยนข้อความแจ้งเตือนให้สื่อความหมายมากขึ้น
+    Swal.fire({
+        title: 'กำลังบันทึกกิจกรรม',
+        html: 'อาจใช้เวลาสักครู่ในการอัปโหลดลายเซ็น...', // แจ้งให้ผู้ใช้ทราบว่าขั้นตอนนี้อาจจะช้า
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+    
+    const rubricScores = {};
+    document.querySelectorAll('[id^="rubric_"]').forEach((item, index) => {
+        rubricScores[`criteria_${index}`] = item.value;
+    });
+
+    // 🟢 [ปรับปรุง] เพิ่มการตรวจสอบก่อนบันทึกลายเซ็น เพื่อป้องกัน Error
+    const signatureData = canvas ? canvas.toDataURL() : '';
+
+    const payload = {
+        type: 'activity',
+        timestamp: new Date().toLocaleString('th-TH'), 
+        grade: document.getElementById('activityGrade').value,
+        time: document.getElementById('activityTime').value,
+        activity: document.getElementById('activityName').value,
+        selectedGroup: document.getElementById('selectedGroup').value,
+        selectedTroop: document.getElementById('selectedTroop').value,
+        totalScore: document.getElementById('totalScore').value,
+        gradeLevel: document.getElementById('gradeLevel').value,
+        comments: document.getElementById('comments').value,
+        notes: document.getElementById('notes').value,
+        signature: signatureData, // ใช้ข้อมูลลายเซ็นที่ตรวจสอบแล้ว
+        rubricScores,
+        summaryPresent: document.getElementById('summaryPresent').innerText,
+        summaryLeave: document.getElementById('summaryLeave').innerText,
+        summaryAbsent: document.getElementById('summaryAbsent').innerText,
+        summarySkipped: document.getElementById('summarySkipped').innerText
+    };
+
+    try {
+        await postData(payload);
+        saveDataLocally(payload, 'scoutActivityRecords'); 
+        showSuccessMessage(payload, false);
+    } catch (error) {
+        saveDataLocally(payload, 'scoutActivityRecords');
+        showSuccessMessage(payload, true);
+        console.error('Failed to save activity to Sheet:', error);
+    }
+}
     
     const rubricScores = {};
     document.querySelectorAll('[id^="rubric_"]').forEach((item, index) => {

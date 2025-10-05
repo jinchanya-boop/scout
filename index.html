@@ -198,7 +198,46 @@
         function loadStudentList(){const grade=document.getElementById('activityGrade').value;const group=document.getElementById('selectedGroup').value;const troop=document.getElementById('selectedTroop').value;const container=document.getElementById('studentCheckList');const wrapper=document.getElementById('studentAttendanceList');const summary=document.getElementById('attendanceSummary');const students=studentData[grade]?.[group]?.[troop]||[];if(grade&&group&&troop){let html='';if(students.length>0){students.forEach(student=>{html+=`<div class="flex items-center justify-between p-3 bg-white rounded-lg border"><div class="flex items-center space-x-3"><span class="font-medium">${student.firstName} ${student.lastName} (${student.id})</span></div><div class="flex space-x-2"><label class="flex items-center space-x-1 cursor-pointer"><input type="radio" onchange="updateAttendanceSummary()" name="activity_attendance_${student.id}" value="มา" checked><span class="text-sm">มา</span></label><label class="flex items-center space-x-1 cursor-pointer"><input type="radio" onchange="updateAttendanceSummary()" name="activity_attendance_${student.id}" value="ลา"><span class="text-sm">ลา</span></label><label class="flex items-center space-x-1 cursor-pointer"><input type="radio" onchange="updateAttendanceSummary()" name="activity_attendance_${student.id}" value="ขาด"><span class="text-sm">ขาด</span></label><label class="flex items-center space-x-1 cursor-pointer"><input type="radio" onchange="updateAttendanceSummary()" name="activity_attendance_${student.id}" value="หนี"><span class="text-sm">หนี</span></label></div></div>`;});}else{html=`<p class="text-center text-gray-500 py-2">-- ไม่มีข้อมูลนักเรียน --</p>`;}
         container.innerHTML=html;wrapper.classList.remove('hidden');summary.classList.remove('hidden');updateAttendanceSummary();}else{container.innerHTML='';wrapper.classList.add('hidden');summary.classList.add('hidden');}}
         function updateAttendanceSummary(){const container=document.getElementById('studentCheckList');if(!container)return;const present=container.querySelectorAll('input[value="มา"]:checked').length;const leave=container.querySelectorAll('input[value="ลา"]:checked').length;const absent=container.querySelectorAll('input[value="ขาด"]:checked').length;const skipped=container.querySelectorAll('input[value="หนี"]:checked').length;document.getElementById('summaryPresent').innerText=present;document.getElementById('summaryLeave').innerText=leave;document.getElementById('summaryAbsent').innerText=absent;document.getElementById('summarySkipped').innerText=skipped;}
-        async function saveActivityRecord(){Swal.fire({title:'กำลังบันทึก...',willOpen:()=>Swal.showLoading()});const rubricScores={};document.querySelectorAll('[id^="rubric_"]').forEach((item,index)=>{rubricScores[`criteria_${index}`]=item.value;});const payload={type:'activity',grade:document.getElementById('activityGrade').value,time:document.getElementById('activityTime').value,activity:document.getElementById('activityName').value,selectedGroup:document.getElementById('selectedGroup').value,selectedTroop:document.getElementById('selectedTroop').value,totalScore:document.getElementById('totalScore').value,gradeLevel:document.getElementById('gradeLevel').value,comments:document.getElementById('comments').value,notes:document.getElementById('notes').value,signature:canvas.toDataURL(),rubricScores,summaryPresent:document.getElementById('summaryPresent').innerText,summaryLeave:document.getElementById('summaryLeave').innerText,summaryAbsent:document.getElementById('summaryAbsent').innerText,summarySkipped:document.getElementById('summarySkipped').innerText};try{await postData(payload);showSuccessMessage(payload,false);}catch(error){showSuccessMessage(payload,true);}}
+        async function saveActivityRecord() {
+    Swal.fire({ title: 'กำลังบันทึกกิจกรรม...', willOpen: () => Swal.showLoading(), showConfirmButton: false, allowOutsideClick: false });
+    
+    const rubricScores = {};
+    document.querySelectorAll('[id^="rubric_"]').forEach((item, index) => {
+        rubricScores[`criteria_${index}`] = item.value;
+    });
+
+    const payload = {
+        type: 'activity',
+        // 🟢 [จุดที่แก้ไข] เพิ่มบรรทัดนี้กลับเข้ามาครับ
+        timestamp: new Date().toLocaleString('th-TH'), 
+        grade: document.getElementById('activityGrade').value,
+        time: document.getElementById('activityTime').value,
+        activity: document.getElementById('activityName').value,
+        selectedGroup: document.getElementById('selectedGroup').value,
+        selectedTroop: document.getElementById('selectedTroop').value,
+        totalScore: document.getElementById('totalScore').value,
+        gradeLevel: document.getElementById('gradeLevel').value,
+        comments: document.getElementById('comments').value,
+        notes: document.getElementById('notes').value,
+        signature: canvas.toDataURL(),
+        rubricScores,
+        summaryPresent: document.getElementById('summaryPresent').innerText,
+        summaryLeave: document.getElementById('summaryLeave').innerText,
+        summaryAbsent: document.getElementById('summaryAbsent').innerText,
+        summarySkipped: document.getElementById('summarySkipped').innerText
+    };
+
+    try {
+        await postData(payload);
+        // We'll use the key 'scoutActivityRecords' for saving activity data locally
+        saveDataLocally(payload, 'scoutActivityRecords'); 
+        showSuccessMessage(payload, false);
+    } catch (error) {
+        saveDataLocally(payload, 'scoutActivityRecords');
+        showSuccessMessage(payload, true);
+        console.error('Failed to save activity to Sheet:', error);
+    }
+}
         
         // --- UTILITY ---
         function updateTroopOptions(groupElId,troopElId){const groupSelect=document.getElementById(groupElId);const troopSelect=document.getElementById(troopElId);troopSelect.innerHTML='<option value="">เลือกหมู่</option>';if(groupSelect.value){for(let i=1;i<=4;i++){troopSelect.innerHTML+=`<option value="หมู่${i}">หมู่ ${i}</option>`;}}}

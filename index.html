@@ -412,6 +412,8 @@
         selectedTab.classList.remove('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
     }
 
+    // ⭐️ START: UPDATED JAVASCRIPT FUNCTIONS ⭐️
+
     function renderActivityStatusTable(gradeKey) {
         currentStatusGrade = gradeKey;
         const gradeMap = { 'm1': 'ม.1', 'm2': 'ม.2', 'm3': 'ม.3' };
@@ -421,7 +423,6 @@
         const tableBody = document.getElementById('activityStatusTableBody');
         tableBody.innerHTML = '';
 
-        // ✨ UPDATE: Change summary button text
         document.getElementById('printGradeReportBtn').textContent = `พิมพ์รายงานสรุป ${gradeThai}`;
 
         schedule.forEach(row => {
@@ -437,7 +438,8 @@
                 if (!isBreak) {
                     tableRow += `<div>${activityName}</div>`;
                     if (isRecorded) {
-                        tableRow += `<div class="mt-2"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">✅ บันทึกแล้ว</span> <button onclick="printActivityRecord('${gradeThai}', '${activityName.replace(/'/g, "\\'")}')" class="ml-2 text-xs text-blue-600 hover:underline">พิมพ์</button></div>`;
+                        // REMOVED: Individual print button is removed as requested
+                        tableRow += `<div class="mt-2"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">✅ บันทึกแล้ว</span></div>`;
                     } else {
                         tableRow += `<div class="mt-2"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">🅾️ ยังไม่บันทึก</span> <button onclick="openActivityModal('${row.time}', '${activityName.replace(/'/g, "\\'")}', ${index + 1})" class="ml-2 text-xs text-purple-600 hover:underline">บันทึก</button></div>`;
                     }
@@ -451,7 +453,7 @@
         });
     }
 
-    // Helper function to generate print HTML for a single activity
+    // UPDATED: Helper function to generate print HTML for a single activity with INLINE STYLES
     const createPrintContentForActivity = (details) => {
         const getImageUrl = (formula) => {
             if (!formula || typeof formula !== 'string' || !formula.startsWith('=IMAGE')) return '';
@@ -462,74 +464,71 @@
         const signatureUrl = getImageUrl(details['Signature']);
         
         return `
-            <div class="p-8">
-                <div class="text-center mb-6 border-b pb-4">
-                    <h1 class="text-3xl font-bold">บันทึกการปฏิบัติกิจกรรมลูกเสือ</h1>
-                    <h2 class="text-xl text-gray-600">โรงเรียนสา</h2>
+            <div style="padding: 2rem; font-family: 'Prompt', sans-serif; color: #1f2937;">
+                <div style="text-align: center; margin-bottom: 1.5rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 1rem;">
+                    <h1 style="font-size: 1.875rem; font-weight: 700;">บันทึกการปฏิบัติกิจกรรมลูกเสือ</h1>
+                    <h2 style="font-size: 1.25rem; color: #4b5563;">โรงเรียนสา</h2>
                 </div>
-                <div class="grid grid-cols-2 gap-x-8 gap-y-4 text-base mb-6 print-no-break">
-                    <div><strong>ระดับชั้น:</strong> ${details.Grade || ''}</div>
-                    <div><strong>กอง/หมู่:</strong> ${details.Group || ''} / ${details.Troop || ''}</div>
-                    <div><strong>กิจกรรม:</strong> ${details.Activity || ''}</div>
-                    <div><strong>เวลา:</strong> ${details.Time || ''}</div>
-                    <div class="col-span-2"><strong>บันทึกเมื่อ:</strong> ${details.Timestamp ? new Date(details.Timestamp).toLocaleString('th-TH') : ''}</div>
-                </div>
-                <div class="mb-6 border-t pt-4 print-no-break">
-                    <h3 class="text-xl font-semibold mb-2">สรุปการเข้าร่วม</h3>
-                    <div class="flex space-x-6">
+                
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 1rem;" class="print-no-break">
+                    <tbody>
+                        <tr>
+                            <td style="padding: 0.5rem; width: 50%;"><strong>ระดับชั้น:</strong> ${details.Grade || ''}</td>
+                            <td style="padding: 0.5rem; width: 50%;"><strong>กอง/หมู่:</strong> ${details.Group || ''} / ${details.Troop || ''}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem;"><strong>กิจกรรม:</strong> ${details.Activity || ''}</td>
+                            <td style="padding: 0.5rem;"><strong>เวลา:</strong> ${details.Time || ''}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem;" colspan="2"><strong>บันทึกเมื่อ:</strong> ${details.Timestamp ? new Date(details.Timestamp).toLocaleString('th-TH') : ''}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div style="margin-bottom: 1.5rem; border-top: 1px solid #e5e7eb; padding-top: 1rem;" class="print-no-break">
+                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">สรุปการเข้าร่วม</h3>
+                    <div style="display: flex; gap: 1.5rem;">
                         <span>✅ มา: ${details.Present || 0}</span>
                         <span>📋 ลา: ${details.Leave || 0}</span>
                         <span>❌ ขาด: ${details.Absent || 0}</span>
                         <span>🏃 หนี: ${details.Skipped || 0}</span>
                     </div>
                 </div>
-                 <div class="mb-6 border-t pt-4 print-no-break">
-                    <h3 class="text-xl font-semibold mb-2">ผลการประเมิน</h3>
-                    <div class="grid grid-cols-2 gap-x-8 gap-y-2">
-                        <div><strong>คะแนนรวม:</strong> ${details['Total Score'] || 0} / 100</div>
-                        <div><strong>ระดับผล:</strong> ${details['Grade Level'] || 'N/A'}</div>
+
+                 <div style="margin-bottom: 1.5rem; border-top: 1px solid #e5e7eb; padding-top: 1rem;" class="print-no-break">
+                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">ผลการประเมิน</h3>
+                     <table style="width: 100%; border-collapse: collapse;">
+                        <tr>
+                           <td style="padding: 0.25rem; width: 50%;"><strong>คะแนนรวม:</strong> ${details['Total Score'] || 0} / 100</td>
+                           <td style="padding: 0.25rem; width: 50%;"><strong>ระดับผล:</strong> ${details['Grade Level'] || 'N/A'}</td>
+                        </tr>
+                     </table>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem; border-top: 1px solid #e5e7eb; padding-top: 1rem;" class="print-no-break">
+                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">ความคิดเห็น/คอมเมนท์</h3>
+                    <p style="padding: 0.75rem; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.375rem;">${details.Comments || 'ไม่มี'}</p>
+                </div>
+
+                 <div style="margin-bottom: 1.5rem; border-top: 1px solid #e5e7eb; padding-top: 1rem;" class="print-no-break">
+                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">ภาพประกอบกิจกรรม</h3>
+                    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem;">
+                        ${photo1Url ? `<img src="${photo1Url}" style="width: 100%; height: auto; border: 1px solid #d1d5db; border-radius: 0.375rem;">` : '<div style="padding: 1rem;">ไม่มีภาพที่ 1</div>'}
+                        ${photo2Url ? `<img src="${photo2Url}" style="width: 100%; height: auto; border: 1px solid #d1d5db; border-radius: 0.375rem;">` : '<div style="padding: 1rem;">ไม่มีภาพที่ 2</div>'}
                     </div>
                 </div>
-                <div class="mb-6 border-t pt-4 print-no-break">
-                    <h3 class="text-xl font-semibold mb-2">ความคิดเห็น/คอมเมนท์</h3>
-                    <p class="p-3 bg-gray-50 rounded-md border">${details.Comments || 'ไม่มี'}</p>
-                </div>
-                 <div class="mb-6 border-t pt-4 print-no-break">
-                    <h3 class="text-xl font-semibold mb-2">ภาพประกอบกิจกรรม</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        ${photo1Url ? `<img src="${photo1Url}" class="w-full h-auto border rounded-md">` : '<div>ไม่มีภาพที่ 1</div>'}
-                        ${photo2Url ? `<img src="${photo2Url}" class="w-full h-auto border rounded-md">` : '<div>ไม่มีภาพที่ 2</div>'}
-                    </div>
-                </div>
-                <div class="mt-12 text-center pt-4 print-no-break">
-                    ${signatureUrl ? `<img src="${signatureUrl}" class="h-20 mx-auto">` : ''}
-                    <p class="border-t mt-2 pt-2">...........................................................</p>
+
+                <div style="margin-top: 3rem; text-align: center; padding-top: 1rem;" class="print-no-break">
+                    ${signatureUrl ? `<img src="${signatureUrl}" style="height: 5rem; margin-left: auto; margin-right: auto;">` : ''}
+                    <p style="border-top: 1px dotted #6b7280; margin-top: 0.5rem; padding-top: 0.5rem; display: inline-block;">...........................................................</p>
                     <p>(ลายเซ็นผู้กำกับลูกเสือ)</p>
                 </div>
             </div>
         `;
     };
 
-    async function printActivityRecord(grade, activityName) {
-        Swal.fire({ title: 'กำลังเตรียมข้อมูลสำหรับพิมพ์...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-        try {
-            const response = await fetch(`${SCRIPT_URL}?action=getActivityDetails&grade=${encodeURIComponent(grade)}&activityName=${encodeURIComponent(activityName)}`);
-            if (!response.ok) throw new Error('Could not fetch activity details.');
-            const details = await response.json();
-            if (!details || Object.keys(details).length === 0) {
-                throw new Error('No details found for this activity.');
-            }
-            const printContent = createPrintContentForActivity(details);
-            document.getElementById('printArea').innerHTML = printContent;
-            Swal.close();
-            window.print();
-        } catch (error) {
-            console.error(error);
-            Swal.fire('เกิดข้อผิดพลาด', error.message, 'error');
-        }
-    }
-
-    // ✨ NEW: Function to print a summary report for the current grade
+    // UPDATED: Function to print a summary report for the current grade
     async function printGradeReport() {
         const gradeMap = { 'm1': 'ม.1', 'm2': 'ม.2', 'm3': 'ม.3' };
         const gradeThai = gradeMap[currentStatusGrade];
@@ -545,21 +544,25 @@
             let fullReportHtml = '';
             activities.forEach((details, index) => {
                 if (index > 0) {
-                    fullReportHtml += '<div class="page-break"></div>'; // Add page break before each new activity report
+                    fullReportHtml += '<div class="page-break"></div>';
                 }
                 fullReportHtml += createPrintContentForActivity(details);
             });
             
             document.getElementById('printArea').innerHTML = fullReportHtml;
             Swal.close();
-            window.print();
+
+            // Add a small delay to ensure images are loaded before printing
+            setTimeout(() => {
+                window.print();
+            }, 500);
 
         } catch (error) {
              console.error(error);
              Swal.fire('เกิดข้อผิดพลาด', error.message, 'error');
         }
     }
-    // END: FUNCTIONS
+    // ⭐️ END: UPDATED JAVASCRIPT FUNCTIONS ⭐️
     </script>
 </body>
 </html>

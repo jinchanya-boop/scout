@@ -17,6 +17,9 @@
         .signature-pad { border: 2px dashed #c4b5fd; background: #faf5ff; }
         .rubric-item { background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%); }
         .modal-overlay { background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(5px); }
+        .file-input-label { cursor: pointer; background-color: #f3e8ff; border: 2px dashed #c4b5fd; }
+        .file-input-label:hover { background-color: #e9d5ff; }
+        .image-preview { width: 100%; height: 150px; object-fit: cover; border: 1px solid #ddd6fe; }
     </style>
 </head>
 <body class="gradient-bg min-h-screen">
@@ -95,7 +98,32 @@
     <div id="activityModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div class="p-6 border-b"><div class="flex items-center justify-between"><div class="flex items-center space-x-3"><span class="text-2xl">📝</span><h3 class="text-xl font-bold">บันทึกกิจกรรม</h3></div><button onclick="closeModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button></div></div>
-            <div class="p-6"><form id="activityForm"><div class="mb-6"><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label class="block text-sm font-medium mb-2">🕐 เวลา</label><input type="text" id="activityTime" class="w-full px-4 py-2 rounded-lg border" readonly></div><div><label class="block text-sm font-medium mb-2">📋 กิจกรรม</label><input type="text" id="activityName" class="w-full px-4 py-2 rounded-lg border" readonly></div></div></div><div class="mb-6"><label class="block text-sm font-medium mb-2">👥 เลือกระดับชั้น, กอง และหมู่</label><div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4"><div><label class="block text-xs mb-1">ระดับชั้น</label><select id="activityGrade" onchange="loadStudentList()" class="w-full px-3 py-2 rounded-lg border"><option value="">เลือกระดับชั้น</option><option value="ม.1">ม.1</option><option value="ม.2">ม.2</option><option value="ม.3">ม.3</option></select></div><div><label class="block text-xs mb-1">กอง</label><select id="selectedGroup" onchange="updateActivityTroopOptions()" class="w-full px-3 py-2 rounded-lg border"><option value="">เลือกกอง</option><option value="กอง1">กอง 1</option><option value="กอง2">กอง 2</option><option value="กอง3">กอง 3</option><option value="กอง4">กอง 4</option></select></div><div><label class="block text-xs mb-1">หมู่</label><select id="selectedTroop" onchange="loadStudentList()" class="w-full px-3 py-2 rounded-lg border" disabled><option value="">เลือกหมู่</option></select></div></div><div id="studentAttendanceList" class="hidden"><div class="bg-purple-50 rounded-lg p-4"><h4 class="font-medium mb-3 flex items-center"><span class="mr-2">📋</span>รายชื่อนักเรียน - เช็คชื่อ</h4><div id="studentCheckList" class="space-y-2"></div></div></div></div><div id="attendanceSummary" class="mt-4 p-4 bg-gray-100 rounded-lg hidden"><h5 class="font-semibold mb-2">สรุปการเช็คชื่อ:</h5><div class="flex flex-wrap gap-x-6 gap-y-2 text-sm"><span class="font-medium">✅ มา: <span id="summaryPresent" class="text-green-600 font-bold">0</span></span><span class="font-medium">📋 ลา: <span id="summaryLeave" class="text-yellow-600 font-bold">0</span></span><span class="font-medium">❌ ขาด: <span id="summaryAbsent" class="text-red-600 font-bold">0</span></span><span class="font-medium">🏃 หนี: <span id="summarySkipped" class="text-orange-600 font-bold">0</span></span></div></div><div class="mb-6 mt-6"><h4 class="text-lg font-semibold mb-4 flex items-center"><span class="mr-2">⭐</span>เกณฑ์การประเมิน</h4><div class="space-y-3" id="rubricItems"></div></div><div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6"><div><label class="block text-sm font-medium mb-2">🎯 คะแนนรวม</label><input type="number" id="totalScore" min="0" max="100" class="w-full px-4 py-2 rounded-lg border" placeholder="0-100"></div><div><label class="block text-sm font-medium mb-2">📊 ระดับ</label><select id="gradeLevel" class="w-full px-4 py-2 rounded-lg border"><option value="">เลือกระดับ</option><option value="ดีเยี่ยม">ดีเยี่ยม (90-100)</option><option value="ดีมาก">ดีมาก (80-89)</option><option value="ดี">ดี (70-79)</option><option value="พอใช้">พอใช้ (60-69)</option><option value="ปรับปรุง">ต้องปรับปรุง (&lt;60)</option></select></div></div><div class="mb-6"><label class="block text-sm font-medium mb-2">💬 ความคิดเห็น/คอมเมนท์</label><textarea id="comments" rows="4" class="w-full px-4 py-2 rounded-lg border" placeholder="บันทึกความคิดเห็น..."></textarea></div><div class="mb-6"><label class="block text-sm font-medium mb-2">📝 หมายเหตุของผู้กำกับ</label><textarea id="notes" rows="3" class="w-full px-4 py-2 rounded-lg border" placeholder="หมายเหตุเพิ่มเติม..."></textarea></div><div class="mb-6"><label class="block text-sm font-medium mb-2">✍️ ลายเซ็นผู้กำกับ</label><div class="signature-pad rounded-lg p-4 text-center"><canvas id="signatureCanvas" width="300" height="100" class="border-2 border-dashed rounded-lg mx-auto cursor-crosshair"></canvas><div class="mt-2 space-x-2"><button type="button" onclick="clearSignature()" class="text-sm text-purple-600 hover:text-purple-800">🗑️ ล้างลายเซ็น</button></div></div></div><div class="flex justify-end space-x-3"><button type="button" onclick="closeModal()" class="px-6 py-2 border rounded-lg">ยกเลิก</button><button type="submit" class="px-6 py-2 btn-primary text-white rounded-lg font-medium">💾 บันทึกข้อมูล</button></div></form></div>
+            <div class="p-6"><form id="activityForm"><div class="mb-6"><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label class="block text-sm font-medium mb-2">🕐 เวลา</label><input type="text" id="activityTime" class="w-full px-4 py-2 rounded-lg border" readonly></div><div><label class="block text-sm font-medium mb-2">📋 กิจกรรม</label><input type="text" id="activityName" class="w-full px-4 py-2 rounded-lg border" readonly></div></div></div><div class="mb-6"><label class="block text-sm font-medium mb-2">👥 เลือกระดับชั้น, กอง และหมู่</label><div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4"><div><label class="block text-xs mb-1">ระดับชั้น</label><select id="activityGrade" onchange="loadStudentList()" class="w-full px-3 py-2 rounded-lg border"><option value="">เลือกระดับชั้น</option><option value="ม.1">ม.1</option><option value="ม.2">ม.2</option><option value="ม.3">ม.3</option></select></div><div><label class="block text-xs mb-1">กอง</label><select id="selectedGroup" onchange="updateActivityTroopOptions()" class="w-full px-3 py-2 rounded-lg border"><option value="">เลือกกอง</option><option value="กอง1">กอง 1</option><option value="กอง2">กอง 2</option><option value="กอง3">กอง 3</option><option value="กอง4">กอง 4</option></select></div><div><label class="block text-xs mb-1">หมู่</label><select id="selectedTroop" onchange="loadStudentList()" class="w-full px-3 py-2 rounded-lg border" disabled><option value="">เลือกหมู่</option></select></div></div><div id="studentAttendanceList" class="hidden"><div class="bg-purple-50 rounded-lg p-4"><h4 class="font-medium mb-3 flex items-center"><span class="mr-2">📋</span>รายชื่อนักเรียน - เช็คชื่อ</h4><div id="studentCheckList" class="space-y-2"></div></div></div></div><div id="attendanceSummary" class="mt-4 p-4 bg-gray-100 rounded-lg hidden"><h5 class="font-semibold mb-2">สรุปการเช็คชื่อ:</h5><div class="flex flex-wrap gap-x-6 gap-y-2 text-sm"><span class="font-medium">✅ มา: <span id="summaryPresent" class="text-green-600 font-bold">0</span></span><span class="font-medium">📋 ลา: <span id="summaryLeave" class="text-yellow-600 font-bold">0</span></span><span class="font-medium">❌ ขาด: <span id="summaryAbsent" class="text-red-600 font-bold">0</span></span><span class="font-medium">🏃 หนี: <span id="summarySkipped" class="text-orange-600 font-bold">0</span></span></div></div>
+            
+            <div class="mb-6 mt-6">
+                <h4 class="text-lg font-semibold mb-4 flex items-center"><span class="mr-2">📸</span>ภาพประกอบกิจกรรม (2 ภาพ)</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="activityPhoto1" class="file-input-label p-4 rounded-lg flex flex-col items-center justify-center text-center">
+                            <span class="text-3xl">🖼️</span>
+                            <span class="mt-2 text-sm font-medium text-purple-700">เลือกภาพที่ 1</span>
+                            <span class="text-xs text-gray-500">คลิกเพื่ออัปโหลด</span>
+                        </label>
+                        <input type="file" id="activityPhoto1" class="hidden" accept="image/*" onchange="previewImage('activityPhoto1', 'photoPreview1')">
+                        <img id="photoPreview1" class="mt-2 rounded-lg image-preview hidden" alt="ตัวอย่างภาพที่ 1">
+                    </div>
+                    <div>
+                        <label for="activityPhoto2" class="file-input-label p-4 rounded-lg flex flex-col items-center justify-center text-center">
+                            <span class="text-3xl">🖼️</span>
+                            <span class="mt-2 text-sm font-medium text-purple-700">เลือกภาพที่ 2</span>
+                             <span class="text-xs text-gray-500">คลิกเพื่ออัปโหลด</span>
+                        </label>
+                        <input type="file" id="activityPhoto2" class="hidden" accept="image/*" onchange="previewImage('activityPhoto2', 'photoPreview2')">
+                        <img id="photoPreview2" class="mt-2 rounded-lg image-preview hidden" alt="ตัวอย่างภาพที่ 2">
+                    </div>
+                </div>
+            </div>
+            <div class="mb-6 mt-6"><h4 class="text-lg font-semibold mb-4 flex items-center"><span class="mr-2">⭐</span>เกณฑ์การประเมิน</h4><div class="space-y-3" id="rubricItems"></div></div><div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6"><div><label class="block text-sm font-medium mb-2">🎯 คะแนนรวม</label><input type="number" id="totalScore" min="0" max="100" class="w-full px-4 py-2 rounded-lg border" placeholder="0-100"></div><div><label class="block text-sm font-medium mb-2">📊 ระดับ</label><select id="gradeLevel" class="w-full px-4 py-2 rounded-lg border"><option value="">เลือกระดับ</option><option value="ดีเยี่ยม">ดีเยี่ยม (90-100)</option><option value="ดีมาก">ดีมาก (80-89)</option><option value="ดี">ดี (70-79)</option><option value="พอใช้">พอใช้ (60-69)</option><option value="ปรับปรุง">ต้องปรับปรุง (&lt;60)</option></select></div></div><div class="mb-6"><label class="block text-sm font-medium mb-2">💬 ความคิดเห็น/คอมเมนท์</label><textarea id="comments" rows="4" class="w-full px-4 py-2 rounded-lg border" placeholder="บันทึกความคิดเห็น..."></textarea></div><div class="mb-6"><label class="block text-sm font-medium mb-2">📝 หมายเหตุของผู้กำกับ</label><textarea id="notes" rows="3" class="w-full px-4 py-2 rounded-lg border" placeholder="หมายเหตุเพิ่มเติม..."></textarea></div><div class="mb-6"><label class="block text-sm font-medium mb-2">✍️ ลายเซ็นผู้กำกับ</label><div class="signature-pad rounded-lg p-4 text-center"><canvas id="signatureCanvas" width="300" height="100" class="border-2 border-dashed rounded-lg mx-auto cursor-crosshair"></canvas><div class="mt-2 space-x-2"><button type="button" onclick="clearSignature()" class="text-sm text-purple-600 hover:text-purple-800">🗑️ ล้างลายเซ็น</button></div></div></div><div class="flex justify-end space-x-3"><button type="button" onclick="closeModal()" class="px-6 py-2 border rounded-lg">ยกเลิก</button><button type="submit" class="px-6 py-2 btn-primary text-white rounded-lg font-medium">💾 บันทึกข้อมูล</button></div></form></div>
         </div>
     </div>
 
@@ -194,7 +222,73 @@
     function loadStudentList(){const grade=document.getElementById('activityGrade').value;const group=document.getElementById('selectedGroup').value;const troop=document.getElementById('selectedTroop').value;const container=document.getElementById('studentCheckList');const wrapper=document.getElementById('studentAttendanceList');const summary=document.getElementById('attendanceSummary');const students=studentData[grade]?.[group]?.[troop]||[];if(grade&&group&&troop){let html='';if(students.length>0){students.forEach(student=>{html+=`<div class="flex items-center justify-between p-3 bg-white rounded-lg border"><div class="flex items-center space-x-3"><span class="font-medium">${student.firstName} ${student.lastName} (${student.id})</span></div><div class="flex space-x-2"><label class="flex items-center space-x-1 cursor-pointer"><input type="radio" onchange="updateAttendanceSummary()" name="activity_attendance_${student.id}" value="มา" checked><span class="text-sm">มา</span></label><label class="flex items-center space-x-1 cursor-pointer"><input type="radio" onchange="updateAttendanceSummary()" name="activity_attendance_${student.id}" value="ลา"><span class="text-sm">ลา</span></label><label class="flex items-center space-x-1 cursor-pointer"><input type="radio" onchange="updateAttendanceSummary()" name="activity_attendance_${student.id}" value="ขาด"><span class="text-sm">ขาด</span></label><label class="flex items-center space-x-1 cursor-pointer"><input type="radio" onchange="updateAttendanceSummary()" name="activity_attendance_${student.id}" value="หนี"><span class="text-sm">หนี</span></label></div></div>`;});}else{html=`<p class="text-center text-gray-500 py-2">-- ไม่มีข้อมูลนักเรียน --</p>`;}
     container.innerHTML=html;wrapper.classList.remove('hidden');summary.classList.remove('hidden');updateAttendanceSummary();}else{container.innerHTML='';wrapper.classList.add('hidden');summary.classList.add('hidden');}}
     function updateAttendanceSummary(){const container=document.getElementById('studentCheckList');if(!container)return;const present=container.querySelectorAll('input[value="มา"]:checked').length;const leave=container.querySelectorAll('input[value="ลา"]:checked').length;const absent=container.querySelectorAll('input[value="ขาด"]:checked').length;const skipped=container.querySelectorAll('input[value="หนี"]:checked').length;document.getElementById('summaryPresent').innerText=present;document.getElementById('summaryLeave').innerText=leave;document.getElementById('summaryAbsent').innerText=absent;document.getElementById('summarySkipped').innerText=skipped;}
-    async function saveActivityRecord(){Swal.fire({title:'กำลังบันทึกกิจกรรม',html:'อาจใช้เวลาสักครู่ในการอัปโหลดลายเซ็น...',allowOutsideClick:false,didOpen:()=>{Swal.showLoading();}});const rubricScores={};document.querySelectorAll('[id^="rubric_"]').forEach((item,index)=>{rubricScores[`criteria_${index}`]=item.value;});const signatureData=canvas?canvas.toDataURL():'';const payload={type:'activity',timestamp:new Date().toLocaleString('th-TH'),grade:document.getElementById('activityGrade').value,time:document.getElementById('activityTime').value,activity:document.getElementById('activityName').value,selectedGroup:document.getElementById('selectedGroup').value,selectedTroop:document.getElementById('selectedTroop').value,totalScore:document.getElementById('totalScore').value,gradeLevel:document.getElementById('gradeLevel').value,comments:document.getElementById('comments').value,notes:document.getElementById('notes').value,signature:signatureData,rubricScores,summaryPresent:document.getElementById('summaryPresent').innerText,summaryLeave:document.getElementById('summaryLeave').innerText,summaryAbsent:document.getElementById('summaryAbsent').innerText,summarySkipped:document.getElementById('summarySkipped').innerText};try{await postData(payload);saveDataLocally(payload,'scoutActivityRecords');showSuccessMessage(payload,false);}catch(error){saveDataLocally(payload,'scoutActivityRecords');showSuccessMessage(payload,true);console.error('Failed to save activity to Sheet:',error);}}
+    
+    // START: New image helper functions
+    function previewImage(inputId, previewId) {
+        const input = document.getElementById(inputId);
+        const preview = document.getElementById(previewId);
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.classList.remove('hidden');
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+    }
+    // END: New image helper functions
+    
+    async function saveActivityRecord(){
+        Swal.fire({title:'กำลังบันทึกกิจกรรม',html:'อาจใช้เวลาสักครู่ในการอัปโหลดรูปภาพและลายเซ็น...',allowOutsideClick:false,didOpen:()=>{Swal.showLoading();}});
+        
+        // Handle file uploads
+        const file1 = document.getElementById('activityPhoto1').files[0];
+        const file2 = document.getElementById('activityPhoto2').files[0];
+        let photo1_base64 = '';
+        let photo2_base64 = '';
+        
+        try {
+            if(file1) photo1_base64 = await fileToBase64(file1);
+            if(file2) photo2_base64 = await fileToBase64(file2);
+        } catch (error) {
+            Swal.fire({icon: 'error', title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถแปลงไฟล์รูปภาพได้!'});
+            return;
+        }
+
+        const rubricScores={};document.querySelectorAll('[id^="rubric_"]').forEach((item,index)=>{rubricScores[`criteria_${index}`]=item.value;});
+        const signatureData=canvas?canvas.toDataURL():'';
+        
+        const payload={type:'activity',
+            timestamp:new Date().toLocaleString('th-TH'),
+            grade:document.getElementById('activityGrade').value,
+            time:document.getElementById('activityTime').value,
+            activity:document.getElementById('activityName').value,
+            selectedGroup:document.getElementById('selectedGroup').value,
+            selectedTroop:document.getElementById('selectedTroop').value,
+            totalScore:document.getElementById('totalScore').value,
+            gradeLevel:document.getElementById('gradeLevel').value,
+            comments:document.getElementById('comments').value,
+            notes:document.getElementById('notes').value,
+            signature:signatureData,
+            rubricScores,
+            summaryPresent:document.getElementById('summaryPresent').innerText,
+            summaryLeave:document.getElementById('summaryLeave').innerText,
+            summaryAbsent:document.getElementById('summaryAbsent').innerText,
+            summarySkipped:document.getElementById('summarySkipped').innerText,
+            photo1: photo1_base64, // Add photo data
+            photo2: photo2_base64  // Add photo data
+        };
+
+        try{await postData(payload);saveDataLocally(payload,'scoutActivityRecords');showSuccessMessage(payload,false);}catch(error){saveDataLocally(payload,'scoutActivityRecords');showSuccessMessage(payload,true);console.error('Failed to save activity to Sheet:',error);}}
 
     // --- UTILITY FUNCTIONS ---
     function updateTroopOptions(groupElId,troopElId){const groupSelect=document.getElementById(groupElId);const troopSelect=document.getElementById(troopElId);troopSelect.innerHTML='<option value="">เลือกหมู่</option>';if(groupSelect.value){for(let i=1;i<=4;i++){troopSelect.innerHTML+=`<option value="หมู่${i}">หมู่ ${i}</option>`;}}}
@@ -207,7 +301,18 @@
     function openAttendanceCheck(){document.getElementById('attendanceModal').classList.remove('hidden');document.getElementById('attendanceDate').value=new Date().toISOString().split('T')[0];}
     function closeAttendanceCheck(){document.getElementById('attendanceModal').classList.add('hidden');}
     function openActivityModal(time,activity,day){document.getElementById('activityModal').classList.remove('hidden');document.getElementById('activityTime').value=time;document.getElementById('activityName').value=activity;let criteriaKey='default';if(['เงื่อน','เข็มทิศ','ปฐมพยาบาล'].some(s=>activity.includes(s)))criteriaKey='skill';else if(['ผู้นำ','บังคับบัญชา'].some(s=>activity.includes(s)))criteriaKey='leadership';loadRubricItems(rubricCriteria[criteriaKey]);setupSignatureCanvas();document.getElementById('activityForm').addEventListener('submit',(e)=>{e.preventDefault();saveActivityRecord();});}
-    function closeModal(){document.getElementById('activityModal').classList.add('hidden');document.getElementById('activityForm').reset();clearSignature();}
+    
+    function closeModal() {
+        document.getElementById('activityModal').classList.add('hidden');
+        document.getElementById('activityForm').reset();
+        // Reset image previews
+        document.getElementById('photoPreview1').classList.add('hidden');
+        document.getElementById('photoPreview1').src = '';
+        document.getElementById('photoPreview2').classList.add('hidden');
+        document.getElementById('photoPreview2').src = '';
+        clearSignature();
+    }
+    
     function hideStudentForm(){document.getElementById('studentForm').classList.add('hidden');editingStudent=null;document.getElementById('addStudentForm').reset();}
     
     function loadRubricItems(criteria){const container=document.getElementById('rubricItems');container.innerHTML=criteria.map((item,index)=>`<div class="rubric-item rounded-lg p-4 border"><div class="flex items-center justify-between mb-2"><span class="font-medium">${item.criteria}</span><span class="text-sm text-purple-600">เต็ม: ${item.maxScore}</span></div><div class="flex items-center space-x-4"><input type="range" min="0" max="${item.maxScore}" value="0" class="flex-1" id="rubric_${index}" oninput="updateRubricScore()"><span id="score_${index}" class="font-bold text-purple-600 min-w-[60px]">0/${item.maxScore}</span></div></div>`).join('');updateRubricScore();}

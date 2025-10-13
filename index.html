@@ -394,7 +394,17 @@
     function closeStudentManagement(){document.getElementById('studentManagementModal').classList.add('hidden');hideStudentForm();}
     function openAttendanceCheck(){document.getElementById('attendanceModal').classList.remove('hidden');document.getElementById('attendanceDate').value=new Date().toISOString().split('T')[0];}
     function closeAttendanceCheck(){document.getElementById('attendanceModal').classList.add('hidden');}
-    function openActivityModal(time,activity,day){document.getElementById('activityModal').classList.remove('hidden');document.getElementById('activityTime').value=time;document.getElementById('activityName').value=activity;let criteriaKey='default';if(['เงื่อน','เข็มทิศ','ปฐมพยาบาล'].some(s=>activity.includes(s)))criteriaKey='skill';else if(['ผู้นำ','บังคับบัญชา'].some(s=>activity.includes(s)))criteriaKey='leadership';loadRubricItems(rubricCriteria[criteriaKey]);setupSignatureCanvas();document.getElementById('activityForm').addEventListener('submit',(e)=>{e.preventDefault();saveActivityRecord();});}
+    function openActivityModal(time, activity, day) {
+    document.getElementById('activityModal').classList.remove('hidden');
+    document.getElementById('activityTime').value = time;
+    document.getElementById('activityName').value = activity;
+    let criteriaKey = 'default';
+    if (['เงื่อน', 'เข็มทิศ', 'ปฐมพยาบาล'].some(s => activity.includes(s))) criteriaKey = 'skill';
+    else if (['ผู้นำ', 'บังคับบัญชา'].some(s => activity.includes(s))) criteriaKey = 'leadership';
+    loadRubricItems(rubricCriteria[criteriaKey]);
+    setupSignatureCanvas();
+
+   
     function closeModal() {
         document.getElementById('activityModal').classList.add('hidden');
         document.getElementById('activityForm').reset();

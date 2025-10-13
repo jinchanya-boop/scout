@@ -223,12 +223,10 @@
     };
 
     document.addEventListener('DOMContentLoaded', function () {
-    fetchStudents();
-    document.getElementById('gradeSelect').addEventListener('change', loadSchedule);
-
-    // 🔻🔻🔻 --- เพิ่มบรรทัดนี้เข้ามาใหม่ --- 🔻🔻🔻
-    document.getElementById('activityForm').addEventListener('submit', (e) => { e.preventDefault(); saveActivityRecord(); });
-});    
+        fetchStudents();
+        document.getElementById('gradeSelect').addEventListener('change', loadSchedule);
+        document.getElementById('activityForm').addEventListener('submit', (e) => { e.preventDefault(); saveActivityRecord(); });
+    });
     
     async function fetchStudents() {
         try {
@@ -281,7 +279,7 @@
     async function saveAttendance(){const date=document.getElementById('attendanceDate').value;const activity=document.getElementById('attendanceActivity').value;const grade=document.getElementById('attendanceGrade').value;const group=document.getElementById('attendanceGroup').value;const troop=document.getElementById('attendanceTroop').value;if(!date||!activity||!grade||!group||!troop){Swal.fire({icon:'warning',title:'กรุณากรอกข้อมูลให้ครบ',confirmButtonColor:'#8b5cf6'});return;}
     const students=studentData[grade]?.[group]?.[troop]||[];if(students.length===0){Swal.fire({icon:'info',title:'ไม่มีนักเรียนในกลุ่มนี้',confirmButtonColor:'#8b5cf6'});return;}
     const attendanceData=students.map(student=>({studentId:student.id,studentName:`${student.firstName} ${student.lastName}`,status:document.querySelector(`input[name="attendance_${student.id}"]:checked`)?.value||'ไม่ระบุ'}));const payload={type:'attendance',date,activity,grade,group,troop,attendanceData};Swal.fire({title:'กำลังบันทึก...',willOpen:()=>Swal.showLoading()});try{await postData(payload);showSuccessMessage(payload,false);}catch(error){showSuccessMessage(payload,true);console.error('Failed to save attendance:',error);}}
-    function loadStudentList(){const grade=document.getElementById('activityGrade').value;const group=document.getElementById('selectedGroup').value;const troop=document.getElementById('selectedTroop').value;const container=document.getElementById('studentCheckList');const wrapper=document.getElementById('studentAttendanceList');const summary=document.getElementById('attendanceSummary');const students=studentData[grade]?.[group]?.[troop]||[];if(grade&&group&&troop){let html='';if(students.length>0){students.forEach(student=>{html+=`<div class="flex items-center justify-between p-3 bg-white rounded-lg border"><div class="flex items-center space-x-3"><span class="font-medium">${student.firstName} ${student.lastName} (${student.id})</span></div><div class="flex space-x-2"><label class="flex items-center space-x-1 cursor-pointer"><input type="radio" onchange="updateAttendanceSummary()" name="activity_attendance_${student.id}" value="มา" checked><span class="text-sm">มา</span></label><label class="flex items-center space-x-1 cursor-pointer"><input type="radio" onchange="updateAttendanceSummary()" name="activity_attendance_${student.id}" value="ลา"><span class="text-sm">ลา</span></label><label class="flex items-center space-x-1 cursor-pointer"><input type="radio" onchange="updateAttendanceSummary()" name="activity_attendance_${student.id}" value="ขาด"><span class="text-sm">ขาด</span></label><label class="flex items-center space-x-1 cursor-pointer"><input type="radio" onchange="updateAttendanceSummary()" name="activity_attendance_${student.id}" value="หนี"><span class="text-sm">หนี</span></label></div></div>`;});}else{html=`<p class="text-center text-gray-500 py-2">-- ไม่มีข้อมูลนักเรียน --</p>`;}
+    function loadStudentList(){const grade=document.getElementById('activityGrade').value;const group=document.getElementById('selectedGroup').value;const troop=document.getElementById('selectedTroop').value;const container=document.getElementById('studentCheckList');const wrapper=document.getElementById('studentAttendanceList');const summary=document.getElementById('attendanceSummary');const students=studentData[grade]?.[group]?.[troop]||[];if(grade&&group&&troop){let html='';if(students.length>0){students.forEach(student=>{html+=`<div class="flex items-center justify-between p-3 bg-white rounded-lg border"><div class="flex items-center space-x-3"><span class="font-medium">${student.firstName} ${student.lastName} (${student.id})</span></div><div class="flex space-x-2"><label class="flex items-center space-x-1 cursor-pointer"><input type="radio" onchange="updateAttendanceSummary()" name="activity_attendance_${student.id}" value="มา" checked><span class="text-sm">มา</span></label><label class="flex items-center space-x-1 cursor-pointer"><input type="radio" onchange="updateAttendanceSummary()" name="activity_attendance_${student.id}" value="ลา"><span class="text-sm">ลา</span></label><label class="flex items-center space-x-1 cursor-pointer"><input type="radio" onchange="updateAttendanceSummary()" name="activity_attendance_${student.id}" value="ขาด"><span class="text-sm">ขาด</span></label><label class="flex items-center space-x-1 cursor-pointer"><input type="radio" onchange="updateAttendanceSummary()" name="activity_attendance_${student.id}" value="หนี"><span class="text-sm">หนี</span></label></div></div>`;});}else{html+=`<p class="text-center text-gray-500 py-2">-- ไม่มีข้อมูลนักเรียน --</p>`;}
     container.innerHTML=html;wrapper.classList.remove('hidden');summary.classList.remove('hidden');updateAttendanceSummary();}else{container.innerHTML='';wrapper.classList.add('hidden');summary.classList.add('hidden');}}
     function updateAttendanceSummary(){const container=document.getElementById('studentCheckList');if(!container)return;const present=container.querySelectorAll('input[value="มา"]:checked').length;const leave=container.querySelectorAll('input[value="ลา"]:checked').length;const absent=container.querySelectorAll('input[value="ขาด"]:checked').length;const skipped=container.querySelectorAll('input[value="หนี"]:checked').length;document.getElementById('summaryPresent').innerText=present;document.getElementById('summaryLeave').innerText=leave;document.getElementById('summaryAbsent').innerText=absent;document.getElementById('summarySkipped').innerText=skipped;}
     function previewImage(inputId, previewId) {
@@ -398,16 +396,16 @@
     function openAttendanceCheck(){document.getElementById('attendanceModal').classList.remove('hidden');document.getElementById('attendanceDate').value=new Date().toISOString().split('T')[0];}
     function closeAttendanceCheck(){document.getElementById('attendanceModal').classList.add('hidden');}
     function openActivityModal(time, activity, day) {
-    document.getElementById('activityModal').classList.remove('hidden');
-    document.getElementById('activityTime').value = time;
-    document.getElementById('activityName').value = activity;
-    let criteriaKey = 'default';
-    if (['เงื่อน', 'เข็มทิศ', 'ปฐมพยาบาล'].some(s => activity.includes(s))) criteriaKey = 'skill';
-    else if (['ผู้นำ', 'บังคับบัญชา'].some(s => activity.includes(s))) criteriaKey = 'leadership';
-    loadRubricItems(rubricCriteria[criteriaKey]);
-    setupSignatureCanvas();
-
-   
+        document.getElementById('activityModal').classList.remove('hidden');
+        document.getElementById('activityTime').value = time;
+        document.getElementById('activityName').value = activity;
+        let criteriaKey = 'default';
+        if (['เงื่อน', 'เข็มทิศ', 'ปฐมพยาบาล'].some(s => activity.includes(s))) criteriaKey = 'skill';
+        else if (['ผู้นำ', 'บังคับบัญชา'].some(s => activity.includes(s))) criteriaKey = 'leadership';
+        loadRubricItems(rubricCriteria[criteriaKey]);
+        setupSignatureCanvas();
+    }
+    
     function closeModal() {
         document.getElementById('activityModal').classList.add('hidden');
         document.getElementById('activityForm').reset();
@@ -510,86 +508,84 @@
         });
     }
 
-    // UPDATED FUNCTION with crossorigin attribute for images
-const createPrintContentForActivity = (details) => {
-    const getImageUrl = (formula) => {
-        if (!formula || typeof formula !== 'string' || !formula.startsWith('=IMAGE')) return '';
-        try { return formula.match(/"(.*?)"/)[1]; } catch { return ''; }
+    const createPrintContentForActivity = (details) => {
+        const getImageUrl = (formula) => {
+            if (!formula || typeof formula !== 'string' || !formula.startsWith('=IMAGE')) return '';
+            try { return formula.match(/"(.*?)"/)[1]; } catch { return ''; }
+        };
+        const photo1Url = getImageUrl(details['Photo 1']);
+        const photo2Url = getImageUrl(details['Photo 2']);
+        const signatureUrl = getImageUrl(details['Signature']);
+        return `
+            <div style="padding: 2rem; font-family: 'Prompt', sans-serif; color: #1f2937;">
+                <div style="text-align: center; margin-bottom: 1.5rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 1rem;">
+                    <h1 style="font-size: 1.875rem; font-weight: 700;">บันทึกการปฏิบัติกิจกรรมลูกเสือ</h1>
+                    <h2 style="font-size: 1.25rem; color: #4b5563;">โรงเรียนสา</h2>
+                </div>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 1rem;" class="print-no-break">
+                    <tbody>
+                        <tr>
+                            <td style="padding: 0.5rem; width: 50%;"><strong>ระดับชั้น:</strong> ${details.Grade || ''}</td>
+                            <td style="padding: 0.5rem; width: 50%;"><strong>กอง/หมู่:</strong> ${details.Group || ''} / ${details.Troop || ''}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem;"><strong>กิจกรรม:</strong> ${details.Activity || ''}</td>
+                            <td style="padding: 0.5rem;"><strong>เวลา:</strong> ${details.Time || ''}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem;" colspan="2"><strong>บันทึกเมื่อ:</strong> ${details.Timestamp ? new Date(details.Timestamp).toLocaleString('th-TH') : ''}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="margin-bottom: 1.5rem; border-top: 1px solid #e5e7eb; padding-top: 1rem;" class="print-no-break">
+                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">สรุปการเข้าร่วม</h3>
+                    <div style="display: flex; gap: 1.5rem;">
+                        <span>✅ มา: ${details.Present || 0}</span>
+                        <span>📋 ลา: ${details.Leave || 0}</span>
+                        <span>❌ ขาด: ${details.Absent || 0}</span>
+                        <span>🏃 หนี: ${details.Skipped || 0}</span>
+                    </div>
+                </div>
+                 <div style="margin-bottom: 1.5rem; border-top: 1px solid #e5e7eb; padding-top: 1rem;" class="print-no-break">
+                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">ผลการประเมิน</h3>
+                     <table style="width: 100%; border-collapse: collapse;">
+                        <tr>
+                           <td style="padding: 0.25rem; width: 50%;"><strong>คะแนนรวม:</strong> ${details['Total Score'] || 0} / 100</td>
+                           <td style="padding: 0.25rem; width: 50%;"><strong>ระดับผล:</strong> ${details['Grade Level'] || 'N/A'}</td>
+                        </tr>
+                     </table>
+                </div>
+                <div style="margin-bottom: 1.5rem; border-top: 1px solid #e5e7eb; padding-top: 1rem;" class="print-no-break">
+                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">ความคิดเห็น/คอมเมนท์</h3>
+                    <p style="padding: 0.75rem; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.375rem;">${details.Comments || 'ไม่มี'}</p>
+                </div>
+                 <div style="margin-bottom: 1.5rem; border-top: 1px solid #e5e7eb; padding-top: 1rem;" class="print-no-break">
+                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">ภาพประกอบกิจกรรม</h3>
+                    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem;">
+                        ${photo1Url ? `<img src="${photo1Url}" crossorigin="anonymous" style="width: 100%; height: auto; border: 1px solid #d1d5db; border-radius: 0.375rem;">` : '<div style="padding: 1rem;">ไม่มีภาพที่ 1</div>'}
+                        ${photo2Url ? `<img src="${photo2Url}" crossorigin="anonymous" style="width: 100%; height: auto; border: 1px solid #d1d5db; border-radius: 0.375rem;">` : '<div style="padding: 1rem;">ไม่มีภาพที่ 2</div>'}
+                    </div>
+                </div>
+                <div style="margin-top: 3rem; text-align: center; padding-top: 1rem;" class="print-no-break">
+                    ${signatureUrl ? `<img src="${signatureUrl}" crossorigin="anonymous" style="height: 5rem; margin-left: auto; margin-right: auto;">` : ''}
+                    <p style="border-top: 1px dotted #6b7280; margin-top: 0.5rem; padding-top: 0.5rem; display: inline-block;">...........................................................</p>
+                    <p>(ลายเซ็นผู้กำกับลูกเสือ)</p>
+                </div>
+            </div>
+        `;
     };
-    const photo1Url = getImageUrl(details['Photo 1']);
-    const photo2Url = getImageUrl(details['Photo 2']);
-    const signatureUrl = getImageUrl(details['Signature']);
-    return `
-        <div style="padding: 2rem; font-family: 'Prompt', sans-serif; color: #1f2937;">
-            <div style="text-align: center; margin-bottom: 1.5rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 1rem;">
-                <h1 style="font-size: 1.875rem; font-weight: 700;">บันทึกการปฏิบัติกิจกรรมลูกเสือ</h1>
-                <h2 style="font-size: 1.25rem; color: #4b5563;">โรงเรียนสา</h2>
-            </div>
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 1rem;" class="print-no-break">
-                <tbody>
-                    <tr>
-                        <td style="padding: 0.5rem; width: 50%;"><strong>ระดับชั้น:</strong> ${details.Grade || ''}</td>
-                        <td style="padding: 0.5rem; width: 50%;"><strong>กอง/หมู่:</strong> ${details.Group || ''} / ${details.Troop || ''}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 0.5rem;"><strong>กิจกรรม:</strong> ${details.Activity || ''}</td>
-                        <td style="padding: 0.5rem;"><strong>เวลา:</strong> ${details.Time || ''}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 0.5rem;" colspan="2"><strong>บันทึกเมื่อ:</strong> ${details.Timestamp ? new Date(details.Timestamp).toLocaleString('th-TH') : ''}</td>
-                    </tr>
-                </tbody>
-            </table>
-            <div style="margin-bottom: 1.5rem; border-top: 1px solid #e5e7eb; padding-top: 1rem;" class="print-no-break">
-                <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">สรุปการเข้าร่วม</h3>
-                <div style="display: flex; gap: 1.5rem;">
-                    <span>✅ มา: ${details.Present || 0}</span>
-                    <span>📋 ลา: ${details.Leave || 0}</span>
-                    <span>❌ ขาด: ${details.Absent || 0}</span>
-                    <span>🏃 หนี: ${details.Skipped || 0}</span>
-                </div>
-            </div>
-             <div style="margin-bottom: 1.5rem; border-top: 1px solid #e5e7eb; padding-top: 1rem;" class="print-no-break">
-                <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">ผลการประเมิน</h3>
-                 <table style="width: 100%; border-collapse: collapse;">
-                    <tr>
-                       <td style="padding: 0.25rem; width: 50%;"><strong>คะแนนรวม:</strong> ${details['Total Score'] || 0} / 100</td>
-                       <td style="padding: 0.25rem; width: 50%;"><strong>ระดับผล:</strong> ${details['Grade Level'] || 'N/A'}</td>
-                    </tr>
-                 </table>
-            </div>
-            <div style="margin-bottom: 1.5rem; border-top: 1px solid #e5e7eb; padding-top: 1rem;" class="print-no-break">
-                <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">ความคิดเห็น/คอมเมนท์</h3>
-                <p style="padding: 0.75rem; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.375rem;">${details.Comments || 'ไม่มี'}</p>
-            </div>
-             <div style="margin-bottom: 1.5rem; border-top: 1px solid #e5e7eb; padding-top: 1rem;" class="print-no-break">
-                <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">ภาพประกอบกิจกรรม</h3>
-                <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem;">
-                    ${photo1Url ? `<img src="${photo1Url}" crossorigin="anonymous" style="width: 100%; height: auto; border: 1px solid #d1d5db; border-radius: 0.375rem;">` : '<div style="padding: 1rem;">ไม่มีภาพที่ 1</div>'}
-                    ${photo2Url ? `<img src="${photo2Url}" crossorigin="anonymous" style="width: 100%; height: auto; border: 1px solid #d1d5db; border-radius: 0.375rem;">` : '<div style="padding: 1rem;">ไม่มีภาพที่ 2</div>'}
-                </div>
-            </div>
-            <div style="margin-top: 3rem; text-align: center; padding-top: 1rem;" class="print-no-break">
-                ${signatureUrl ? `<img src="${signatureUrl}" crossorigin="anonymous" style="height: 5rem; margin-left: auto; margin-right: auto;">` : ''}
-                <p style="border-top: 1px dotted #6b7280; margin-top: 0.5rem; padding-top: 0.5rem; display: inline-block;">...........................................................</p>
-                <p>(ลายเซ็นผู้กำกับลูกเสือ)</p>
-            </div>
-        </div>
-    `;
-};
 
     async function printGradeReport() {
-    const gradeMap = { 'm1': 'ม.1', 'm2': 'ม.2', 'm3': 'ม.3' };
-    const gradeThai = gradeMap[currentStatusGrade];
-    Swal.fire({ title: `กำลังสร้างรายงานสรุป ${gradeThai}...`, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-    try {
-        const response = await fetch(`${SCRIPT_URL}?action=getActivitiesForGrade&grade=${encodeURIComponent(gradeThai)}`);
-         if (!response.ok) throw new Error('Could not fetch activity details for the grade.');
-        const activities = await response.json();
-
-        if (!activities || activities.length === 0) {
-            throw new Error(`ไม่พบกิจกรรมที่บันทึกแล้วสำหรับ ${gradeThai}`);
-        }
+        const gradeMap = { 'm1': 'ม.1', 'm2': 'ม.2', 'm3': 'ม.3' };
+        const gradeThai = gradeMap[currentStatusGrade];
+        Swal.fire({ title: `กำลังสร้างรายงานสรุป ${gradeThai}...`, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+        try {
+            const response = await fetch(`${SCRIPT_URL}?action=getActivitiesForGrade&grade=${encodeURIComponent(gradeThai)}`);
+             if (!response.ok) throw new Error('Could not fetch activity details for the grade.');
+            const activities = await response.json();
+            if (!activities || activities.length === 0) {
+                throw new Error(`ไม่พบกิจกรรมที่บันทึกแล้วสำหรับ ${gradeThai}`);
+            }
             let fullReportHtml = '';
             activities.forEach((details, index) => {
                 if (index > 0) {

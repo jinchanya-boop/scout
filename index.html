@@ -565,16 +565,21 @@
     };
 
     async function printGradeReport() {
-        const gradeMap = { 'm1': 'ม.1', 'm2': 'ม.2', 'm3': 'ม.3' };
-        const gradeThai = gradeMap[currentStatusGrade];
-        Swal.fire({ title: `กำลังสร้างรายงานสรุป ${gradeThai}...`, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-        try {
-            const response = await fetch(`${SCRIPT_URL}?action=getActivitiesForGrade&grade=${encodeURIComponent(gradeThai)}`);
-             if (!response.ok) throw new Error('Could not fetch activity details for the grade.');
-            const activities = await response.json();
-            if (!activities || activities.length === 0) {
-                throw new Error(`ไม่พบกิจกรรมที่บันทึกแล้วสำหรับ ${gradeThai}`);
-            }
+    const gradeMap = { 'm1': 'ม.1', 'm2': 'ม.2', 'm3': 'ม.3' };
+    const gradeThai = gradeMap[currentStatusGrade];
+    Swal.fire({ title: `กำลังสร้างรายงานสรุป ${gradeThai}...`, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+    try {
+        const response = await fetch(`${SCRIPT_URL}?action=getActivitiesForGrade&grade=${encodeURIComponent(gradeThai)}`);
+         if (!response.ok) throw new Error('Could not fetch activity details for the grade.');
+        const activities = await response.json();
+
+        // VVVV --- เพิ่มบรรทัดนี้เข้ามาครับ --- VVVV
+        console.log('Raw data from Sheet:', activities); 
+        // ^^^^ --- เพิ่มบรรทัดนี้เข้ามาครับ --- ^^^^
+
+        if (!activities || activities.length === 0) {
+            throw new Error(`ไม่พบกิจกรรมที่บันทึกแล้วสำหรับ ${gradeThai}`);
+        }
             let fullReportHtml = '';
             activities.forEach((details, index) => {
                 if (index > 0) {

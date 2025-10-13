@@ -23,38 +23,38 @@
 
         /* START: FINAL PRINT STYLES */
         @media print {
-    /* --- ส่วนเดิมของคุณ (สำคัญมาก ห้ามลบ) --- */
     /* ซ่อนทุกอย่างใน body ยกเว้น #printArea */
     body > *:not(#printArea) {
         display: none;
     }
+
     /* บังคับให้ #printArea แสดงผลตอนพิมพ์เท่านั้น */
     #printArea {
         display: block !important;
         visibility: visible !important;
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-    }
-    .print-no-break {
-        page-break-inside: avoid;
-    }
-    .page-break {
-        page-break-before: always;
-    }
-
-    /* --- ส่วนใหม่ที่เพิ่มเข้ามาเพื่อจัดหน้ารูปภาพ --- */
-    #printArea img {
-        max-width: 100% !important; /* จำกัดความกว้างสูงสุดของรูปภาพ */
-        height: auto !important;    /* ปรับความสูงอัตโนมัติ */
-        break-inside: avoid;       /* ป้องกันไม่ให้รูปภาพถูกแบ่งครึ่งหน้า */
+        position: static; /* ใช้ static แทน absolute เพื่อการจัดหน้าที่ดีกว่า */
     }
     
-    /* ปรับขนาดรูปภาพลายเซ็นโดยเฉพาะ */
+    /* 🟢 [แก้ไข] ทำให้ 1 กิจกรรมอยู่หน้าเดียว */
+    .single-page-activity {
+        page-break-inside: avoid; /* ป้องกันการแบ่งครึ่งหน้า */
+        break-inside: avoid;
+    }
+
+    /* จัดการการขึ้นหน้าใหม่ */
+    .page-break {
+        page-break-before: always; /* บังคับขึ้นหน้าใหม่ */
+        break-before: page;
+    }
+    
+    /* จัดการรูปภาพไม่ให้ล้นหน้า และคงขนาดลายเซ็น */
+    #printArea img {
+        max-width: 100% !important;
+        height: auto !important;
+    }
     #printArea img[style*="height: 5rem"] {
-        height: 5rem !important;   /* รักษาสูงเดิม */
-        width: auto !important;    /* ปรับกว้างอัตโนมัติ */
+        height: 5rem !important;
+        width: auto !important;
     }
 }        
     
@@ -587,29 +587,34 @@ const createPrintContentForActivity = (details) => {
     Swal.fire({ title: `กำลังสร้างรายงานสรุป ${gradeThai}...`, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
     try {
         const response = await fetch(`${SCRIPT_URL}?action=getActivitiesForGrade&grade=${encodeURIComponent(gradeThai)}`);
-         if (!response.ok) throw new Error('Could not fetch activity details for the grade.');
+        if (!response.ok) throw new Error('Could not fetch activity details for the grade.');
         const activities = await response.json();
 
         if (!activities || activities.length === 0) {
             throw new Error(`ไม่พบกิจกรรมที่บันทึกแล้วสำหรับ ${gradeThai}`);
         }
-            let fullReportHtml = '';
-            activities.forEach((details, index) => {
-                if (index > 0) {
-                    fullReportHtml += '<div class="page-break"></div>';
-                }
-                fullReportHtml += createPrintContentForActivity(details);
-            });
-            document.getElementById('printArea').innerHTML = fullReportHtml;
-            Swal.close();
-            setTimeout(() => {
-                window.print();
-            }, 500);
-        } catch (error) {
-             console.error(error);
-             Swal.fire('เกิดข้อผิดพลาด', error.message, 'error');
-        }
+        
+        let fullReportHtml = '';
+        activities.forEach((details, index) => {
+            // 🟢 [แก้ไข] เพิ่ม div ครอบกิจกรรมแต่ละอันด้วย class "single-page-activity"
+            // และเพิ่ม class "page-break" เพื่อบังคับขึ้นหน้าใหม่ (ยกเว้นหน้าแรก)
+            const pageBreakClass = index > 0 ? 'page-break' : '';
+            
+            fullReportHtml += `<div class="single-page-activity ${pageBreakClass}">`;
+            fullReportHtml += createPrintContentForActivity(details);
+            fullReportHtml += `</div>`;
+        });
+        
+        document.getElementById('printArea').innerHTML = fullReportHtml;
+        Swal.close();
+        setTimeout(() => {
+            window.print();
+        }, 500);
+    } catch (error) {
+        console.error(error);
+        Swal.fire('เกิดข้อผิดพลาด', error.message, 'error');
     }
+}
 </script>
 </body>
 </html>

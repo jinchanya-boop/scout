@@ -497,72 +497,73 @@
         });
     }
 
-    const createPrintContentForActivity = (details) => {
-        const getImageUrl = (formula) => {
-            if (!formula || typeof formula !== 'string' || !formula.startsWith('=IMAGE')) return '';
-            try { return formula.match(/"(.*?)"/)[1]; } catch { return ''; }
-        };
-        const photo1Url = getImageUrl(details['Photo 1']);
-        const photo2Url = getImageUrl(details['Photo 2']);
-        const signatureUrl = getImageUrl(details['Signature']);
-        return `
-            <div style="padding: 2rem; font-family: 'Prompt', sans-serif; color: #1f2937;">
-                <div style="text-align: center; margin-bottom: 1.5rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 1rem;">
-                    <h1 style="font-size: 1.875rem; font-weight: 700;">บันทึกการปฏิบัติกิจกรรมลูกเสือ</h1>
-                    <h2 style="font-size: 1.25rem; color: #4b5563;">โรงเรียนสา</h2>
-                </div>
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 1rem;" class="print-no-break">
-                    <tbody>
-                        <tr>
-                            <td style="padding: 0.5rem; width: 50%;"><strong>ระดับชั้น:</strong> ${details.Grade || ''}</td>
-                            <td style="padding: 0.5rem; width: 50%;"><strong>กอง/หมู่:</strong> ${details.Group || ''} / ${details.Troop || ''}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 0.5rem;"><strong>กิจกรรม:</strong> ${details.Activity || ''}</td>
-                            <td style="padding: 0.5rem;"><strong>เวลา:</strong> ${details.Time || ''}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 0.5rem;" colspan="2"><strong>บันทึกเมื่อ:</strong> ${details.Timestamp ? new Date(details.Timestamp).toLocaleString('th-TH') : ''}</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div style="margin-bottom: 1.5rem; border-top: 1px solid #e5e7eb; padding-top: 1rem;" class="print-no-break">
-                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">สรุปการเข้าร่วม</h3>
-                    <div style="display: flex; gap: 1.5rem;">
-                        <span>✅ มา: ${details.Present || 0}</span>
-                        <span>📋 ลา: ${details.Leave || 0}</span>
-                        <span>❌ ขาด: ${details.Absent || 0}</span>
-                        <span>🏃 หนี: ${details.Skipped || 0}</span>
-                    </div>
-                </div>
-                 <div style="margin-bottom: 1.5rem; border-top: 1px solid #e5e7eb; padding-top: 1rem;" class="print-no-break">
-                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">ผลการประเมิน</h3>
-                     <table style="width: 100%; border-collapse: collapse;">
-                        <tr>
-                           <td style="padding: 0.25rem; width: 50%;"><strong>คะแนนรวม:</strong> ${details['Total Score'] || 0} / 100</td>
-                           <td style="padding: 0.25rem; width: 50%;"><strong>ระดับผล:</strong> ${details['Grade Level'] || 'N/A'}</td>
-                        </tr>
-                     </table>
-                </div>
-                <div style="margin-bottom: 1.5rem; border-top: 1px solid #e5e7eb; padding-top: 1rem;" class="print-no-break">
-                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">ความคิดเห็น/คอมเมนท์</h3>
-                    <p style="padding: 0.75rem; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.375rem;">${details.Comments || 'ไม่มี'}</p>
-                </div>
-                 <div style="margin-bottom: 1.5rem; border-top: 1px solid #e5e7eb; padding-top: 1rem;" class="print-no-break">
-                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">ภาพประกอบกิจกรรม</h3>
-                    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem;">
-                        ${photo1Url ? `<img src="${photo1Url}" style="width: 100%; height: auto; border: 1px solid #d1d5db; border-radius: 0.375rem;">` : '<div style="padding: 1rem;">ไม่มีภาพที่ 1</div>'}
-                        ${photo2Url ? `<img src="${photo2Url}" style="width: 100%; height: auto; border: 1px solid #d1d5db; border-radius: 0.375rem;">` : '<div style="padding: 1rem;">ไม่มีภาพที่ 2</div>'}
-                    </div>
-                </div>
-                <div style="margin-top: 3rem; text-align: center; padding-top: 1rem;" class="print-no-break">
-                    ${signatureUrl ? `<img src="${signatureUrl}" style="height: 5rem; margin-left: auto; margin-right: auto;">` : ''}
-                    <p style="border-top: 1px dotted #6b7280; margin-top: 0.5rem; padding-top: 0.5rem; display: inline-block;">...........................................................</p>
-                    <p>(ลายเซ็นผู้กำกับลูกเสือ)</p>
+    // UPDATED FUNCTION with crossorigin attribute for images
+const createPrintContentForActivity = (details) => {
+    const getImageUrl = (formula) => {
+        if (!formula || typeof formula !== 'string' || !formula.startsWith('=IMAGE')) return '';
+        try { return formula.match(/"(.*?)"/)[1]; } catch { return ''; }
+    };
+    const photo1Url = getImageUrl(details['Photo 1']);
+    const photo2Url = getImageUrl(details['Photo 2']);
+    const signatureUrl = getImageUrl(details['Signature']);
+    return `
+        <div style="padding: 2rem; font-family: 'Prompt', sans-serif; color: #1f2937;">
+            <div style="text-align: center; margin-bottom: 1.5rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 1rem;">
+                <h1 style="font-size: 1.875rem; font-weight: 700;">บันทึกการปฏิบัติกิจกรรมลูกเสือ</h1>
+                <h2 style="font-size: 1.25rem; color: #4b5563;">โรงเรียนสา</h2>
+            </div>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 1rem;" class="print-no-break">
+                <tbody>
+                    <tr>
+                        <td style="padding: 0.5rem; width: 50%;"><strong>ระดับชั้น:</strong> ${details.Grade || ''}</td>
+                        <td style="padding: 0.5rem; width: 50%;"><strong>กอง/หมู่:</strong> ${details.Group || ''} / ${details.Troop || ''}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.5rem;"><strong>กิจกรรม:</strong> ${details.Activity || ''}</td>
+                        <td style="padding: 0.5rem;"><strong>เวลา:</strong> ${details.Time || ''}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.5rem;" colspan="2"><strong>บันทึกเมื่อ:</strong> ${details.Timestamp ? new Date(details.Timestamp).toLocaleString('th-TH') : ''}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div style="margin-bottom: 1.5rem; border-top: 1px solid #e5e7eb; padding-top: 1rem;" class="print-no-break">
+                <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">สรุปการเข้าร่วม</h3>
+                <div style="display: flex; gap: 1.5rem;">
+                    <span>✅ มา: ${details.Present || 0}</span>
+                    <span>📋 ลา: ${details.Leave || 0}</span>
+                    <span>❌ ขาด: ${details.Absent || 0}</span>
+                    <span>🏃 หนี: ${details.Skipped || 0}</span>
                 </div>
             </div>
-        `;
-    };
+             <div style="margin-bottom: 1.5rem; border-top: 1px solid #e5e7eb; padding-top: 1rem;" class="print-no-break">
+                <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">ผลการประเมิน</h3>
+                 <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                       <td style="padding: 0.25rem; width: 50%;"><strong>คะแนนรวม:</strong> ${details['Total Score'] || 0} / 100</td>
+                       <td style="padding: 0.25rem; width: 50%;"><strong>ระดับผล:</strong> ${details['Grade Level'] || 'N/A'}</td>
+                    </tr>
+                 </table>
+            </div>
+            <div style="margin-bottom: 1.5rem; border-top: 1px solid #e5e7eb; padding-top: 1rem;" class="print-no-break">
+                <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">ความคิดเห็น/คอมเมนท์</h3>
+                <p style="padding: 0.75rem; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.375rem;">${details.Comments || 'ไม่มี'}</p>
+            </div>
+             <div style="margin-bottom: 1.5rem; border-top: 1px solid #e5e7eb; padding-top: 1rem;" class="print-no-break">
+                <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">ภาพประกอบกิจกรรม</h3>
+                <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem;">
+                    ${photo1Url ? `<img src="${photo1Url}" crossorigin="anonymous" style="width: 100%; height: auto; border: 1px solid #d1d5db; border-radius: 0.375rem;">` : '<div style="padding: 1rem;">ไม่มีภาพที่ 1</div>'}
+                    ${photo2Url ? `<img src="${photo2Url}" crossorigin="anonymous" style="width: 100%; height: auto; border: 1px solid #d1d5db; border-radius: 0.375rem;">` : '<div style="padding: 1rem;">ไม่มีภาพที่ 2</div>'}
+                </div>
+            </div>
+            <div style="margin-top: 3rem; text-align: center; padding-top: 1rem;" class="print-no-break">
+                ${signatureUrl ? `<img src="${signatureUrl}" crossorigin="anonymous" style="height: 5rem; margin-left: auto; margin-right: auto;">` : ''}
+                <p style="border-top: 1px dotted #6b7280; margin-top: 0.5rem; padding-top: 0.5rem; display: inline-block;">...........................................................</p>
+                <p>(ลายเซ็นผู้กำกับลูกเสือ)</p>
+            </div>
+        </div>
+    `;
+};
 
     async function printGradeReport() {
     const gradeMap = { 'm1': 'ม.1', 'm2': 'ม.2', 'm3': 'ม.3' };

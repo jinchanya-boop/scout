@@ -313,7 +313,7 @@
         const rubricScores={};document.querySelectorAll('[id^="rubric_"]').forEach((item,index)=>{rubricScores[`criteria_${index}`]=item.value;});
         const signatureData=canvas?canvas.toDataURL():'';
         const payload={type:'activity',
-            timestamp:new Date().toLocaleString('th-TH'),
+            timestamp: new Date().toISOString(),
             grade:document.getElementById('activityGrade').value,
             time:document.getElementById('activityTime').value,
             activity:document.getElementById('activityName').value,

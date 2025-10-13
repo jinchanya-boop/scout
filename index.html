@@ -681,11 +681,11 @@ const createPrintContentForActivity = (details) => {
         </div>
     `;
 };
-
-    async function printGradeReport() {
+async function printGradeReport() {
     const gradeMap = { 'm1': 'ม.1', 'm2': 'ม.2', 'm3': 'ม.3' };
     const gradeThai = gradeMap[currentStatusGrade];
-    Swal.fire({ title: `กำลังสร้างรายงานสรุป ${gradeThai}...`, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+    Swal.fire({ title: `กำลังสร้างรายงานสรุป ${gradeThai}...`, html: 'กำลังเตรียมข้อมูลและรูปภาพ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
     try {
         const response = await fetch(`${SCRIPT_URL}?action=getActivitiesForGrade&grade=${encodeURIComponent(gradeThai)}`);
         if (!response.ok) throw new Error('Could not fetch activity details for the grade.');
@@ -697,25 +697,45 @@ const createPrintContentForActivity = (details) => {
         
         let fullReportHtml = '';
         activities.forEach((details, index) => {
-            // 🟢 [แก้ไข] เพิ่ม div ครอบกิจกรรมแต่ละอันด้วย class "single-page-activity"
-            // และเพิ่ม class "page-break" เพื่อบังคับขึ้นหน้าใหม่ (ยกเว้นหน้าแรก)
             const pageBreakClass = index > 0 ? 'page-break' : '';
-            
             fullReportHtml += `<div class="single-page-activity ${pageBreakClass}">`;
             fullReportHtml += createPrintContentForActivity(details);
             fullReportHtml += `</div>`;
         });
         
         document.getElementById('printArea').innerHTML = fullReportHtml;
-        Swal.close();
-        setTimeout(() => {
-            window.print();
-        }, 500);
+
+        // 🟢 [แก้ไข] เพิ่มโค้ดส่วน "รอให้รูปโหลดเสร็จก่อนพิมพ์"
+        const images = document.querySelectorAll('#printArea img');
+        const promises = [];
+
+        images.forEach(img => {
+            // ตรวจสอบให้แน่ใจว่า img.src ไม่ใช่ค่าว่าง
+            if (img.src && img.src !== window.location.href) {
+                promises.push(new Promise((resolve) => {
+                    // สร้างอ็อบเจ็กต์ Image ใหม่เพื่อป้องกันปัญหา cache ของเบราว์เซอร์
+                    const imageLoader = new Image();
+                    imageLoader.onload = resolve;
+                    imageLoader.onerror = resolve; // ให้ทำงานต่อแม้ว่ารูปใดรูปหนึ่งจะเสีย
+                    imageLoader.src = img.src;
+                }));
+            }
+        });
+
+        // เมื่อ Promise ทั้งหมด (การโหลดรูป) ทำงานเสร็จ
+        Promise.all(promises).then(() => {
+            Swal.close();
+            // ใช้ setTimeout เล็กน้อยเพื่อให้แน่ใจว่าเบราว์เซอร์วาดภาพลง DOM เรียบร้อยแล้ว
+            setTimeout(() => {
+                window.print();
+            }, 250); // หน่วงเวลา 0.25 วินาที
+        });
+
     } catch (error) {
         console.error(error);
         Swal.fire('เกิดข้อผิดพลาด', error.message, 'error');
     }
 }
-</script>
+    </script>
 </body>
 </html>

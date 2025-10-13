@@ -573,10 +573,6 @@
          if (!response.ok) throw new Error('Could not fetch activity details for the grade.');
         const activities = await response.json();
 
-        // VVVV --- เพิ่มบรรทัดนี้เข้ามาครับ --- VVVV
-        console.log('Raw data from Sheet:', activities); 
-        // ^^^^ --- เพิ่มบรรทัดนี้เข้ามาครับ --- ^^^^
-
         if (!activities || activities.length === 0) {
             throw new Error(`ไม่พบกิจกรรมที่บันทึกแล้วสำหรับ ${gradeThai}`);
         }

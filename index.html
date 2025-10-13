@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>แบบบันทึกกิจกรรมลูกเสือ - โรงเรียนสา</title>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -23,10 +24,11 @@
 
         /* START: FINAL PRINT STYLES */
         @media print {
-    /* --- พื้นฐานการพิมพ์ (ห้ามลบ) --- */
+    /* --- Basic setup --- */
     body {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
+        background-color: #fff; /* Ensure white background */
     }
     body > *:not(#printArea) {
         display: none;
@@ -35,78 +37,124 @@
         display: block !important;
         visibility: visible !important;
         position: static;
-        font-size: 10pt; /* 🟢[แก้ไข] กำหนดขนาดอักษรพื้นฐานสำหรับงานพิมพ์ */
+        font-family: 'Sarabun', sans-serif; /* Use the new font */
+        font-size: 11pt;
+        color: #000;
     }
 
-    /* --- การควบคุมการแบ่งหน้า (ห้ามลบ) --- */
+    /* --- Page control --- */
     .single-page-activity {
         width: 100%;
         height: 100%;
         box-sizing: border-box;
         page-break-inside: avoid !important;
-        break-inside: avoid !important;
-        /* 🟢[แก้ไข] ลด Padding หลักเพื่อให้มีพื้นที่เนื้อหามากขึ้น */
-        padding: 1.5cm !important;
+        padding: 1.5cm;
     }
     .page-break {
         page-break-before: always;
-        break-before: page;
     }
 
-    /* --- 🟢[ใหม่] การปรับย่อส่วนต่างๆ ให้กระชับ --- */
-    #printArea h1, #printArea h2, #printArea h3, #printArea p, #printArea div, #printArea table {
-        margin: 0 !important; /* ลบ margin ทั้งหมด แล้วกำหนดใหม่ด้านล่าง */
-        padding: 0 !important;
+    /* --- New Form Styles --- */
+    .print-form {
+        line-height: 1.8;
     }
-
-    /* ปรับหัวข้อ */
-    #printArea h1 {
-        font-size: 16pt !important;
-        margin-bottom: 0.5cm !important;
+    .form-header {
         text-align: center;
+        margin-bottom: 1cm;
     }
-    #printArea h2 {
-        font-size: 12pt !important;
-        text-align: center;
-        margin-bottom: 0.7cm !important;
-    }
-    #printArea h3 {
-        font-size: 12pt !important;
-        font-weight: bold;
-        margin-top: 0.6cm !important; /* เพิ่มระยะห่างด้านบนของหัวข้อย่อย */
-        margin-bottom: 0.2cm !important; /* ลดระยะห่างด้านล่าง */
-    }
+    .form-header h1 { font-size: 16pt; font-weight: bold; margin: 0; }
+    .form-header h2 { font-size: 14pt; margin: 0; }
 
-    /* ปรับตารางและเนื้อหาทั่วไป */
-     #printArea table {
+    .data-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5cm 1.5cm;
+        margin-bottom: 0.5cm;
+    }
+    .data-field {
+        display: flex;
+        border-bottom: 1px dotted #000;
+        padding-bottom: 2px;
+    }
+    .data-field.full-width {
+        grid-column: 1 / -1;
+    }
+    .data-field.no-border {
+        border-bottom: none;
+    }
+    .data-field strong {
+        margin-right: 0.5em;
+        white-space: nowrap;
+    }
+    .data-field span {
         width: 100%;
-        margin-bottom: 0.2cm !important;
     }
-     #printArea table td {
-        padding: 0.1cm 0.2cm !important;
-        font-size: 10pt !important;
+    
+    .attendance-item {
+        margin-left: 1.5cm;
+        white-space: nowrap;
     }
-    #printArea p {
-        padding: 0.3cm !important;
-        margin-bottom: 0.2cm !important;
+    .attendance-item span {
+        display: inline-block;
+        width: 5em; /* Give space for attendance numbers */
+        text-align: center;
+    }
+    
+    .photo-section {
+        margin-top: 1cm;
+    }
+    .photo-section h3 {
+        text-align: center;
+        font-weight: bold;
+        margin-bottom: 0.5cm;
+    }
+    .photo-grid {
+        display: flex;
+        justify-content: space-around;
+        gap: 1cm;
+    }
+    .photo-container {
+        border: 1px solid #000;
+        width: 7cm;
+        height: 5cm;
+        text-align: center;
+        padding: 0.2cm;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    .photo-container img {
+        max-width: 100%;
+        max-height: 4cm;
+        object-fit: contain;
+        margin-bottom: 0.2cm;
+    }
+    .photo-container p {
+        margin: 0;
     }
 
-    /* ปรับรูปภาพและลายเซ็น */
-    #printArea div[style*="grid-template-columns"] {
-        gap: 0.5cm !important;
-        margin-top: 0.2cm !important;
+    .form-footer {
+        margin-top: 1cm;
+        display: flex;
+        justify-content: flex-end;
     }
-    #printArea div[style*="margin-top: 3rem"] { /* ส่วนของลายเซ็น */
-        margin-top: 0.5cm !important; /* ลดระยะห่างจากด้านบนอย่างมาก */
+    .signature-area {
+        width: 7cm;
+        text-align: center;
     }
-    #printArea img {
-        max-width: 100% !important;
-        height: auto !important;
-        break-inside: avoid;
+    .signature-box {
+        border: 1px solid #000;
+        height: 2.5cm;
+        margin-bottom: 0.2cm;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
-    #printArea img[style*="height: 5rem"] {
-        height: 3.5cm !important;
-        width: auto !important;
+    .signature-img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
     }
 }
     </style>
@@ -565,70 +613,73 @@
     // UPDATED FUNCTION with crossorigin attribute for images
 // UPDATED FUNCTION with crossorigin attribute for images
 const createPrintContentForActivity = (details) => {
-    const getImageUrl = (formula) => {
-        if (!formula || typeof formula !== 'string' || !formula.startsWith('=IMAGE')) return '';
-        try { return formula.match(/"(.*?)"/)[1]; } catch { return ''; }
-    };
-    const photo1Url = getImageUrl(details['Photo 1']);
-    const photo2Url = getImageUrl(details['Photo 2']);
-    const signatureUrl = getImageUrl(details['Signature']);
-    return `
-        <div style="padding: 2rem; font-family: 'Prompt', sans-serif; color: #1f2937;">
-            <div style="text-align: center; margin-bottom: 1.5rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 1rem;">
-                <h1 style="font-size: 1.875rem; font-weight: 700;">บันทึกการปฏิบัติกิจกรรมลูกเสือ</h1>
-                <h2 style="font-size: 1.25rem; color: #4b5563;">โรงเรียนสา</h2>
-            </div>
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 1rem;" class="print-no-break">
-                <tbody>
-                    <tr>
-                        <td style="padding: 0.5rem; width: 50%;"><strong>ระดับชั้น:</strong> ${details.Grade || ''}</td>
-                        <td style="padding: 0.5rem; width: 50%;"><strong>กอง/หมู่:</strong> ${details.Group || ''} / ${details.Troop || ''}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 0.5rem;"><strong>กิจกรรม:</strong> ${details.Activity || ''}</td>
-                        <td style="padding: 0.5rem;"><strong>เวลา:</strong> ${details.Time || ''}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 0.5rem;" colspan="2"><strong>บันทึกเมื่อ:</strong> ${details.Timestamp ? new Date(details.Timestamp).toLocaleString('th-TH') : ''}</td>
-                    </tr>
-                </tbody>
-            </table>
-            <div style="margin-bottom: 1.5rem; border-top: 1px solid #e5e7eb; padding-top: 1rem;" class="print-no-break">
-                <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">สรุปการเข้าร่วม</h3>
-                <div style="display: flex; gap: 1.5rem;">
-                    <span>✅ มา: ${details.Present || 0}</span>
-                    <span>📋 ลา: ${details.Leave || 0}</span>
-                    <span>❌ ขาด: ${details.Absent || 0}</span>
-                    <span>🏃 หนี: ${details.Skipped || 0}</span>
-                </div>
-            </div>
-             <div style="margin-bottom: 1.5rem; border-top: 1px solid #e5e7eb; padding-top: 1rem;" class="print-no-break">
-                <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">ผลการประเมิน</h3>
-                 <table style="width: 100%; border-collapse: collapse;">
-                    <tr>
-                       <td style="padding: 0.25rem; width: 50%;"><strong>คะแนนรวม:</strong> ${details['Total Score'] || 0} / 100</td>
-                       <td style="padding: 0.25rem; width: 50%;"><strong>ระดับผล:</strong> ${details['Grade Level'] || 'N/A'}</td>
-                    </tr>
-                 </table>
-            </div>
-            <div style="margin-bottom: 1.5rem; border-top: 1px solid #e5e7eb; padding-top: 1rem;" class="print-no-break">
-                <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">ความคิดเห็น/คอมเมนท์</h3>
-                <p style="padding: 0.75rem; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.375rem;">${details.Comments || 'ไม่มี'}</p>
-            </div>
-             <div style="margin-bottom: 1.5rem; border-top: 1px solid #e5e7eb; padding-top: 1rem;" class="print-no-break">
-                <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">ภาพประกอบกิจกรรม</h3>
-                <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem;">
-                                        ${photo1Url ? `<img src="${photo1Url}" crossorigin="anonymous" style="width: 100%; height: auto; border: 1px solid #d1d5db; border-radius: 0.375rem;">` : '<div style="padding: 1rem;">ไม่มีภาพที่ 1</div>'}
-                                        ${photo2Url ? `<img src="${photo2Url}" crossorigin="anonymous" style="width: 100%; height: auto; border: 1px solid #d1d5db; border-radius: 0.375rem;">` : '<div style="padding: 1rem;">ไม่มีภาพที่ 2</div>'}
-                </div>
-            </div>
-            <div style="margin-top: 3rem; text-align: center; padding-top: 1rem;" class="print-no-break">
-                                ${signatureUrl ? `<img src="${signatureUrl}" crossorigin="anonymous" style="height: 5rem; margin-left: auto; margin-right: auto;">` : ''}
-                <p style="border-top: 1px dotted #6b7280; margin-top: 0.5rem; padding-top: 0.5rem; display: inline-block;">...........................................................</p>
-                <p>(ลายเซ็นผู้กำกับลูกเสือ)</p>
-            </div>
-        </div>
-    `;
+    const getImageUrl = (formula) => {
+        if (!formula || typeof formula !== 'string' || !formula.startsWith('=IMAGE')) return '';
+        try { return formula.match(/"(.*?)"/)[1]; } catch { return ''; }
+    };
+    const photo1Url = getImageUrl(details['Photo 1']);
+    const photo2Url = getImageUrl(details['Photo 2']);
+    const signatureUrl = getImageUrl(details['Signature']);
+
+    return `
+        <div class="print-form">
+            <header class="form-header">
+                <h1>บันทึกการปฏิบัติกิจกรรมลูกเสือ</h1>
+                <h2>โรงเรียนสา</h2>
+            </header>
+
+            <div class="data-grid">
+                <div class="data-field"><strong>ระดับชั้น:</strong><span>${details.Grade || ''}</span></div>
+                <div class="data-field"><strong>กอง/หมู่:</strong><span>${(details.Group || '') + ' / ' + (details.Troop || '')}</span></div>
+                <div class="data-field"><strong>กิจกรรม:</strong><span>${details.Activity || ''}</span></div>
+                <div class="data-field"><strong>เวลา:</strong><span>${details.Time || ''}</span></div>
+                <div class="data-field full-width"><strong>บันทึกเมื่อ:</strong><span>${details.Timestamp ? new Date(details.Timestamp).toLocaleString('th-TH') : ''}</span></div>
+            </div>
+
+            <div class="data-grid">
+                <div class="data-field full-width">
+                    <strong>สรุปการเข้าร่วมกิจกรรม:</strong>
+                    <span class="attendance-item">มา <span>${details.Present || 0}</span></span>
+                    <span class="attendance-item">ลา <span>${details.Leave || 0}</span></span>
+                    <span class="attendance-item">ขาด <span>${details.Absent || 0}</span></span>
+                    <span class="attendance-item">หนีเรียน <span>${details.Skipped || 0}</span></span>
+                </div>
+            </div>
+            
+            <div class="data-grid">
+                <div class="data-field full-width no-border"><strong>ผลการประเมิน</strong></div>
+                <div class="data-field"><strong>คะแนนรวม:</strong><span>${details['Total Score'] || 0} / 100</span></div>
+                <div class="data-field"><strong>ระดับผล:</strong><span>${details['Grade Level'] || 'N/A'}</span></div>
+            </div>
+
+            <div class="data-grid">
+                <div class="data-field full-width"><strong>ความคิดเห็น/คอมเมนท์:</strong><span>${details.Comments || ''}</span></div>
+            </div>
+            
+            <section class="photo-section">
+                <h3>ภาพประกอบกิจกรรม</h3>
+                <div class="photo-grid">
+                    <div class="photo-container">
+                        ${photo1Url ? `<img src="${photo1Url}" crossorigin="anonymous">` : ''}
+                        <p>ภาพที่ 1</p>
+                    </div>
+                    <div class="photo-container">
+                        ${photo2Url ? `<img src="${photo2Url}" crossorigin="anonymous">` : ''}
+                        <p>ภาพที่ 2</p>
+                    </div>
+                </div>
+            </section>
+
+            <footer class="form-footer">
+                <div class="signature-area">
+                    <div class="signature-box">
+                        ${signatureUrl ? `<img src="${signatureUrl}" crossorigin="anonymous" class="signature-img">` : ''}
+                    </div>
+                    <p>(ลายเซ็นผู้กำกับ)</p>
+                </div>
+            </footer>
+        </div>
+    `;
 };
 
     async function printGradeReport() {

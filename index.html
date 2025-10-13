@@ -23,42 +23,92 @@
 
         /* START: FINAL PRINT STYLES */
         @media print {
-    /* ซ่อนทุกอย่างใน body ยกเว้น #printArea */
+    /* --- พื้นฐานการพิมพ์ (ห้ามลบ) --- */
+    body {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
     body > *:not(#printArea) {
         display: none;
     }
-
-    /* บังคับให้ #printArea แสดงผลตอนพิมพ์เท่านั้น */
     #printArea {
         display: block !important;
         visibility: visible !important;
-        position: static; /* ใช้ static แทน absolute เพื่อการจัดหน้าที่ดีกว่า */
-    }
-    
-    /* 🟢 [แก้ไข] ทำให้ 1 กิจกรรมอยู่หน้าเดียว */
-    .single-page-activity {
-        page-break-inside: avoid; /* ป้องกันการแบ่งครึ่งหน้า */
-        break-inside: avoid;
+        position: static;
+        font-size: 10pt; /* 🟢[แก้ไข] กำหนดขนาดอักษรพื้นฐานสำหรับงานพิมพ์ */
     }
 
-    /* จัดการการขึ้นหน้าใหม่ */
+    /* --- การควบคุมการแบ่งหน้า (ห้ามลบ) --- */
+    .single-page-activity {
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        /* 🟢[แก้ไข] ลด Padding หลักเพื่อให้มีพื้นที่เนื้อหามากขึ้น */
+        padding: 1.5cm !important;
+    }
     .page-break {
-        page-break-before: always; /* บังคับขึ้นหน้าใหม่ */
+        page-break-before: always;
         break-before: page;
     }
-    
-    /* จัดการรูปภาพไม่ให้ล้นหน้า และคงขนาดลายเซ็น */
+
+    /* --- 🟢[ใหม่] การปรับย่อส่วนต่างๆ ให้กระชับ --- */
+    #printArea h1, #printArea h2, #printArea h3, #printArea p, #printArea div, #printArea table {
+        margin: 0 !important; /* ลบ margin ทั้งหมด แล้วกำหนดใหม่ด้านล่าง */
+        padding: 0 !important;
+    }
+
+    /* ปรับหัวข้อ */
+    #printArea h1 {
+        font-size: 16pt !important;
+        margin-bottom: 0.5cm !important;
+        text-align: center;
+    }
+    #printArea h2 {
+        font-size: 12pt !important;
+        text-align: center;
+        margin-bottom: 0.7cm !important;
+    }
+    #printArea h3 {
+        font-size: 12pt !important;
+        font-weight: bold;
+        margin-top: 0.6cm !important; /* เพิ่มระยะห่างด้านบนของหัวข้อย่อย */
+        margin-bottom: 0.2cm !important; /* ลดระยะห่างด้านล่าง */
+    }
+
+    /* ปรับตารางและเนื้อหาทั่วไป */
+     #printArea table {
+        width: 100%;
+        margin-bottom: 0.2cm !important;
+    }
+     #printArea table td {
+        padding: 0.1cm 0.2cm !important;
+        font-size: 10pt !important;
+    }
+    #printArea p {
+        padding: 0.3cm !important;
+        margin-bottom: 0.2cm !important;
+    }
+
+    /* ปรับรูปภาพและลายเซ็น */
+    #printArea div[style*="grid-template-columns"] {
+        gap: 0.5cm !important;
+        margin-top: 0.2cm !important;
+    }
+    #printArea div[style*="margin-top: 3rem"] { /* ส่วนของลายเซ็น */
+        margin-top: 0.5cm !important; /* ลดระยะห่างจากด้านบนอย่างมาก */
+    }
     #printArea img {
         max-width: 100% !important;
         height: auto !important;
+        break-inside: avoid;
     }
     #printArea img[style*="height: 5rem"] {
-        height: 5rem !important;
+        height: 3.5cm !important;
         width: auto !important;
     }
-}        
-    
-    /* END: FINAL PRINT STYLES */
+}
     </style>
 </head>
 <body class="gradient-bg min-h-screen">

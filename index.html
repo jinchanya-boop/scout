@@ -223,9 +223,12 @@
     };
 
     document.addEventListener('DOMContentLoaded', function () {
-        fetchStudents();
-        document.getElementById('gradeSelect').addEventListener('change', loadSchedule);
-    });
+    fetchStudents();
+    document.getElementById('gradeSelect').addEventListener('change', loadSchedule);
+
+    // 🔻🔻🔻 --- เพิ่มบรรทัดนี้เข้ามาใหม่ --- 🔻🔻🔻
+    document.getElementById('activityForm').addEventListener('submit', (e) => { e.preventDefault(); saveActivityRecord(); });
+});    
     
     async function fetchStudents() {
         try {

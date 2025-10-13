@@ -23,27 +23,42 @@
 
         /* START: FINAL PRINT STYLES */
         @media print {
-          /* ซ่อนทุกอย่างใน body ยกเว้น #printArea */
-          body > *:not(#printArea) {
-            display: none;
-          }
-          /* บังคับให้ #printArea แสดงผลตอนพิมพ์เท่านั้น */
-          #printArea {
-            display: block !important;
-            visibility: visible !important;
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-          }
-          .print-no-break {
-            page-break-inside: avoid;
-          }
-          .page-break {
-            page-break-before: always;
-          }
-        }
-        /* END: FINAL PRINT STYLES */
+    /* --- ส่วนเดิมของคุณ (สำคัญมาก ห้ามลบ) --- */
+    /* ซ่อนทุกอย่างใน body ยกเว้น #printArea */
+    body > *:not(#printArea) {
+        display: none;
+    }
+    /* บังคับให้ #printArea แสดงผลตอนพิมพ์เท่านั้น */
+    #printArea {
+        display: block !important;
+        visibility: visible !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+    .print-no-break {
+        page-break-inside: avoid;
+    }
+    .page-break {
+        page-break-before: always;
+    }
+
+    /* --- ส่วนใหม่ที่เพิ่มเข้ามาเพื่อจัดหน้ารูปภาพ --- */
+    #printArea img {
+        max-width: 100% !important; /* จำกัดความกว้างสูงสุดของรูปภาพ */
+        height: auto !important;    /* ปรับความสูงอัตโนมัติ */
+        break-inside: avoid;       /* ป้องกันไม่ให้รูปภาพถูกแบ่งครึ่งหน้า */
+    }
+    
+    /* ปรับขนาดรูปภาพลายเซ็นโดยเฉพาะ */
+    #printArea img[style*="height: 5rem"] {
+        height: 5rem !important;   /* รักษาสูงเดิม */
+        width: auto !important;    /* ปรับกว้างอัตโนมัติ */
+    }
+}        
+    
+    /* END: FINAL PRINT STYLES */
     </style>
 </head>
 <body class="gradient-bg min-h-screen">

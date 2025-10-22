@@ -865,145 +865,76 @@
     // UPDATED FUNCTION with crossorigin attribute for images
 
 // UPDATED FUNCTION with crossorigin attribute for images
-
+// UPDATED FUNCTION with correct Thai keys for attendance
 const createPrintContentForActivity = (details) => {
-
     const getImageUrl = (formula) => {
-
         if (!formula || typeof formula !== 'string' || !formula.startsWith('=IMAGE')) return '';
-
         try { return formula.match(/"(.*?)"/)[1]; } catch { return ''; }
-
     };
-
     const photo1Url = getImageUrl(details['Photo 1']);
-
     const photo2Url = getImageUrl(details['Photo 2']);
-
     const signatureUrl = getImageUrl(details['Signature']);
 
-
-
     return `
-
         <div class="print-form">
-
             <header class="form-header">
-
                 <h1>บันทึกการปฏิบัติกิจกรรมลูกเสือ</h1>
-
                 <h2>โรงเรียนสา</h2>
-
             </header>
 
-
-
             <div class="data-grid">
-
                 <div class="data-field"><strong>ระดับชั้น:</strong><span>${details.Grade || ''}</span></div>
-
                 <div class="data-field"><strong>กอง/หมู่:</strong><span>${(details.Group || '') + ' / ' + (details.Troop || '')}</span></div>
-
                 <div class="data-field"><strong>กิจกรรม:</strong><span>${details.Activity || ''}</span></div>
-
                 <div class="data-field"><strong>เวลา:</strong><span>${details.Time || ''}</span></div>
-
                 <div class="data-field full-width"><strong>บันทึกเมื่อ:</strong><span>${details.Timestamp ? new Date(details.Timestamp).toLocaleString('th-TH') : ''}</span></div>
-
             </div>
 
-
-
             <div class="data-grid">
-
                 <div class="data-field full-width">
-
                     <strong>สรุปการเข้าร่วมกิจกรรม:</strong>
-
-                    <span class="attendance-item">มา <span>${details.Present || 0}</span></span>
-
-                    <span class="attendance-item">ลา <span>${details.Leave || 0}</span></span>
-
-                    <span class="attendance-item">ขาด <span>${details.Absent || 0}</span></span>
-
-                    <span class="attendance-item">หนีเรียน <span>${details.Skipped || 0}</span></span>
-
-                </div>
-
+                    <span class="attendance-item">มา <span>${details.มา || 0}</span></span>
+                    <span class="attendance-item">ลา <span>${details.ลา || 0}</span></span>
+                    <span class="attendance-item">ขาด <span>${details.ขาด || 0}</span></span>
+                    <span class="attendance-item">หนีเรียน <span>${details.หนี || 0}</span></span>
+                    </div>
             </div>
-
             
-
             <div class="data-grid">
-
                 <div class="data-field full-width no-border"><strong>ผลการประเมิน</strong></div>
-
                 <div class="data-field"><strong>คะแนนรวม:</strong><span>${details['Total Score'] || 0} / 100</span></div>
-
                 <div class="data-field"><strong>ระดับผล:</strong><span>${details['Grade Level'] || 'N/A'}</span></div>
-
             </div>
-
-
 
             <div class="data-grid">
-
                 <div class="data-field full-width"><strong>ความคิดเห็น/คอมเมนท์:</strong><span>${details.Comments || ''}</span></div>
-
             </div>
-
             
-
             <section class="photo-section">
-
                 <h3>ภาพประกอบกิจกรรม</h3>
-
                 <div class="photo-grid">
-
                     <div class="photo-container">
-
                         ${photo1Url ? `<img src="${photo1Url}" crossorigin="anonymous">` : ''}
-
                         <p>ภาพที่ 1</p>
-
                     </div>
-
                     <div class="photo-container">
-
                         ${photo2Url ? `<img src="${photo2Url}" crossorigin="anonymous">` : ''}
-
                         <p>ภาพที่ 2</p>
-
                     </div>
-
                 </div>
-
             </section>
 
-
-
             <footer class="form-footer">
-
                 <div class="signature-area">
-
                     <div class="signature-box">
-
                         ${signatureUrl ? `<img src="${signatureUrl}" crossorigin="anonymous" class="signature-img">` : ''}
-
                     </div>
-
                     <p>(ลายเซ็นผู้กำกับ)</p>
-
                 </div>
-
             </footer>
-
         </div>
-
     `;
-
 };
-
 async function printGradeReport() {
 
     const gradeMap = { 'm1': 'ม.1', 'm2': 'ม.2', 'm3': 'ม.3' };

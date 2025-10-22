@@ -21,302 +21,180 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
+    body { font-family: 'Prompt', sans-serif; }
+    .gradient-bg { background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 50%, #ddd6fe 100%); }
+    .card-shadow { box-shadow: 0 4px 20px rgba(139, 92, 246, 0.1); }
+    .btn-primary { background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%); transition: all 0.3s ease; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3); }
+    .signature-pad { border: 2px dashed #c4b5fd; background: #faf5ff; }
+    .rubric-item { background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%); }
+    .modal-overlay { background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(5px); }
+    .file-input-label { cursor: pointer; background-color: #f3e8ff; border: 2px dashed #c4b5fd; }
+    .file-input-label:hover { background-color: #e9d5ff; }
+    .image-preview { width: 100%; height: 150px; object-fit: cover; border: 1px solid #ddd6fe; }
 
-        body { font-family: 'Prompt', sans-serif; }
+    /* START: FINAL PRINT STYLES (ปรับปรุงแล้ว) */
+    @media print {
+        /* --- 🟢 [ใหม่] การตั้งค่าหน้ากระดาษและ Footer --- */
+        @page {
+            size: A4;
+            margin: 1.5cm; /* กำหนดขอบกระดาษ 1.5cm */
 
-        .gradient-bg { background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 50%, #ddd6fe 100%); }
+            @bottom-left {
+                content: "https://jinchanya-boop.github.io/scout/"; /* URL ที่มุมล่างซ้าย */
+                font-family: 'Sarabun', sans-serif;
+                font-size: 9pt;
+                color: #666;
+                padding-bottom: 0.25cm; /* ยกระดับขึ้นเล็กน้อย */
+            }
 
-        .card-shadow { box-shadow: 0 4px 20px rgba(139, 92, 246, 0.1); }
+            @bottom-right {
+                content: "หน้า " counter(page) " / " counter(pages); /* เลขหน้า */
+                font-family: 'Sarabun', sans-serif;
+                font-size: 9pt;
+                color: #666;
+                padding-bottom: 0.25cm; /* ยกระดับขึ้นเล็กน้อย */
+            }
+        }
 
-        .btn-primary { background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%); transition: all 0.3s ease; }
+        /* --- Basic setup --- */
+        body {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            background-color: #fff; /* Ensure white background */
+        }
+        body > *:not(#printArea) {
+            display: none;
+        }
+        #printArea {
+            display: block !important;
+            visibility: visible !important;
+            position: static;
+            font-family: 'Sarabun', sans-serif; /* Use the new font */
+            font-size: 11pt;
+            color: #000;
+        }
 
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3); }
+        /* --- Page control --- */
+        .single-page-activity {
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            page-break-inside: avoid !important;
+            padding: 0; /* 🟢 [แก้ไข] เปลี่ยนเป็น 0 (เพราะ @page margin จัดการแล้ว) */
+        }
+        .page-break {
+            page-break-before: always;
+        }
 
-        .signature-pad { border: 2px dashed #c4b5fd; background: #faf5ff; }
+        /* --- New Form Styles --- */
+        .print-form {
+            line-height: 1.8;
+        }
+        .form-header {
+            text-align: center;
+            margin-bottom: 1cm;
+        }
+        .form-header h1 { font-size: 16pt; font-weight: bold; margin: 0; }
+        .form-header h2 { font-size: 14pt; margin: 0; }
 
-        .rubric-item { background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%); }
+        .data-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5cm 1.5cm;
+            margin-bottom: 0.5cm;
+        }
+        .data-field {
+            display: flex;
+            border-bottom: 1px dotted #000;
+            padding-bottom: 2px;
+        }
+        .data-field.full-width {
+            grid-column: 1 / -1;
+        }
+        .data-field.no-border {
+            border-bottom: none;
+        }
+        .data-field strong {
+            margin-right: 0.5em;
+            white-space: nowrap;
+        }
+        .data-field span {
+            width: 100%;
+        }
+        
+        /* --- 🟢 [แก้ไข] สไตล์การเช็คชื่อ --- */
+        .attendance-item {
+            /* margin-left: 1.5cm; */ /* ลบออก */
+            margin-left: 1.5em; /* เปลี่ยนเป็นระยะห่างที่เหมาะสม */
+            white-space: nowrap;
+        }
+        .attendance-item span {
+            display: inline-block;
+            /* width: 5em; */ /* ลบออก */
+            /* text-align: center; */ /* ลบออก */
+            margin-left: 0.5em; /* เพิ่มระยะห่างระหว่างข้อความกับตัวเลข */
+            font-weight: bold; /* ทำให้ตัวเลขหนา */
+        }
+        
+        .photo-section {
+            margin-top: 1cm;
+        }
+        .photo-section h3 {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 0.5cm;
+        }
+        .photo-grid {
+            display: flex;
+            justify-content: space-around;
+            gap: 1cm;
+        }
+        .photo-container {
+            border: 1px solid #000;
+            width: 7cm;
+            height: 5cm;
+            text-align: center;
+            padding: 0.2cm;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .photo-container img {
+            max-width: 100%;
+            max-height: 4cm;
+            object-fit: contain;
+            margin-bottom: 0.2cm;
+        }
+        .photo-container p {
+            margin: 0;
+        }
 
-        .modal-overlay { background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(5px); }
-
-        .file-input-label { cursor: pointer; background-color: #f3e8ff; border: 2px dashed #c4b5fd; }
-
-        .file-input-label:hover { background-color: #e9d5ff; }
-
-        .image-preview { width: 100%; height: 150px; object-fit: cover; border: 1px solid #ddd6fe; }
-
-
-
-        /* START: FINAL PRINT STYLES */
-
-        @media print {
-
-    /* --- Basic setup --- */
-
-    body {
-
-        -webkit-print-color-adjust: exact !important;
-
-        print-color-adjust: exact !important;
-
-        background-color: #fff; /* Ensure white background */
-
+        .form-footer {
+            margin-top: 1cm;
+            display: flex;
+            justify-content: flex-end;
+        }
+        .signature-area {
+            width: 7cm;
+            text-align: center;
+        }
+        .signature-box {
+            border: 1px solid #000;
+            height: 2.5cm;
+            margin-bottom: 0.2cm;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .signature-img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
     }
-
-    body > *:not(#printArea) {
-
-        display: none;
-
-    }
-
-    #printArea {
-
-        display: block !important;
-
-        visibility: visible !important;
-
-        position: static;
-
-        font-family: 'Sarabun', sans-serif; /* Use the new font */
-
-        font-size: 11pt;
-
-        color: #000;
-
-    }
-
-
-
-    /* --- Page control --- */
-
-    .single-page-activity {
-
-        width: 100%;
-
-        height: 100%;
-
-        box-sizing: border-box;
-
-        page-break-inside: avoid !important;
-
-        padding: 1.5cm;
-
-    }
-
-    .page-break {
-
-        page-break-before: always;
-
-    }
-
-
-
-    /* --- New Form Styles --- */
-
-    .print-form {
-
-        line-height: 1.8;
-
-    }
-
-    .form-header {
-
-        text-align: center;
-
-        margin-bottom: 1cm;
-
-    }
-
-    .form-header h1 { font-size: 16pt; font-weight: bold; margin: 0; }
-
-    .form-header h2 { font-size: 14pt; margin: 0; }
-
-
-
-    .data-grid {
-
-        display: grid;
-
-        grid-template-columns: 1fr 1fr;
-
-        gap: 0.5cm 1.5cm;
-
-        margin-bottom: 0.5cm;
-
-    }
-
-    .data-field {
-
-        display: flex;
-
-        border-bottom: 1px dotted #000;
-
-        padding-bottom: 2px;
-
-    }
-
-    .data-field.full-width {
-
-        grid-column: 1 / -1;
-
-    }
-
-    .data-field.no-border {
-
-        border-bottom: none;
-
-    }
-
-    .data-field strong {
-
-        margin-right: 0.5em;
-
-        white-space: nowrap;
-
-    }
-
-    .data-field span {
-
-        width: 100%;
-
-    }
-
-    
-
-    .attendance-item {
-
-        margin-left: 1.5cm;
-
-        white-space: nowrap;
-
-    }
-
-    .attendance-item span {
-
-        display: inline-block;
-
-        width: 5em; /* Give space for attendance numbers */
-
-        text-align: center;
-
-    }
-
-    
-
-    .photo-section {
-
-        margin-top: 1cm;
-
-    }
-
-    .photo-section h3 {
-
-        text-align: center;
-
-        font-weight: bold;
-
-        margin-bottom: 0.5cm;
-
-    }
-
-    .photo-grid {
-
-        display: flex;
-
-        justify-content: space-around;
-
-        gap: 1cm;
-
-    }
-
-    .photo-container {
-
-        border: 1px solid #000;
-
-        width: 7cm;
-
-        height: 5cm;
-
-        text-align: center;
-
-        padding: 0.2cm;
-
-        display: flex;
-
-        flex-direction: column;
-
-        justify-content: center;
-
-        align-items: center;
-
-    }
-
-    .photo-container img {
-
-        max-width: 100%;
-
-        max-height: 4cm;
-
-        object-fit: contain;
-
-        margin-bottom: 0.2cm;
-
-    }
-
-    .photo-container p {
-
-        margin: 0;
-
-    }
-
-
-
-    .form-footer {
-
-        margin-top: 1cm;
-
-        display: flex;
-
-        justify-content: flex-end;
-
-    }
-
-    .signature-area {
-
-        width: 7cm;
-
-        text-align: center;
-
-    }
-
-    .signature-box {
-
-        border: 1px solid #000;
-
-        height: 2.5cm;
-
-        margin-bottom: 0.2cm;
-
-        display: flex;
-
-        align-items: center;
-
-        justify-content: center;
-
-    }
-
-    .signature-img {
-
-        max-width: 100%;
-
-        max-height: 100%;
-
-        object-fit: contain;
-
-    }
-
-}
-
-    </style>
+</style>
 
 </head>
 

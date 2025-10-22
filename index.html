@@ -873,7 +873,7 @@
     // UPDATED FUNCTION with crossorigin attribute for images
 
 // UPDATED FUNCTION with crossorigin attribute for images
-// UPDATED FUNCTION with keys matching GSheet headers (with spaces)
+// UPDATED FUNCTION (using keys with NO spaces - e.g., 'มา')
 const createPrintContentForActivity = (details) => {
     const getImageUrl = (formula) => {
         if (!formula || typeof formula !== 'string' || !formula.startsWith('=IMAGE')) return '';
@@ -901,10 +901,10 @@ const createPrintContentForActivity = (details) => {
             <div class="data-grid">
                 <div class="data-field full-width">
                     <strong>สรุปการเข้าร่วมกิจกรรม:</strong>
-                    <span class="attendance-item">มา <span>${details[' มา '] || 0}</span></span>
-                    <span class="attendance-item">ลา <span>${details[' ลา '] || 0}</span></span>
-                    <span class="attendance-item">ขาด <span>${details[' ขาด '] || 0}</span></span>
-                    <span class="attendance-item">หนีเรียน <span>${details[' หนี '] || 0}</span></span>
+                    <span class="attendance-item">มา <span>${details.มา || 0}</span></span>
+                    <span class="attendance-item">ลา <span>${details.ลา || 0}</span></span>
+                    <span class="attendance-item">ขาด <span>${details.ขาด || 0}</span></span>
+                    <span class="attendance-item">หนีเรียน <span>${details.หนี || 0}</span></span>
                     </div>
             </div>
             
@@ -943,6 +943,8 @@ const createPrintContentForActivity = (details) => {
         </div>
     `;
 };
+
+    
 async function printGradeReport() {
 
     const gradeMap = { 'm1': 'ม.1', 'm2': 'ม.2', 'm3': 'ม.3' };

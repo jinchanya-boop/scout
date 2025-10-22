@@ -865,7 +865,7 @@
     // UPDATED FUNCTION with crossorigin attribute for images
 
 // UPDATED FUNCTION with crossorigin attribute for images
-// UPDATED FUNCTION with correct Thai keys for attendance
+// UPDATED FUNCTION with keys matching GSheet headers (with spaces)
 const createPrintContentForActivity = (details) => {
     const getImageUrl = (formula) => {
         if (!formula || typeof formula !== 'string' || !formula.startsWith('=IMAGE')) return '';
@@ -893,10 +893,10 @@ const createPrintContentForActivity = (details) => {
             <div class="data-grid">
                 <div class="data-field full-width">
                     <strong>สรุปการเข้าร่วมกิจกรรม:</strong>
-                    <span class="attendance-item">มา <span>${details.มา || 0}</span></span>
-                    <span class="attendance-item">ลา <span>${details.ลา || 0}</span></span>
-                    <span class="attendance-item">ขาด <span>${details.ขาด || 0}</span></span>
-                    <span class="attendance-item">หนีเรียน <span>${details.หนี || 0}</span></span>
+                    <span class="attendance-item">มา <span>${details[' มา '] || 0}</span></span>
+                    <span class="attendance-item">ลา <span>${details[' ลา '] || 0}</span></span>
+                    <span class="attendance-item">ขาด <span>${details[' ขาด '] || 0}</span></span>
+                    <span class="attendance-item">หนีเรียน <span>${details[' หนี '] || 0}</span></span>
                     </div>
             </div>
             

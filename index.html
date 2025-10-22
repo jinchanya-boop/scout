@@ -370,20 +370,8 @@
                         <a href="#" onclick="renderActivityStatusTable('m3'); setActiveTab(this); return false;" class="status-tab text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">มัธยมศึกษาปีที่ 3</a>
                     </nav>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">เวลา</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">วันแรก</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">วันที่สอง</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">วันที่สาม</th>
-                            </tr>
-                        </thead>
-                        <tbody id="activityStatusTableBody" class="bg-white divide-y divide-gray-200">
-                            </tbody>
-                    </table>
-                </div>
+                <div id="activityStatusContentContainer" class="mt-4">
+    </div>
             </div>
             <div class="p-4 border-t bg-gray-50 text-right">
                 <button id="printGradeReportBtn" onclick="printGradeReport()" class="px-6 py-2 btn-primary text-white rounded-lg font-medium">
@@ -514,7 +502,12 @@
     document.addEventListener('DOMContentLoaded', function () {
         fetchStudents(); // ยังคงเรียก fetchStudents() เหมือนเดิม
         document.getElementById('gradeSelect').addEventListener('change', loadSchedule);
-        // ไม่ต้องเรียก loadSchedule() ทันทีแล้ว ให้รอ fetchStudents() เสร็จก่อน
+        
+        // 🟢 [เพิ่มบรรทัดนี้] เพิ่ม Event Listener ที่นี่ (ทำงานครั้งเดียว)
+        document.getElementById('activityForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            saveActivityRecord(); 
+        });
     });
 
     async function fetchStudents() {
@@ -917,8 +910,18 @@
 
     function closeAttendanceCheck(){document.getElementById('attendanceModal').classList.add('hidden');}
 
-    function openActivityModal(time,activity,day){document.getElementById('activityModal').classList.remove('hidden');document.getElementById('activityTime').value=time;document.getElementById('activityName').value=activity;let criteriaKey='default';if(['เงื่อน','เข็มทิศ','ปฐมพยาบาล'].some(s=>activity.includes(s)))criteriaKey='skill';else if(['ผู้นำ','บังคับบัญชา'].some(s=>activity.includes(s)))criteriaKey='leadership';loadRubricItems(rubricCriteria[criteriaKey]);setupSignatureCanvas();document.getElementById('activityForm').addEventListener('submit',(e)=>{e.preventDefault();saveActivityRecord();});}
-
+    function openActivityModal(time,activity,day){
+        document.getElementById('activityModal').classList.remove('hidden');
+        document.getElementById('activityTime').value=time;
+        document.getElementById('activityName').value=activity;
+        let criteriaKey='default';
+        if(['เงื่อน','เข็มทิศ','ปฐมพยาบาล'].some(s=>activity.includes(s)))criteriaKey='skill';
+        else if(['ผูนำ','บังคับบัญชา'].some(s=>activity.includes(s)))criteriaKey='leadership';
+        loadRubricItems(rubricCriteria[criteriaKey]);
+        setupSignatureCanvas();
+        // (บรรทัด EventListener ถูกลบไปแล้ว)
+    }
+    
     function closeModal() {
 
         document.getElementById('activityModal').classList.add('hidden');
@@ -1027,15 +1030,9 @@
 
     }
 
-
-
     function closeActivityStatusDashboard() {
-
         document.getElementById('activityStatusModal').classList.add('hidden');
-
     }
-
-
 
     function setActiveTab(selectedTab) {
 
@@ -1052,76 +1049,76 @@
         selectedTab.classList.remove('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
 
     }
-
-
-
+    // 🟢 [แทนที่] ฟังก์ชัน renderActivityStatusTable เดิมทั้งหมดด้วยโค้ดนี้
     function renderActivityStatusTable(gradeKey) {
-
         currentStatusGrade = gradeKey;
-
         const gradeMap = { 'm1': 'ม.1', 'm2': 'ม.2', 'm3': 'ม.3' };
+        const gradeThai = gradeMap[gradeKey]; // เช่น "ม.1"
+        const recordedList = recordedActivitiesData[gradeThai] || []; // เช่น ["กิจการของคณะลูกเสือ...", "คำปฏิญาณ..."]
+        
+        const container = document.getElementById('activityStatusContentContainer');
+        if (!container) return;
+        
+        let html = '';
+        
+        // วนลูปทั้ง 2 ภาคเรียน
+        ['term1', 'term2'].forEach(termKey => {
+            const data = allScheduleData[termKey]?.[gradeKey];
+            if (!data || !data.schedule) return;
 
-        const gradeThai = gradeMap[gradeKey];
+            const termNum = (termKey === 'term1') ? 1 : 2;
 
-        const schedule = scheduleData[gradeKey].schedule;
+            // สร้างหัวข้อของภาคเรียน
+            html += `<div class="mb-6">
+                        <h4 class="text-xl font-bold text-purple-700 mb-3">ภาคเรียนที่ ${termNum}: ${data.title}</h4>`;
 
-        const recordedList = recordedActivitiesData[gradeThai] || [];
+            const day1 = data.schedule.day1;
+            const day2 = data.schedule.day2;
+            const day3 = data.schedule.day3;
 
-        const tableBody = document.getElementById('activityStatusTableBody');
+            // ฟังก์ชันช่วยสร้างรายการกิจกรรม (<li>) พร้อมสถานะ
+            const createStatusItems = (dayData, dayNum) => {
+                return dayData.activities.map(activity => {
+                    const isRecorded = recordedList.includes(activity);
+                    const cleanActivity = activity.replace(/'/g, "\\'");
+                    const dayTitle = dayData.title.replace(/'/g, "\\'");
 
-        tableBody.innerHTML = '';
-
-        document.getElementById('printGradeReportBtn').textContent = `พิมพ์รายงานสรุป ${gradeThai}`;
-
-        schedule.forEach(row => {
-
-            const isBreak = row.day1.includes('พัก');
-
-            let tableRow = `<tr class="${isBreak ? 'bg-gray-50' : ''}">`;
-
-            tableRow += `<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${row.time}</td>`;
-
-            ['day1', 'day2', 'day3'].forEach((day, index) => {
-
-                const activityName = row[day];
-
-                const isRecorded = recordedList.includes(activityName);
-
-                tableRow += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">`;
-
-                if (!isBreak) {
-
-                    tableRow += `<div>${activityName}</div>`;
-
+                    let statusHtml = '';
                     if (isRecorded) {
-
-                        tableRow += `<div class="mt-2"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">✅ บันทึกแล้ว</span></div>`;
-
+                        statusHtml = `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 flex-shrink-0">✅ บันทึกแล้ว</span>`;
                     } else {
-
-                        tableRow += `<div class="mt-2"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">🅾️ ยังไม่บันทึก</span> <button onclick="openActivityModal('${row.time}', '${activityName.replace(/'/g, "\\'")}', ${index + 1})" class="ml-2 text-xs text-purple-600 hover:underline">บันทึก</button></div>`;
-
+                        // ถ้ายังไม่บันทึก ให้แสดงปุ่ม "บันทึก"
+                        statusHtml = `<button onclick="openActivityModal('${dayTitle}', '${cleanActivity}', ${dayNum})" class="ml-2 text-xs text-purple-600 hover:underline flex-shrink-0">🅾️ บันทึก</button>`;
                     }
+                    // เราใช้ class "activity-item" ที่เราสร้างไว้ใน CSS ก่อนหน้านี้
+                    return `<li class="activity-item"><span>${activity}</span>${statusHtml}</li>`;
+                }).join('');
+            };
 
-                } else {
-
-                    tableRow += activityName;
-
-                }
-
-                tableRow += `</td>`;
-
-            });
-
-            tableRow += `</tr>`;
-
-            tableBody.innerHTML += tableRow;
-
+            // สร้างการ์ด 3 ใบ
+            html += `<div class="grid md:grid-cols-3 gap-6">
+                        <div class="bg-rose-50 border border-rose-200 rounded-lg p-5">
+                            <span class="inline-block bg-rose-200 text-rose-800 text-sm font-medium px-3 py-1 rounded-full mb-3">☀️ ${day1.title}</span>
+                            <ul class="space-y-3 mt-3">${createStatusItems(day1, 1)}</ul>
+                        </div>
+                        <div class="bg-amber-50 border border-amber-200 rounded-lg p-5">
+                            <span class="inline-block bg-amber-200 text-amber-800 text-sm font-medium px-3 py-1 rounded-full mb-3">☀️ ${day2.title}</span>
+                            <ul class="space-y-3 mt-3">${createStatusItems(day2, 2)}</ul>
+                        </div>
+                        <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-5">
+                            <span class="inline-block bg-emerald-200 text-emerald-800 text-sm font-medium px-3 py-1 rounded-full mb-3">☀️ ${day3.title}</span>
+                            <ul class="space-y-3 mt-3">${createStatusItems(day3, 3)}</ul>
+                        </div>
+                     </div>`;
+            
+            html += `</div>`; // ปิด div ของภาคเรียน
         });
-
+        
+        container.innerHTML = html;
+        
+        // อัปเดตข้อความปุ่มพิมพ์
+        document.getElementById('printGradeReportBtn').textContent = `พิมพ์รายงานสรุป ${gradeThai}`;
     }
-
-
 
     // UPDATED FUNCTION with crossorigin attribute for images
 

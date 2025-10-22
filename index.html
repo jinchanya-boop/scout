@@ -175,6 +175,8 @@
             justify-content: space-around;
             gap: 1cm;
         }
+        /* ... (โค้ด CSS อื่นๆ) ... */
+
         .photo-container {
             border: 1px solid #000;
             width: 7cm;
@@ -183,15 +185,16 @@
             padding: 0.2cm;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: space-around; /* 🟢 [แก้ไข] เปลี่ยนจาก center เป็น space-around */
             align-items: center;
         }
         .photo-container img {
             max-width: 100%;
-            max-height: 4cm;
+            max-height: 4.4cm; /* 🟢 [แก้ไข] เพิ่มความสูงสูงสุดจาก 4cm เป็น 4.4cm */
             object-fit: contain;
-            margin-bottom: 0.2cm;
+            margin-bottom: 0.1cm; /* 🟢 [แก้ไข] ลดระยะห่างล่างเล็กน้อย */
         }
+                
         .photo-container p {
             margin: 0;
         }
@@ -1120,10 +1123,8 @@
         document.getElementById('printGradeReportBtn').textContent = `พิมพ์รายงานสรุป ${gradeThai}`;
     }
 
-    // UPDATED FUNCTION with crossorigin attribute for images
-
 // UPDATED FUNCTION with crossorigin attribute for images
-// UPDATED FUNCTION (using keys with NO spaces - e.g., 'มา')
+// 🟢 [แทนที่] ฟังก์ชัน createPrintContentForActivity ทั้งหมดด้วยโค้ดนี้
 const createPrintContentForActivity = (details) => {
     const getImageUrl = (formula) => {
         if (!formula || typeof formula !== 'string' || !formula.startsWith('=IMAGE')) return '';
@@ -1155,7 +1156,7 @@ const createPrintContentForActivity = (details) => {
                     <span class="attendance-item">ลา <span>${details.ลา || 0}</span></span>
                     <span class="attendance-item">ขาด <span>${details.ขาด || 0}</span></span>
                     <span class="attendance-item">หนีเรียน <span>${details.หนี || 0}</span></span>
-                    </div>
+                </div>
             </div>
             
             <div class="data-grid">
@@ -1164,6 +1165,13 @@ const createPrintContentForActivity = (details) => {
                 <div class="data-field"><strong>ระดับผล:</strong><span>${details['Grade Level'] || 'N/A'}</span></div>
             </div>
 
+            <div class="data-grid">
+                <div class="data-field full-width no-border"><strong>คะแนนเกณฑ์ย่อย</strong></div>
+                <div class="data-field"><strong>เกณฑ์ที่ 1:</strong><span>${details[' Criteria 0 '] || 0}</span></div>
+                <div class="data-field"><strong>เกณฑ์ที่ 2:</strong><span>${details[' Criteria 1 '] || 0}</span></div>
+                <div class="data-field"><strong>เกณฑ์ที่ 3:</strong><span>${details[' Criteria 2 '] || 0}</span></div>
+                <div class="data-field"><strong>เกณฑ์ที่ 4:</strong><span>${details[' Criteria 3 '] || 0}</span></div>
+            </div>
             <div class="data-grid">
                 <div class="data-field full-width"><strong>ความคิดเห็น/คอมเมนท์:</strong><span>${details.Comments || ''}</span></div>
             </div>
@@ -1193,35 +1201,18 @@ const createPrintContentForActivity = (details) => {
         </div>
     `;
 };
-
     
 async function printGradeReport() {
-
     const gradeMap = { 'm1': 'ม.1', 'm2': 'ม.2', 'm3': 'ม.3' };
-
     const gradeThai = gradeMap[currentStatusGrade];
-
     Swal.fire({ title: `กำลังสร้างรายงานสรุป ${gradeThai}...`, html: 'กำลังเตรียมข้อมูลและรูปภาพ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-
-
-
     try {
-
         const response = await fetch(`${SCRIPT_URL}?action=getActivitiesForGrade&grade=${encodeURIComponent(gradeThai)}`);
-
         if (!response.ok) throw new Error('Could not fetch activity details for the grade.');
-
         const activities = await response.json();
-
-
-
         if (!activities || activities.length === 0) {
-
             throw new Error(`ไม่พบกิจกรรมที่บันทึกแล้วสำหรับ ${gradeThai}`);
-
         }
-
-        
 
         let fullReportHtml = '';
 

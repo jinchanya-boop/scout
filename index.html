@@ -197,6 +197,7 @@
                 
         .photo-container p {
             margin: 0;
+            margin-top: 0.15cm; /* 🟢 [เพิ่ม] เพิ่มระยะห่างบน (ย้ายข้อความ "ภาพที่ 1" ลง) */
         }
 
         .form-footer {
@@ -217,8 +218,8 @@
             justify-content: center;
         }
         .signature-img {
-            max-width: 100%;
-            max-height: 100%;
+            max-width: 80%;    /* 🟢 [แก้ไข] ลดความกว้างสูงสุด */
+            max-height: 1.8cm; /* 🟢 [แก้ไข] ลดความสูงสูงสุด (เดิม 100% ของกล่อง 2.5cm) */
             object-fit: contain;
         }
     }
@@ -1134,28 +1135,26 @@ const createPrintContentForActivity = (details) => {
     const photo2Url = getImageUrl(details['Photo 2']);
     const signatureUrl = getImageUrl(details['Signature']);
 
-    // --- 🟢 START: ลอจิกใหม่สำหรับดึงชื่อเกณฑ์ ---
+    // --- ลอจิกสำหรับดึงชื่อเกณฑ์ (เหมือนเดิม) ---
     const activityName = details.Activity || '';
     let criteriaKey = 'default';
-    
-    // ใช้ลอจิกเดียวกับตอนเปิด Modal (รวมถึงคำว่า 'ผูนำ' ที่อาจจะพิมพ์ตก '้')
-    // เพื่อให้แน่ใจว่าเราได้เกณฑ์ชุดเดียวกับตอนที่บันทึก
     if (['เงื่อน','เข็มทิศ','ปฐมพยาบาล'].some(s => activityName.includes(s))) criteriaKey = 'skill';
     else if (['ผูนำ','บังคับบัญชา'].some(s => activityName.includes(s))) criteriaKey = 'leadership';
     
     const criteriaArray = rubricCriteria[criteriaKey] || rubricCriteria.default;
 
-    // สร้าง HTML สำหรับคะแนนย่อย
+    // --- 🟢 START: แก้ไข HTML ของเกณฑ์ย่อย ---
+    // (ลบเว้นวรรคออกจาก ' Criteria 0 ' ให้เป็น 'Criteria 0')
     const criteriaHtml = `
         <div class="data-grid">
             <div class="data-field full-width no-border"><strong>คะแนนเกณฑ์ย่อย</strong></div>
-            <div class="data-field"><strong>${criteriaArray[0]?.criteria || 'เกณฑ์ที่ 1'}:</strong><span>${details[' Criteria 0 '] || 0} / ${criteriaArray[0]?.maxScore || ''}</span></div>
-            <div class="data-field"><strong>${criteriaArray[1]?.criteria || 'เกณฑ์ที่ 2'}:</strong><span>${details[' Criteria 1 '] || 0} / ${criteriaArray[1]?.maxScore || ''}</span></div>
-            <div class="data-field"><strong>${criteriaArray[2]?.criteria || 'เกณฑ์ที่ 3'}:</strong><span>${details[' Criteria 2 '] || 0} / ${criteriaArray[2]?.maxScore || ''}</span></div>
-            <div class="data-field"><strong>${criteriaArray[3]?.criteria || 'เกณฑ์ที่ 4'}:</strong><span>${details[' Criteria 3 '] || 0} / ${criteriaArray[3]?.maxScore || ''}</span></div>
+            <div class="data-field"><strong>${criteriaArray[0]?.criteria || 'เกณฑ์ที่ 1'}:</strong><span>${details['Criteria 0'] || 0} / ${criteriaArray[0]?.maxScore || ''}</span></div>
+            <div class="data-field"><strong>${criteriaArray[1]?.criteria || 'เกณฑ์ที่ 2'}:</strong><span>${details['Criteria 1'] || 0} / ${criteriaArray[1]?.maxScore || ''}</span></div>
+            <div class="data-field"><strong>${criteriaArray[2]?.criteria || 'เกณฑ์ที่ 3'}:</strong><span>${details['Criteria 2'] || 0} / ${criteriaArray[2]?.maxScore || ''}</span></div>
+            <div class="data-field"><strong>${criteriaArray[3]?.criteria || 'เกณฑ์ที่ 4'}:</strong><span>${details['Criteria 3'] || 0} / ${criteriaArray[3]?.maxScore || ''}</span></div>
         </div>
     `;
-    // --- 🟢 END: ลอจิกใหม่ ---
+    // --- 🟢 END: แก้ไข HTML ของเกณฑ์ย่อย ---
 
     return `
         <div class="print-form">
@@ -1219,6 +1218,7 @@ const createPrintContentForActivity = (details) => {
         </div>
     `;
 };
+    
 async function printGradeReport() {
     const gradeMap = { 'm1': 'ม.1', 'm2': 'ม.2', 'm3': 'ม.3' };
     const gradeThai = gradeMap[currentStatusGrade];

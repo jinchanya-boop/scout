@@ -59,8 +59,8 @@
             display: block !important;
             visibility: visible !important;
             position: static;
-            font-family: 'Sarabun', sans-serif; /* Use the new font */
-            font-size: 11pt;
+            font-family: 'TH SarabunPSK', 'Sarabun', sans-serif; /* 🟢 [แก้ไข] เปลี่ยนฟอนต์ */
+            font-size: 16pt; /* 🟢 [แก้ไข] เปลี่ยนขนาดตัวอักษรเนื้อหา */
             color: #000;
         }
 
@@ -84,8 +84,16 @@
             text-align: center;
             margin-bottom: 1cm;
         }
-        .form-header h1 { font-size: 16pt; font-weight: bold; margin: 0; }
-        .form-header h2 { font-size: 14pt; margin: 0; }
+        .form-header h1 { 
+            font-size: 18pt; /* 🟢 [แก้ไข] เปลี่ยนขนาดหัวข้อหลัก */
+            font-weight: bold; 
+            margin: 0; 
+        }
+        .form-header h2 { 
+            font-size: 16pt; /* 🟢 [แก้ไข] เปลี่ยนขนาดหัวข้อรอง */
+            font-weight: bold; /* 🟢 [เพิ่ม] ทำให้เป็นตัวหนา */
+            margin: 0; 
+        }
 
         .data-grid {
             display: grid;

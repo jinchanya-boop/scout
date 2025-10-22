@@ -106,11 +106,11 @@
 
         /* --- New Form Styles --- */
         .print-form {
-            line-height: 1.8;
+            line-height: 1.6;
         }
         .form-header {
             text-align: center;
-            margin-bottom: 1cm;
+            margin-bottom: 0.75cm;
         }
         .form-header h1 { 
             font-size: 18pt; /* 🟢 [แก้ไข] เปลี่ยนขนาดหัวข้อหลัก */
@@ -126,8 +126,8 @@
         .data-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 0.5cm 1.5cm;
-            margin-bottom: 0.5cm;
+            gap: 0.35cm 1.5cm; /* 🟢 [แก้ไข] ลด gap แนวตั้งจาก 0.5cm */
+            margin-bottom: 0.35cm; /* 🟢 [แก้ไข] ลด margin ล่างจาก 0.5cm */
         }
         .data-field {
             display: flex;
@@ -163,7 +163,7 @@
         }
         
         .photo-section {
-            margin-top: 1cm;
+            margin-top: 0.75cm; /* 🟢 [แก้ไข] ลด margin บนจาก 1cm */
         }
         .photo-section h3 {
             text-align: center;
@@ -200,7 +200,7 @@
         }
 
         .form-footer {
-            margin-top: 1cm;
+            margin-top: 0.75cm;
             display: flex;
             justify-content: flex-end;
         }
@@ -1123,8 +1123,8 @@
         document.getElementById('printGradeReportBtn').textContent = `พิมพ์รายงานสรุป ${gradeThai}`;
     }
 
-// UPDATED FUNCTION with crossorigin attribute for images
 // 🟢 [แทนที่] ฟังก์ชัน createPrintContentForActivity ทั้งหมดด้วยโค้ดนี้
+
 const createPrintContentForActivity = (details) => {
     const getImageUrl = (formula) => {
         if (!formula || typeof formula !== 'string' || !formula.startsWith('=IMAGE')) return '';
@@ -1133,6 +1133,29 @@ const createPrintContentForActivity = (details) => {
     const photo1Url = getImageUrl(details['Photo 1']);
     const photo2Url = getImageUrl(details['Photo 2']);
     const signatureUrl = getImageUrl(details['Signature']);
+
+    // --- 🟢 START: ลอจิกใหม่สำหรับดึงชื่อเกณฑ์ ---
+    const activityName = details.Activity || '';
+    let criteriaKey = 'default';
+    
+    // ใช้ลอจิกเดียวกับตอนเปิด Modal (รวมถึงคำว่า 'ผูนำ' ที่อาจจะพิมพ์ตก '้')
+    // เพื่อให้แน่ใจว่าเราได้เกณฑ์ชุดเดียวกับตอนที่บันทึก
+    if (['เงื่อน','เข็มทิศ','ปฐมพยาบาล'].some(s => activityName.includes(s))) criteriaKey = 'skill';
+    else if (['ผูนำ','บังคับบัญชา'].some(s => activityName.includes(s))) criteriaKey = 'leadership';
+    
+    const criteriaArray = rubricCriteria[criteriaKey] || rubricCriteria.default;
+
+    // สร้าง HTML สำหรับคะแนนย่อย
+    const criteriaHtml = `
+        <div class="data-grid">
+            <div class="data-field full-width no-border"><strong>คะแนนเกณฑ์ย่อย</strong></div>
+            <div class="data-field"><strong>${criteriaArray[0]?.criteria || 'เกณฑ์ที่ 1'}:</strong><span>${details[' Criteria 0 '] || 0} / ${criteriaArray[0]?.maxScore || ''}</span></div>
+            <div class="data-field"><strong>${criteriaArray[1]?.criteria || 'เกณฑ์ที่ 2'}:</strong><span>${details[' Criteria 1 '] || 0} / ${criteriaArray[1]?.maxScore || ''}</span></div>
+            <div class="data-field"><strong>${criteriaArray[2]?.criteria || 'เกณฑ์ที่ 3'}:</strong><span>${details[' Criteria 2 '] || 0} / ${criteriaArray[2]?.maxScore || ''}</span></div>
+            <div class="data-field"><strong>${criteriaArray[3]?.criteria || 'เกณฑ์ที่ 4'}:</strong><span>${details[' Criteria 3 '] || 0} / ${criteriaArray[3]?.maxScore || ''}</span></div>
+        </div>
+    `;
+    // --- 🟢 END: ลอจิกใหม่ ---
 
     return `
         <div class="print-form">
@@ -1165,13 +1188,8 @@ const createPrintContentForActivity = (details) => {
                 <div class="data-field"><strong>ระดับผล:</strong><span>${details['Grade Level'] || 'N/A'}</span></div>
             </div>
 
-            <div class="data-grid">
-                <div class="data-field full-width no-border"><strong>คะแนนเกณฑ์ย่อย</strong></div>
-                <div class="data-field"><strong>เกณฑ์ที่ 1:</strong><span>${details[' Criteria 0 '] || 0}</span></div>
-                <div class="data-field"><strong>เกณฑ์ที่ 2:</strong><span>${details[' Criteria 1 '] || 0}</span></div>
-                <div class="data-field"><strong>เกณฑ์ที่ 3:</strong><span>${details[' Criteria 2 '] || 0}</span></div>
-                <div class="data-field"><strong>เกณฑ์ที่ 4:</strong><span>${details[' Criteria 3 '] || 0}</span></div>
-            </div>
+            ${criteriaHtml}
+
             <div class="data-grid">
                 <div class="data-field full-width"><strong>ความคิดเห็น/คอมเมนท์:</strong><span>${details.Comments || ''}</span></div>
             </div>
@@ -1201,7 +1219,6 @@ const createPrintContentForActivity = (details) => {
         </div>
     `;
 };
-    
 async function printGradeReport() {
     const gradeMap = { 'm1': 'ม.1', 'm2': 'ม.2', 'm3': 'ม.3' };
     const gradeThai = gradeMap[currentStatusGrade];

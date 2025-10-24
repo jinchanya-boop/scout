@@ -1287,8 +1287,250 @@ async function printGradeReport() {
 
 }
 
+    function onMultiGradeChange(grade) {
+  if (!grade) {
+    document.getElementById('multi-troop-selector-container').innerHTML = '<p style="color: #999; text-align: center;">กรุณาเลือกระดับชั้น</p>';
+    return;
+  }
+
+  // โหลดข้อมูลนักเรียน
+  fetch(window.location.href + '?action=getStudents')
+    .then(r => r.json())
+    .then(studentData => {
+      renderMultipleTroopSelector(studentData, grade);
+    })
+    .catch(error => {
+      console.error('Error loading students:', error);
+      alert('ไม่สามารถโหลดข้อมูลนักเรียน');
+    });
+}
+
+/**
+ * ตัวจัดการการอัปโหลดรูปภาพ
+ */
+function handlePhotoCapture(event, photoSlot) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    storePhotoData(photoSlot, e.target.result);
+  };
+  reader.readAsDataURL(file);
+}
+
+/**
+ * ส่งฟอร์มบันทึกกิจกรรม
+ */
+function submitMultiActivityForm() {
+  const grade = document.getElementById('multi-grade').value;
+  const activity = document.getElementById('multi-activity').value;
+  const date = document.getElementById('multi-date').value;
+  const time = document.getElementById('multi-time').value;
+  const comments = document.getElementById('multi-comments').value;
+  const notes = document.getElementById('multi-notes').value;
+
+  if (!grade || !activity) {
+    alert('กรุณากรอกข้อมูลให้ครบ (ระดับชั้น และ ชื่อกิจกรรม)');
+    return;
+  }
+
+  const selectedTroops = getSelectedTroops();
+  if (selectedTroops.length === 0) {
+    alert('กรุณาเลือกอย่างน้อย 1 หมู่');
+    return;
+  }
+
+  // เตรียมข้อมูล
+  const activityData = {
+    grade: grade,
+    activity: activity,
+    date: date,
+    time: time,
+    gradeLevel: grade,
+    comments: comments,
+    notes: notes,
+    totalScore: 0,
+    summaryPresent: 0,
+    summaryLeave: 0,
+    summaryAbsent: 0,
+    summarySkipped: 0,
+    rubricScores: {}
+  };
+
+  // บันทึกสำหรับแต่ละหมู่
+  saveActivityMultipleTroops(activityData);
+}
+
+/**
+ * ฟังก์ชันสำหรับดึงหมู่ที่เลือก
+ */
+function getSelectedTroops() {
+  const checkboxes = document.querySelectorAll('#multi-troop-selector-container input[name="troop-checkbox"]:checked');
+  const selectedTroops = [];
+  
+  checkboxes.forEach(checkbox => {
+    try {
+      const troopData = JSON.parse(checkbox.dataset.troopData);
+      selectedTroops.push(troopData);
+    } catch (e) {
+      console.error('Error parsing troop data:', e);
+    }
+  });
+  
+  return selectedTroops;
+}
+        
     </script>
+<!-- ============================================
+     TAB SECTION: บันทึกกิจกรรมแบบหลายหมู่ (เวียนฐาน)
+     ============================================ -->
+<div id="multi-activity-section" style="display: none; padding: 20px; background: #f9f9f9; margin-top: 20px; border-radius: 10px;">
+  <h2 style="color: #2196F3; margin-top: 0;">📝 บันทึกกิจกรรมแบบหลายหมู่ (เวียนฐาน)</h2>
+  <p style="color: #666;">สำหรับกิจกรรมที่สอนทั้งหลายหมู่พร้อมกัน - เลือกหมู่ที่ต้องการ และบันทึกครั้งเดียวจะบันทึกทั้งหมด</p>
 
+  <!-- 1. ข้อมูลพื้นฐาน -->
+  <fieldset style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
+    <legend style="font-weight: bold; color: #333;">ข้อมูลพื้นฐาน</legend>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+      <div>
+        <label for="multi-grade" style="display: block; margin-bottom: 5px; font-weight: bold;">ระดับชั้น:</label>
+        <select id="multi-grade" onchange="onMultiGradeChange(this.value)" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+          <option value="">-- เลือกระดับชั้น --</option>
+          <option value="ป.1">ป.1</option>
+          <option value="ป.2">ป.2</option>
+          <option value="ป.3">ป.3</option>
+          <option value="ป.4">ป.4</option>
+          <option value="ป.5">ป.5</option>
+          <option value="ป.6">ป.6</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="multi-activity" style="display: block; margin-bottom: 5px; font-weight: bold;">ชื่อกิจกรรม:</label>
+        <input type="text" id="multi-activity" placeholder="เช่น การเดินป่า" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" />
+      </div>
+
+      <div>
+        <label for="multi-date" style="display: block; margin-bottom: 5px; font-weight: bold;">วันที่:</label>
+        <input type="date" id="multi-date" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" />
+      </div>
+
+      <div>
+        <label for="multi-time" style="display: block; margin-bottom: 5px; font-weight: bold;">เวลาบันทึก:</label>
+        <input type="time" id="multi-time" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" />
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+      <div>
+        <label for="multi-comments" style="display: block; margin-bottom: 5px; font-weight: bold;">หมายเหตุ:</label>
+        <textarea id="multi-comments" placeholder="หมายเหตุเพิ่มเติม" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-height: 80px;"></textarea>
+      </div>
+
+      <div>
+        <label for="multi-notes" style="display: block; margin-bottom: 5px; font-weight: bold;">บันทึก:</label>
+        <textarea id="multi-notes" placeholder="บันทึกเพิ่มเติม" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-height: 80px;"></textarea>
+      </div>
+    </div>
+  </fieldset>
+
+  <!-- 2. เลือกหมู่ -->
+  <fieldset style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
+    <legend style="font-weight: bold; color: #333;">🎯 เลือกหมู่ที่ต้องการบันทึก</legend>
+    <div id="multi-troop-selector-container" style="max-height: 300px; overflow-y: auto; padding: 10px;">
+      <p style="color: #999; text-align: center;">กรุณาเลือกระดับชั้นก่อน</p>
+    </div>
+  </fieldset>
+
+  <!-- 3. อัปโหลดรูปภาพ 4 ภาพ -->
+  <fieldset style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
+    <legend style="font-weight: bold; color: #333;">📸 อัปโหลดรูปภาพ (4 รูป)</legend>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+      <!-- Photo 1 -->
+      <div style="text-align: center; padding: 10px; background: #f0f0f0; border-radius: 5px;">
+        <label style="display: block; margin-bottom: 10px; font-weight: bold;">รูปที่ 1:</label>
+        <input 
+          type="file" 
+          id="photo1-input" 
+          accept="image/*" 
+          onchange="handlePhotoCapture(event, 'photo1')"
+          style="margin-bottom: 10px;"
+        />
+        <img id="photo1-preview" style="max-width: 100%; max-height: 150px; display: none; border-radius: 5px;" />
+      </div>
+
+      <!-- Photo 2 -->
+      <div style="text-align: center; padding: 10px; background: #f0f0f0; border-radius: 5px;">
+        <label style="display: block; margin-bottom: 10px; font-weight: bold;">รูปที่ 2:</label>
+        <input 
+          type="file" 
+          id="photo2-input" 
+          accept="image/*" 
+          onchange="handlePhotoCapture(event, 'photo2')"
+          style="margin-bottom: 10px;"
+        />
+        <img id="photo2-preview" style="max-width: 100%; max-height: 150px; display: none; border-radius: 5px;" />
+      </div>
+
+      <!-- Photo 3 -->
+      <div style="text-align: center; padding: 10px; background: #f0f0f0; border-radius: 5px;">
+        <label style="display: block; margin-bottom: 10px; font-weight: bold;">รูปที่ 3:</label>
+        <input 
+          type="file" 
+          id="photo3-input" 
+          accept="image/*" 
+          onchange="handlePhotoCapture(event, 'photo3')"
+          style="margin-bottom: 10px;"
+        />
+        <img id="photo3-preview" style="max-width: 100%; max-height: 150px; display: none; border-radius: 5px;" />
+      </div>
+
+      <!-- Photo 4 -->
+      <div style="text-align: center; padding: 10px; background: #f0f0f0; border-radius: 5px;">
+        <label style="display: block; margin-bottom: 10px; font-weight: bold;">รูปที่ 4:</label>
+        <input 
+          type="file" 
+          id="photo4-input" 
+          accept="image/*" 
+          onchange="handlePhotoCapture(event, 'photo4')"
+          style="margin-bottom: 10px;"
+        />
+        <img id="photo4-preview" style="max-width: 100%; max-height: 150px; display: none; border-radius: 5px;" />
+      </div>
+    </div>
+
+    <!-- Signature -->
+    <div style="margin-top: 15px; text-align: center; padding: 10px; background: #f0f0f0; border-radius: 5px;">
+      <label style="display: block; margin-bottom: 10px; font-weight: bold;">ลายเซ็น:</label>
+      <input 
+        type="file" 
+        id="signature-input" 
+        accept="image/*" 
+        onchange="handlePhotoCapture(event, 'signature')"
+        style="margin-bottom: 10px;"
+      />
+      <img id="signature-preview" style="max-width: 100%; max-height: 120px; display: none; border-radius: 5px;" />
+    </div>
+  </fieldset>
+
+  <!-- 4. ปุ่มบันทึก -->
+  <div style="text-align: center; padding: 20px;">
+    <button 
+      onclick="submitMultiActivityForm()" 
+      style="padding: 12px 30px; background: #4CAF50; color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; margin-right: 10px;"
+    >
+      ✓ บันทึกกิจกรรม
+    </button>
+    <button 
+      onclick="clearAllPhotos()" 
+      style="padding: 12px 30px; background: #f44336; color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer;"
+    >
+      🗑️ ล้างรูป
+    </button>
+  </div>
+</div>
 </body>
-
 </html>

@@ -325,10 +325,10 @@
     <div id="activityModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div class="p-6 border-b"><div class="flex items-center justify-between"><div class="flex items-center space-x-3"><span class="text-2xl">📝</span><h3 class="text-xl font-bold">บันทึกกิจกรรม</h3></div><button onclick="closeModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button></div></div>
-            <div class="p-6"><form id="activityForm"><div class="mb-6"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"><div><label class="block text-sm font-medium mb-2">🕐 เวลา</label><input type="text" id="activityTime" class="w-full px-4 py-2 rounded-lg border" readonly></div><div><label class="block text-sm font-medium mb-2">📋 กิจกรรม</label><input type="text" id="activityName" class="w-full px-4 py-2 rounded-lg border" readonly></div></div></div><div class="mb-6"><label class="block text-sm font-medium mb-2">👥 เลือกระดับชั้น, กอง และหมู่</label><div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4"><div><label class="block text-xs mb-1">ระดับชั้น</label><select id="activityGrade" onchange="loadStudentList()" class="w-full px-3 py-2 rounded-lg border"><option value="">เลือกระดับชั้น</option><option value="ม.1">ม.1</option><option value="ม.2">ม.2</option><option value="ม.3">ม.3</option></select></div><div><label class="block text-xs mb-1">กอง</label><select id="selectedGroup" onchange="updateActivityTroopOptions()" class="w-full px-3 py-2 rounded-lg border"><option value="">เลือกกอง</option><option value="กอง1">กอง 1</option><option value="กอง2">กอง 2</option><option value="กอง3">กอง 3</option><option value="กอง4">กอง 4</option></select></div><div><label class="block text-xs mb-1">หมู่</label><select id="selectedTroop" onchange="loadStudentList()" class="w-full px-3 py-2 rounded-lg border" disabled><option value="">เลือกหมู่</option></select></div></div><div id="studentAttendanceList" class="hidden"><div class="bg-purple-50 rounded-lg p-4"><h4 class="font-medium mb-3 flex items-center"><span class="mr-2">📋</span>รายชื่อนักเรียน - เช็คชื่อ</h4><div id="studentCheckList" class="space-y-2"></div></div></div></div><div id="attendanceSummary" class="mt-4 p-4 bg-gray-100 rounded-lg hidden"><h5 class="font-semibold mb-2">สรุปการเช็คชื่อ:</h5><div class="flex flex-wrap gap-x-6 gap-y-2 text-sm"><span class="font-medium">✅ มา: <span id="summaryPresent" class="text-green-600 font-bold">0</span></span><span class="font-medium">📋 ลา: <span id="summaryLeave" class="text-yellow-600 font-bold">0</span></span><span class="font-medium">❌ ขาด: <span id="summaryAbsent" class="text-red-600 font-bold">0</span></span><span class="font-medium">🏃 หนี: <span id="summarySkipped" class="text-orange-600 font-bold">0</span></span></div></div>
+            <div class="p-6"><form id="activityForm"><div class="mb-6"><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label class="block text-sm font-medium mb-2">🕐 เวลา</label><input type="text" id="activityTime" class="w-full px-4 py-2 rounded-lg border" readonly></div><div><label class="block text-sm font-medium mb-2">📋 กิจกรรม</label><input type="text" id="activityName" class="w-full px-4 py-2 rounded-lg border" readonly></div></div></div><div class="mb-6"><label class="block text-sm font-medium mb-2">👥 เลือกระดับชั้น, กอง และหมู่</label><div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4"><div><label class="block text-xs mb-1">ระดับชั้น</label><select id="activityGrade" onchange="loadStudentList()" class="w-full px-3 py-2 rounded-lg border"><option value="">เลือกระดับชั้น</option><option value="ม.1">ม.1</option><option value="ม.2">ม.2</option><option value="ม.3">ม.3</option></select></div><div><label class="block text-xs mb-1">กอง</label><select id="selectedGroup" onchange="updateActivityTroopOptions()" class="w-full px-3 py-2 rounded-lg border"><option value="">เลือกกอง</option><option value="กอง1">กอง 1</option><option value="กอง2">กอง 2</option><option value="กอง3">กอง 3</option><option value="กอง4">กอง 4</option></select></div><div><label class="block text-xs mb-1">หมู่</label><select id="selectedTroop" onchange="loadStudentList()" class="w-full px-3 py-2 rounded-lg border" disabled><option value="">เลือกหมู่</option></select></div></div><div id="studentAttendanceList" class="hidden"><div class="bg-purple-50 rounded-lg p-4"><h4 class="font-medium mb-3 flex items-center"><span class="mr-2">📋</span>รายชื่อนักเรียน - เช็คชื่อ</h4><div id="studentCheckList" class="space-y-2"></div></div></div></div><div id="attendanceSummary" class="mt-4 p-4 bg-gray-100 rounded-lg hidden"><h5 class="font-semibold mb-2">สรุปการเช็คชื่อ:</h5><div class="flex flex-wrap gap-x-6 gap-y-2 text-sm"><span class="font-medium">✅ มา: <span id="summaryPresent" class="text-green-600 font-bold">0</span></span><span class="font-medium">📋 ลา: <span id="summaryLeave" class="text-yellow-600 font-bold">0</span></span><span class="font-medium">❌ ขาด: <span id="summaryAbsent" class="text-red-600 font-bold">0</span></span><span class="font-medium">🏃 หนี: <span id="summarySkipped" class="text-orange-600 font-bold">0</span></span></div></div>
             <div class="mb-6 mt-6">
                 <h4 class="text-lg font-semibold mb-4 flex items-center"><span class="mr-2">📸</span>ภาพประกอบกิจกรรม (2 ภาพ)</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label for="activityPhoto1" class="file-input-label p-4 rounded-lg flex flex-col items-center justify-center text-center">
                             <span class="text-3xl">🖼️</span>
@@ -347,27 +347,6 @@
                         <input type="file" id="activityPhoto2" class="hidden" accept="image/*" onchange="previewImage('activityPhoto2', 'photoPreview2')">
                         <img id="photoPreview2" class="mt-2 rounded-lg image-preview hidden" alt="ตัวอย่างภาพที่ 2">
                     </div>
-
-                    <div>
-                        <label for="activityPhoto3" class="file-input-label p-4 rounded-lg flex flex-col items-center justify-center text-center">
-                            <span class="text-3xl">🖼️</span>
-                            <span class="mt-2 text-sm font-medium text-purple-700">เลือกภาพที่ 3</span>
-                            <span class="text-xs text-gray-500">คลิกเพื่ออัปโหลด</span>
-                        </label>
-                        <input type="file" id="activityPhoto3" class="hidden" accept="image/*" onchange="previewImage('activityPhoto3', 'photoPreview3')">
-                        <img id="photoPreview3" class="mt-2 rounded-lg image-preview hidden" alt="ตัวอย่างภาพที่ 3">
-                    </div>
-
-                    <div>
-                        <label for="activityPhoto4" class="file-input-label p-4 rounded-lg flex flex-col items-center justify-center text-center">
-                            <span class="text-3xl">🖼️</span>
-                            <span class="mt-2 text-sm font-medium text-purple-700">เลือกภาพที่ 4</span>
-                            <span class="text-xs text-gray-500">คลิกเพื่ออัปโหลด</span>
-                        </label>
-                        <input type="file" id="activityPhoto4" class="hidden" accept="image/*" onchange="previewImage('activityPhoto4', 'photoPreview4')">
-                        <img id="photoPreview4" class="mt-2 rounded-lg image-preview hidden" alt="ตัวอย่างภาพที่ 4">
-                    </div>
-                    
                 </div>
             </div>
             <div class="mb-6 mt-6"><h4 class="text-lg font-semibold mb-4 flex items-center"><span class="mr-2">⭐</span>เกณฑ์การประเมิน</h4><div class="space-y-3" id="rubricItems"></div></div><div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6"><div><label class="block text-sm font-medium mb-2">🎯 คะแนนรวม</label><input type="number" id="totalScore" min="0" max="100" class="w-full px-4 py-2 rounded-lg border" placeholder="0-100"></div><div><label class="block text-sm font-medium mb-2">📊 ระดับ</label><select id="gradeLevel" class="w-full px-4 py-2 rounded-lg border"><option value="">เลือกระดับ</option><option value="ดีเยี่ยม">ดีเยี่ยม (90-100)</option><option value="ดีมาก">ดีมาก (80-89)</option><option value="ดี">ดี (70-79)</option><option value="พอใช้">พอใช้ (60-69)</option><option value="ปรับปรุง">ต้องปรับปรุง (&lt;60)</option></select></div></div><div class="mb-6"><label class="block text-sm font-medium mb-2">💬 ความคิดเห็น/คอมเมนท์</label><textarea id="comments" rows="4" class="w-full px-4 py-2 rounded-lg border" placeholder="บันทึกความคิดเห็น..."></textarea></div><div class="mb-6"><label class="block text-sm font-medium mb-2">📝 หมายเหตุของผู้กำกับ</label><textarea id="notes" rows="3" class="w-full px-4 py-2 rounded-lg border" placeholder="หมายเหตุเพิ่มเติม..."></textarea></div><div class="mb-6"><label class="block text-sm font-medium mb-2">✍️ ลายเซ็นผู้กำกับ</label><div class="signature-pad rounded-lg p-4 text-center"><canvas id="signatureCanvas" width="300" height="100" class="border-2 border-dashed rounded-lg mx-auto cursor-crosshair"></canvas><div class="mt-2 space-x-2"><button type="button" onclick="clearSignature()" class="text-sm text-purple-600 hover:text-purple-800">🗑️ ล้างลายเซ็น</button></div></div></div><div class="flex justify-end space-x-3"><button type="button" onclick="closeModal()" class="px-6 py-2 border rounded-lg">ยกเลิก</button><button type="submit" class="px-6 py-2 btn-primary text-white rounded-lg font-medium">💾 บันทึกข้อมูล</button></div></form></div>
@@ -458,8 +437,7 @@
         }
     };
 
-    // 🟢 [แทนที่] ตัวแปร rotationContentHtml ทั้งหมดด้วยก้อนนี้
-
+    // 1.2 ข้อมูลตารางเวียนฐาน (อันนี้เหมือนเดิม)
     const rotationContentHtml = `
         <div class="p-6 space-y-6">
             <div>
@@ -469,10 +447,9 @@
                     <li><strong>หน่วยในการเวียน:</strong> 1 กอง (Troop) (ไม่ใช่ 1 หมู่)</li>
                     <li><strong>ม.1 (4 กอง x 4 หมู่):</strong> ใช้งานได้ทันที</li>
                     <li><strong>ม.2 (4 กอง x 4 หมู่):</strong> ใช้งานได้ทันที</li>
-                    <li><strong>ม.3 (4 กอง x 3 หมู่):</strong> ใช้งานได้เช่นกัน (กอง 1-4 จะเวียนไปพร้อมกัน)</li>
-                    </ul>
+                    <li><strong>ม.3 (4 กอง x 4 หมู่):</strong> ใช้งานได้เช่นกัน</li>
+                </ul>
             </div>
-            
             <div class="overflow-x-auto">
                 <h3 class="text-xl font-semibold text-gray-800 mb-3">ตัวอย่างตารางเวียนฐาน (4x4)</h3>
                 <table class="w-full min-w-lg text-left border-collapse">
@@ -803,68 +780,112 @@
 
     }
 
-    async function saveActivityRecord() {
-        Swal.fire({
-            title: 'กำลังบันทึกกิจกรรม',
-            html: 'กำลังย่อขนาดและอัปโหลดรูปภาพ...',
-            allowOutsideClick: false,
-            didOpen: () => { Swal.showLoading(); }
-        });
-        const file1 = document.getElementById('activityPhoto1').files[0];
-        const file2 = document.getElementById('activityPhoto2').files[0];
-        const file3 = document.getElementById('activityPhoto3').files[0];
-        const file4 = document.getElementById('activityPhoto4').files[0];
-        let photo1_base64 = '';
-        let photo2_base64 = '';
-        let photo3_base64 = '';
-        let photo4_base64 = '';
 
-    try {
-        if (file1) photo1_base64 = await resizeImage(file1);
-        if (file2) photo2_base64 = await resizeImage(file2);
-        if (file3) photo3_base64 = await resizeImage(file3);
-        if (file4) photo4_base64 = await resizeImage(file4);
+
+    async function saveActivityRecord() {
+
+        Swal.fire({
+
+            title: 'กำลังบันทึกกิจกรรม',
+
+            html: 'กำลังย่อขนาดและอัปโหลดรูปภาพ...',
+
+            allowOutsideClick: false,
+
+            didOpen: () => { Swal.showLoading(); }
+
+        });
+
+        const file1 = document.getElementById('activityPhoto1').files[0];
+
+        const file2 = document.getElementById('activityPhoto2').files[0];
+
+        let photo1_base64 = '';
+
+        let photo2_base64 = '';
+
+        try {
+
+            if (file1) photo1_base64 = await resizeImage(file1);
+
+            if (file2) photo2_base64 = await resizeImage(file2);
+
         } catch (error) {
+
             Swal.fire({
+
                 icon: 'error',
+
                 title: 'เกิดข้อผิดพลาด',
+
                 text: 'ไม่สามารถแปลงไฟล์รูปภาพได้!'
+
             });
 
             console.error("Image processing error:", error);
+
             return;
+
         }
+
         const rubricScores = {};
+
         document.querySelectorAll('[id^="rubric_"]').forEach((item, index) => {
+
             rubricScores[`criteria_${index}`] = item.value;
+
         });
+
         const signatureData = canvas ? canvas.toDataURL('image/png', 0.5) : '';
+
         const payload = {
+
             type: 'activity',
+
             timestamp: new Date().toISOString(),
+
             grade: document.getElementById('activityGrade').value,
+
             time: document.getElementById('activityTime').value,
+
             activity: document.getElementById('activityName').value,
+
             selectedGroup: document.getElementById('selectedGroup').value,
+
             selectedTroop: document.getElementById('selectedTroop').value,
+
             totalScore: document.getElementById('totalScore').value,
+
             gradeLevel: document.getElementById('gradeLevel').value,
+
             comments: document.getElementById('comments').value,
+
             notes: document.getElementById('notes').value,
+
             signature: signatureData,
+
             rubricScores,
+
             summaryPresent: document.getElementById('summaryPresent').innerText,
+
             summaryLeave: document.getElementById('summaryLeave').innerText,
+
             summaryAbsent: document.getElementById('summaryAbsent').innerText,
+
             summarySkipped: document.getElementById('summarySkipped').innerText,
+
             photo1: photo1_base64,
-            photo2: photo2_base64,
-            photo3: photo3_base64,
-            photo4: photo4_base64
+
+            photo2: photo2_base64
+
         };
+
         try {
+
             await postData(payload);
+
             showSuccessMessage(payload, false);
+
         } catch (error) {
 
             showSuccessMessage(payload, true);
@@ -906,17 +927,22 @@
     }
     
     function closeModal() {
-    document.getElementById('activityModal').classList.add('hidden');
-    document.getElementById('activityForm').reset();
-    document.getElementById('photoPreview1').classList.add('hidden');
-    document.getElementById('photoPreview1').src = '';
-    document.getElementById('photoPreview2').classList.add('hidden');
-    document.getElementById('photoPreview2').src = '';
-    document.getElementById('photoPreview3').classList.add('hidden');
-    document.getElementById('photoPreview3').src = '';
-    document.getElementById('photoPreview4').classList.add('hidden');
-    document.getElementById('photoPreview4').src = '';
-    clearSignature();
+
+        document.getElementById('activityModal').classList.add('hidden');
+
+        document.getElementById('activityForm').reset();
+
+        document.getElementById('photoPreview1').classList.add('hidden');
+
+        document.getElementById('photoPreview1').src = '';
+
+        document.getElementById('photoPreview2').classList.add('hidden');
+
+        document.getElementById('photoPreview2').src = '';
+
+        clearSignature();
+
+    }
 
     function hideStudentForm(){document.getElementById('studentForm').classList.add('hidden');editingStudent=null;document.getElementById('addStudentForm').reset();}
 
@@ -1287,250 +1313,8 @@ async function printGradeReport() {
 
 }
 
-    function onMultiGradeChange(grade) {
-  if (!grade) {
-    document.getElementById('multi-troop-selector-container').innerHTML = '<p style="color: #999; text-align: center;">กรุณาเลือกระดับชั้น</p>';
-    return;
-  }
-
-  // โหลดข้อมูลนักเรียน
-  fetch(window.location.href + '?action=getStudents')
-    .then(r => r.json())
-    .then(studentData => {
-      renderMultipleTroopSelector(studentData, grade);
-    })
-    .catch(error => {
-      console.error('Error loading students:', error);
-      alert('ไม่สามารถโหลดข้อมูลนักเรียน');
-    });
-}
-
-/**
- * ตัวจัดการการอัปโหลดรูปภาพ
- */
-function handlePhotoCapture(event, photoSlot) {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    storePhotoData(photoSlot, e.target.result);
-  };
-  reader.readAsDataURL(file);
-}
-
-/**
- * ส่งฟอร์มบันทึกกิจกรรม
- */
-function submitMultiActivityForm() {
-  const grade = document.getElementById('multi-grade').value;
-  const activity = document.getElementById('multi-activity').value;
-  const date = document.getElementById('multi-date').value;
-  const time = document.getElementById('multi-time').value;
-  const comments = document.getElementById('multi-comments').value;
-  const notes = document.getElementById('multi-notes').value;
-
-  if (!grade || !activity) {
-    alert('กรุณากรอกข้อมูลให้ครบ (ระดับชั้น และ ชื่อกิจกรรม)');
-    return;
-  }
-
-  const selectedTroops = getSelectedTroops();
-  if (selectedTroops.length === 0) {
-    alert('กรุณาเลือกอย่างน้อย 1 หมู่');
-    return;
-  }
-
-  // เตรียมข้อมูล
-  const activityData = {
-    grade: grade,
-    activity: activity,
-    date: date,
-    time: time,
-    gradeLevel: grade,
-    comments: comments,
-    notes: notes,
-    totalScore: 0,
-    summaryPresent: 0,
-    summaryLeave: 0,
-    summaryAbsent: 0,
-    summarySkipped: 0,
-    rubricScores: {}
-  };
-
-  // บันทึกสำหรับแต่ละหมู่
-  saveActivityMultipleTroops(activityData);
-}
-
-/**
- * ฟังก์ชันสำหรับดึงหมู่ที่เลือก
- */
-function getSelectedTroops() {
-  const checkboxes = document.querySelectorAll('#multi-troop-selector-container input[name="troop-checkbox"]:checked');
-  const selectedTroops = [];
-  
-  checkboxes.forEach(checkbox => {
-    try {
-      const troopData = JSON.parse(checkbox.dataset.troopData);
-      selectedTroops.push(troopData);
-    } catch (e) {
-      console.error('Error parsing troop data:', e);
-    }
-  });
-  
-  return selectedTroops;
-}
-        
     </script>
-<!-- ============================================
-     TAB SECTION: บันทึกกิจกรรมแบบหลายหมู่ (เวียนฐาน)
-     ============================================ -->
-<div id="multi-activity-section" style="display: none; padding: 20px; background: #f9f9f9; margin-top: 20px; border-radius: 10px;">
-  <h2 style="color: #2196F3; margin-top: 0;">📝 บันทึกกิจกรรมแบบหลายหมู่ (เวียนฐาน)</h2>
-  <p style="color: #666;">สำหรับกิจกรรมที่สอนทั้งหลายหมู่พร้อมกัน - เลือกหมู่ที่ต้องการ และบันทึกครั้งเดียวจะบันทึกทั้งหมด</p>
 
-  <!-- 1. ข้อมูลพื้นฐาน -->
-  <fieldset style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
-    <legend style="font-weight: bold; color: #333;">ข้อมูลพื้นฐาน</legend>
-    
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-      <div>
-        <label for="multi-grade" style="display: block; margin-bottom: 5px; font-weight: bold;">ระดับชั้น:</label>
-        <select id="multi-grade" onchange="onMultiGradeChange(this.value)" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-          <option value="">-- เลือกระดับชั้น --</option>
-          <option value="ป.1">ป.1</option>
-          <option value="ป.2">ป.2</option>
-          <option value="ป.3">ป.3</option>
-          <option value="ป.4">ป.4</option>
-          <option value="ป.5">ป.5</option>
-          <option value="ป.6">ป.6</option>
-        </select>
-      </div>
-
-      <div>
-        <label for="multi-activity" style="display: block; margin-bottom: 5px; font-weight: bold;">ชื่อกิจกรรม:</label>
-        <input type="text" id="multi-activity" placeholder="เช่น การเดินป่า" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" />
-      </div>
-
-      <div>
-        <label for="multi-date" style="display: block; margin-bottom: 5px; font-weight: bold;">วันที่:</label>
-        <input type="date" id="multi-date" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" />
-      </div>
-
-      <div>
-        <label for="multi-time" style="display: block; margin-bottom: 5px; font-weight: bold;">เวลาบันทึก:</label>
-        <input type="time" id="multi-time" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" />
-      </div>
-    </div>
-
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-      <div>
-        <label for="multi-comments" style="display: block; margin-bottom: 5px; font-weight: bold;">หมายเหตุ:</label>
-        <textarea id="multi-comments" placeholder="หมายเหตุเพิ่มเติม" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-height: 80px;"></textarea>
-      </div>
-
-      <div>
-        <label for="multi-notes" style="display: block; margin-bottom: 5px; font-weight: bold;">บันทึก:</label>
-        <textarea id="multi-notes" placeholder="บันทึกเพิ่มเติม" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-height: 80px;"></textarea>
-      </div>
-    </div>
-  </fieldset>
-
-  <!-- 2. เลือกหมู่ -->
-  <fieldset style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
-    <legend style="font-weight: bold; color: #333;">🎯 เลือกหมู่ที่ต้องการบันทึก</legend>
-    <div id="multi-troop-selector-container" style="max-height: 300px; overflow-y: auto; padding: 10px;">
-      <p style="color: #999; text-align: center;">กรุณาเลือกระดับชั้นก่อน</p>
-    </div>
-  </fieldset>
-
-  <!-- 3. อัปโหลดรูปภาพ 4 ภาพ -->
-  <fieldset style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
-    <legend style="font-weight: bold; color: #333;">📸 อัปโหลดรูปภาพ (4 รูป)</legend>
-    
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-      <!-- Photo 1 -->
-      <div style="text-align: center; padding: 10px; background: #f0f0f0; border-radius: 5px;">
-        <label style="display: block; margin-bottom: 10px; font-weight: bold;">รูปที่ 1:</label>
-        <input 
-          type="file" 
-          id="photo1-input" 
-          accept="image/*" 
-          onchange="handlePhotoCapture(event, 'photo1')"
-          style="margin-bottom: 10px;"
-        />
-        <img id="photo1-preview" style="max-width: 100%; max-height: 150px; display: none; border-radius: 5px;" />
-      </div>
-
-      <!-- Photo 2 -->
-      <div style="text-align: center; padding: 10px; background: #f0f0f0; border-radius: 5px;">
-        <label style="display: block; margin-bottom: 10px; font-weight: bold;">รูปที่ 2:</label>
-        <input 
-          type="file" 
-          id="photo2-input" 
-          accept="image/*" 
-          onchange="handlePhotoCapture(event, 'photo2')"
-          style="margin-bottom: 10px;"
-        />
-        <img id="photo2-preview" style="max-width: 100%; max-height: 150px; display: none; border-radius: 5px;" />
-      </div>
-
-      <!-- Photo 3 -->
-      <div style="text-align: center; padding: 10px; background: #f0f0f0; border-radius: 5px;">
-        <label style="display: block; margin-bottom: 10px; font-weight: bold;">รูปที่ 3:</label>
-        <input 
-          type="file" 
-          id="photo3-input" 
-          accept="image/*" 
-          onchange="handlePhotoCapture(event, 'photo3')"
-          style="margin-bottom: 10px;"
-        />
-        <img id="photo3-preview" style="max-width: 100%; max-height: 150px; display: none; border-radius: 5px;" />
-      </div>
-
-      <!-- Photo 4 -->
-      <div style="text-align: center; padding: 10px; background: #f0f0f0; border-radius: 5px;">
-        <label style="display: block; margin-bottom: 10px; font-weight: bold;">รูปที่ 4:</label>
-        <input 
-          type="file" 
-          id="photo4-input" 
-          accept="image/*" 
-          onchange="handlePhotoCapture(event, 'photo4')"
-          style="margin-bottom: 10px;"
-        />
-        <img id="photo4-preview" style="max-width: 100%; max-height: 150px; display: none; border-radius: 5px;" />
-      </div>
-    </div>
-
-    <!-- Signature -->
-    <div style="margin-top: 15px; text-align: center; padding: 10px; background: #f0f0f0; border-radius: 5px;">
-      <label style="display: block; margin-bottom: 10px; font-weight: bold;">ลายเซ็น:</label>
-      <input 
-        type="file" 
-        id="signature-input" 
-        accept="image/*" 
-        onchange="handlePhotoCapture(event, 'signature')"
-        style="margin-bottom: 10px;"
-      />
-      <img id="signature-preview" style="max-width: 100%; max-height: 120px; display: none; border-radius: 5px;" />
-    </div>
-  </fieldset>
-
-  <!-- 4. ปุ่มบันทึก -->
-  <div style="text-align: center; padding: 20px;">
-    <button 
-      onclick="submitMultiActivityForm()" 
-      style="padding: 12px 30px; background: #4CAF50; color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; margin-right: 10px;"
-    >
-      ✓ บันทึกกิจกรรม
-    </button>
-    <button 
-      onclick="clearAllPhotos()" 
-      style="padding: 12px 30px; background: #f44336; color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer;"
-    >
-      🗑️ ล้างรูป
-    </button>
-  </div>
-</div>
 </body>
+
 </html>

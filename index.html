@@ -927,44 +927,103 @@ document.addEventListener('DOMContentLoaded', () => {
         leadership:[{criteria:"ความเป็นผู้นำ",maxScore:30},{criteria:"การสื่อสาร",maxScore:25},{criteria:"การตัดสินใจ",maxScore:25},{criteria:"การดูแลสมาชิก",maxScore:20}]
     };
 
-    // 🟢 [ย้ายมาที่นี่] ฟังก์ชันใหม่สำหรับควบคุมแท็บหลัก (ภาคเรียน/เวียนฐาน)
     function showMainTab(tabId, selectedTab) {
-        // ซ่อนเนื้อหาทั้งหมด
         document.querySelectorAll('.main-tab-content').forEach(content => {
             content.style.display = 'none';
         });
-        
-        // แสดงเนื้อหาที่เลือก
         document.getElementById(`${tabId}-content`).style.display = 'block';
-        
-        // อัปเดตสไตล์ของปุ่มแท็บ
         document.querySelectorAll('.main-tab').forEach(tab => {
             tab.classList.remove('text-purple-600', 'border-purple-600');
             tab.classList.add('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300', 'border-transparent');
         });
-        
         selectedTab.classList.add('text-purple-600', 'border-purple-600');
         selectedTab.classList.remove('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300', 'border-transparent');
-
-        // อัปเดตตัวแปร currentTerm ถ้ามีการเลือกแท็บภาคเรียน
         if (tabId === 'term1' || tabId === 'term2') {
             currentTerm = tabId;
-            // ไม่จำเป็นต้องเรียก loadSchedule() ที่นี่ เพราะมันถูกเรียกตอนเปลี่ยน ม. แล้ว
-            // การสลับแท็บจะแค่แสดง/ซ่อน div ที่มีตารางที่สร้างไว้แล้ว
         }
     }
-    // 🟢 [แทนที่] DOMContentLoaded เดิมของคุณด้วยโค้ดนี้
-    document.addEventListener('DOMContentLoaded', function () {
-        fetchStudents(); // ยังคงเรียก fetchStudents() เหมือนเดิม
-        document.getElementById('gradeSelect').addEventListener('change', loadSchedule);
-        
-        // 🟢 [เพิ่มบรรทัดนี้] เพิ่ม Event Listener ที่นี่ (ทำงานครั้งเดียว)
-        document.getElementById('activityForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            saveActivityRecord(); 
-        });
-    });
 
+    function openDashboard() {
+        document.getElementById('dashboardModal').classList.remove('hidden');
+        if (!attendanceSummaryData || !activitySummaryData) {
+            loadDashboardData();
+        } else {
+            renderDashboardCharts();
+        }
+    }
+
+    function closeDashboard() {
+        document.getElementById('dashboardModal').classList.add('hidden');
+    }
+
+    function openAttendanceCheck() {
+        document.getElementById('attendanceModal').classList.remove('hidden');
+        document.getElementById('attendanceDate').value = new Date().toISOString().split('T')[0];
+    }
+
+    function closeAttendanceCheck() {
+        document.getElementById('attendanceModal').classList.add('hidden');
+    }
+
+    function openActivityStatusDashboard() {
+        document.getElementById('activityStatusModal').classList.remove('hidden');
+        loadActivityStatusData();
+    }
+
+    function closeActivityStatusDashboard() {
+        document.getElementById('activityStatusModal').classList.add('hidden');
+    }
+
+    function openStudentManagement() {
+        document.getElementById('studentManagementModal').classList.remove('hidden');
+        document.getElementById('addStudentForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            saveStudent();
+        });
+    }
+
+    function closeStudentManagement() {
+        document.getElementById('studentManagementModal').classList.add('hidden');
+        hideStudentForm();
+    }
+
+    async function showActivityReport() {
+        Swal.fire({
+            title: 'กำลังโหลดรายงาน...',
+            didOpen: () => Swal.showLoading()
+        });
+        try {
+            const response = await fetch(SCRIPT_URL + '?action=getActivitySummary');
+            const summary = await response.json();
+            if (Object.keys(summary).length === 0) {
+                return Swal.fire({
+                    icon: 'info',
+                    title: 'ไม่มีข้อมูลกิจกรรม'
+                });
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    async function showAttendanceReport() {
+        Swal.fire({
+            title: 'กำลังโหลดรายงาน...',
+            didOpen: () => Swal.showLoading()
+        });
+        try {
+            const response = await fetch(SCRIPT_URL + '?action=getAttendanceSummary');
+            const summary = await response.json();
+            if (Object.keys(summary).length === 0) {
+                return Swal.fire({
+                    icon: 'info',
+                    title: 'ไม่มีข้อมูลการเช็คชื่อ'
+                });
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
     async function fetchStudents() {
        try {
             const response = await fetch(SCRIPT_URL + '?action=getStudents');

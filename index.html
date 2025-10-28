@@ -832,7 +832,7 @@
 
         document.querySelectorAll('[id^="rubric_"]').forEach((item, index) => {
 
-            rubricScores[`criteria_${index}`] = item.value;
+            rubricScores[`criteria_${index}`] = parseInt(item.value) || 0;  // เป็นตัวเลข 0, 5, 10
 
         });
 
@@ -1318,3 +1318,4 @@ async function printGradeReport() {
 </body>
 
 </html>
+

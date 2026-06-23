@@ -998,7 +998,7 @@
                             
                             Swal.fire('สำเร็จ', 'นำเข้าข้อมูลนักเรียนเรียบร้อย', 'success');
                             // โหลดข้อมูลนักเรียนใหม่
-                            await initApp();
+                            await fetchStudents();
                             loadManageStudentList();
                         } catch (error) {
                             console.error(error);

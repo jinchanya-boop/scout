@@ -397,6 +397,15 @@
             <div class="p-6">
                 <form id="specialUploadForm">
                     <div class="mb-4">
+                        <label class="block text-sm font-medium mb-2">เลือกระดับชั้น</label>
+                        <select id="specialGradeSelect" required class="w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500">
+                            <option value="">-- เลือกระดับชั้น --</option>
+                            <option value="ม.1">มัธยมศึกษาปีที่ 1 (ม.1)</option>
+                            <option value="ม.2">มัธยมศึกษาปีที่ 2 (ม.2)</option>
+                            <option value="ม.3">มัธยมศึกษาปีที่ 3 (ม.3)</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
                         <label class="block text-sm font-medium mb-2">เลือกกิจกรรม</label>
                         <select id="specialActivitySelect" required class="w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500">
                             <option value="">-- กรุณาเลือกกิจกรรม --</option>
@@ -434,12 +443,20 @@
                     <button onclick="closeSpecialGalleryModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
                 </div>
             </div>
-            <div class="p-6 border-b bg-gray-50">
+            <div class="p-6 border-b bg-gray-50 flex flex-col md:flex-row gap-4 justify-between items-center">
                 <div class="flex flex-wrap gap-2" id="galleryFilterContainer">
                     <button onclick="filterGallery('all')" class="px-4 py-2 rounded-lg font-medium bg-purple-600 text-white gallery-filter-btn" data-filter="all">ทั้งหมด</button>
                     <button onclick="filterGallery('อนุรักษ์สิ่งแวดล้อม')" class="px-4 py-2 rounded-lg font-medium bg-white border text-gray-700 hover:bg-gray-100 gallery-filter-btn" data-filter="อนุรักษ์สิ่งแวดล้อม">อนุรักษ์สิ่งแวดล้อม</button>
                     <button onclick="filterGallery('พิธีสวนสนาม')" class="px-4 py-2 rounded-lg font-medium bg-white border text-gray-700 hover:bg-gray-100 gallery-filter-btn" data-filter="พิธีสวนสนาม">พิธีสวนสนาม</button>
                     <button onclick="filterGallery('พิธีถวายราชสดุดี')" class="px-4 py-2 rounded-lg font-medium bg-white border text-gray-700 hover:bg-gray-100 gallery-filter-btn" data-filter="พิธีถวายราชสดุดี">ถวายราชสดุดี</button>
+                </div>
+                <div>
+                    <select id="galleryGradeFilter" onchange="applyGalleryFilters()" class="px-4 py-2 rounded-lg border font-medium text-gray-700 focus:ring-2 focus:ring-purple-500">
+                        <option value="all">ทุกระดับชั้น</option>
+                        <option value="ม.1">ม.1</option>
+                        <option value="ม.2">ม.2</option>
+                        <option value="ม.3">ม.3</option>
+                    </select>
                 </div>
             </div>
             <div class="p-6 flex-grow overflow-y-auto">
@@ -454,7 +471,7 @@
     <div id="printArea" class="hidden font-sans"></div>
 
 <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzASODxAK1pQadqg07duHQXg_ifPZjDh1djnD7w823EQFRSYyAGlRfZ-HQkHZy2TAxF/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwaEFnL2ToUUfSyp6I3hO9yORn2gY4Sh1FcLJTV0gpkh3l44fplEMjAj9tmNkeVF3TJ/exec';
     let studentData = {};
     let editingStudent = null;
     let canvas, ctx, isDrawing = false;
@@ -1524,11 +1541,13 @@ document.getElementById('specialUploadForm').addEventListener('submit', async (e
             reader.onerror = error => reject(error);
         });
 
+        const gradeSelect = document.getElementById('specialGradeSelect').value;
         const data = {
             type: 'uploadSpecialPhoto',
             activityId: activitySelect,
             description: desc,
-            photo: photoBase64
+            photo: photoBase64,
+            grade: gradeSelect
         };
 
         const response = await fetch(SCRIPT_URL, {
@@ -1572,10 +1591,15 @@ async function loadSpecialGallery() {
     }
 }
 
-function filterGallery(filter) {
+let currentGalleryFilterActivity = 'all';
+
+function filterGallery(filterActivity) {
+    currentGalleryFilterActivity = filterActivity;
+    
+    // Update button styles
     const btns = document.querySelectorAll('.gallery-filter-btn');
     btns.forEach(btn => {
-        if (btn.dataset.filter === filter) {
+        if (btn.dataset.filter === filterActivity) {
             btn.classList.replace('bg-white', 'bg-purple-600');
             btn.classList.replace('text-gray-700', 'text-white');
         } else {
@@ -1584,10 +1608,22 @@ function filterGallery(filter) {
         }
     });
 
+    applyGalleryFilters();
+}
+
+function applyGalleryFilters() {
+    const gradeFilter = document.getElementById('galleryGradeFilter').value;
     const container = document.getElementById('specialGalleryContainer');
-    const filteredPhotos = filter === 'all' 
-        ? currentSpecialPhotos 
-        : currentSpecialPhotos.filter(p => p.activity === filter);
+    
+    let filteredPhotos = currentSpecialPhotos;
+    
+    if (currentGalleryFilterActivity !== 'all') {
+        filteredPhotos = filteredPhotos.filter(p => p.activity === currentGalleryFilterActivity);
+    }
+    
+    if (gradeFilter !== 'all') {
+        filteredPhotos = filteredPhotos.filter(p => p.grade === gradeFilter);
+    }
 
     if (filteredPhotos.length === 0) {
         container.innerHTML = '<div class="col-span-full text-center text-gray-500 py-12">ไม่พบภาพในหมวดหมู่นี้</div>';
@@ -1603,7 +1639,10 @@ function filterGallery(filter) {
         <div class="bg-white rounded-xl shadow-md overflow-hidden border">
             <img src="${url}" alt="${photo.activity}" class="w-full h-48 object-cover cursor-pointer hover:opacity-90" onclick="window.open('${url}', '_blank')">
             <div class="p-4">
-                <span class="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full mb-2">${photo.activity}</span>
+                <div class="flex items-center space-x-2 mb-2">
+                    <span class="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full">${photo.activity}</span>
+                    ${photo.grade ? `<span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">${photo.grade}</span>` : ''}
+                </div>
                 <p class="text-sm text-gray-600 mb-1">${photo.description || 'ไม่มีคำอธิบาย'}</p>
                 <p class="text-xs text-gray-400">📅 ${photo.timestamp}</p>
             </div>

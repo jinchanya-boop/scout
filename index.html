@@ -644,30 +644,62 @@
             return;
         }
         const filteredData = selectedGrade === 'all' ? absenteeReportData : absenteeReportData.filter(d => d.grade === selectedGrade);
+        
+        // --- 1. สรุปยอดรวมรายบุคคล ---
+        const studentTotals = {};
+        filteredData.forEach(item => {
+            const key = `${item.grade} / ${item.group} / ${item.troop} - ${item.name}`;
+            if (!studentTotals[key]) studentTotals[key] = { absent: 0, skipped: 0, grade: item.grade, group: item.group, troop: item.troop, name: item.name };
+            if (item.status === 'ขาด') studentTotals[key].absent++;
+            if (item.status === 'หนี') studentTotals[key].skipped++;
+        });
+
+        const studentTotalsArray = Object.values(studentTotals).sort((a, b) => (b.absent + b.skipped) - (a.absent + a.skipped));
+        let html = '<h4 class="text-lg font-semibold mb-4 mt-8">🚨 สรุปรายชื่อนักเรียนที่ ขาด/หนี</h4>';
+        
+        if (studentTotalsArray.length > 0) {
+            html += `<div class="mb-8 border rounded-lg overflow-hidden shadow-sm">
+                <div class="bg-red-100 p-3 font-bold text-red-900">สรุปยอดรวม ขาด/หนี รายบุคคล (เรียงตามจำนวนครั้งสูงสุด)</div>
+                <ul class="divide-y divide-red-100">`;
+            studentTotalsArray.forEach(s => {
+                let statsHtml = [];
+                if (s.absent > 0) statsHtml.push(`<span class="px-2 py-1 bg-red-100 text-red-700 rounded-lg font-semibold text-sm">ขาดรวม ${s.absent} ครั้ง</span>`);
+                if (s.skipped > 0) statsHtml.push(`<span class="px-2 py-1 bg-orange-100 text-orange-700 rounded-lg font-semibold text-sm">หนีรวม ${s.skipped} ครั้ง</span>`);
+                
+                html += `<li class="p-3 flex justify-between items-center bg-white hover:bg-gray-50">
+                    <span class="font-medium text-gray-800">👤 ${s.grade} / ${s.group} / ${s.troop} - ${s.name}</span>
+                    <span class="flex space-x-2">${statsHtml.join('')}</span>
+                </li>`;
+            });
+            html += `</ul></div>`;
+        }
+
+        // --- 2. รายละเอียดรายวัน ---
         const grouped = {};
         filteredData.forEach(item => {
             const key = `${item.date} - กิจกรรม${item.activity}`;
             if (!grouped[key]) grouped[key] = [];
             grouped[key].push(item);
         });
-        let html = '<h4 class="text-lg font-semibold mb-4">🚨 รายชื่อนักเรียนที่ ขาด/หนี</h4>';
+
         if (Object.keys(grouped).length === 0) {
             html += '<p class="text-gray-500 text-center py-4">ไม่มีนักเรียนที่ขาด/หนีในระดับชั้นนี้</p>';
         } else {
+            html += '<h5 class="text-md font-semibold mb-3 text-gray-700">รายละเอียดแบ่งตามวัน</h5>';
             for (const [key, students] of Object.entries(grouped)) {
                 const absentCount = students.filter(s => s.status === 'ขาด').length;
                 const skippedCount = students.filter(s => s.status === 'หนี').length;
-                html += `<div class="mb-6 border rounded-lg overflow-hidden">
-                    <div class="bg-red-50 p-3 font-semibold text-red-800 flex justify-between flex-col md:flex-row">
+                html += `<div class="mb-6 border rounded-lg overflow-hidden shadow-sm">
+                    <div class="bg-gray-50 border-b p-3 font-semibold text-gray-700 flex justify-between flex-col md:flex-row">
                         <span>📅 ${key}</span>
                         <span>ขาด: ${absentCount} คน | หนี: ${skippedCount} คน</span>
                     </div>
-                    <ul class="divide-y divide-gray-200">`;
+                    <ul class="divide-y divide-gray-100">`;
                 students.forEach(s => {
-                    const statusColor = s.status === 'หนี' ? 'text-orange-600' : 'text-red-600';
+                    const statusColor = s.status === 'หนี' ? 'text-orange-600 bg-orange-50' : 'text-red-600 bg-red-50';
                     html += `<li class="p-3 flex justify-between items-center bg-white hover:bg-gray-50">
-                        <span>👤 ${s.grade} / ${s.group} / ${s.troop} - ${s.name}</span>
-                        <span class="font-semibold px-2 py-1 rounded-full bg-red-100 ${statusColor}">${s.status}</span>
+                        <span class="text-gray-600">👤 ${s.grade} / ${s.group} / ${s.troop} - ${s.name}</span>
+                        <span class="font-semibold px-3 py-1 rounded-full text-sm border ${statusColor}">${s.status}</span>
                     </li>`;
                 });
                 html += `</ul></div>`;

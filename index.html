@@ -362,7 +362,7 @@
      <div id="dashboardModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
             <div class="p-6 border-b sticky top-0 bg-white/80 backdrop-blur-md"><div class="flex items-center justify-between"><div class="flex items-center space-x-3"><span class="text-2xl">📈</span><h3 class="text-xl font-bold">แดชบอร์ดสรุปผล</h3></div><button onclick="closeDashboard()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button></div><div class="mt-4"><label for="dashboardGradeFilter" class="text-sm font-medium">กรองตามระดับชั้น:</label><select id="dashboardGradeFilter" onchange="renderDashboardCharts()" class="mt-1 w-full md:w-auto px-3 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500"><option value="all">ทั้งหมด</option><option value="ม.1">ม.1</option><option value="ม.2">ม.2</option><option value="ม.3">ม.3</option></select></div></div>
-            <div class="p-6 space-y-8"><div><h4 class="text-lg font-semibold mb-4">📊 สถิติการเช็คชื่อ (รายครั้ง)</h4><div class="p-4 bg-gray-50 rounded-lg"><canvas id="attendanceChart"></canvas></div></div><div><h4 class="text-lg font-semibold mb-4">⭐ คะแนนกิจกรรมเฉลี่ย</h4><div class="p-4 bg-gray-50 rounded-lg"><canvas id="scoreChart"></canvas></div></div></div>
+            <div class="p-6 space-y-8"><div><h4 class="text-lg font-semibold mb-4">📊 สถิติการเช็คชื่อ (รายครั้ง)</h4><div class="p-4 bg-gray-50 rounded-lg"><canvas id="attendanceChart"></canvas></div></div><div><h4 class="text-lg font-semibold mb-4">⭐ คะแนนกิจกรรมเฉลี่ย</h4><div class="p-4 bg-gray-50 rounded-lg"><canvas id="scoreChart"></canvas></div></div><div id="absenteeReportContainer"></div></div>
         </div>
    </div>
     <div id="activityStatusModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
@@ -624,16 +624,57 @@
         }
     }
 
+    let absenteeReportData = [];
     function openDashboard(){document.getElementById('dashboardModal').classList.remove('hidden');if(!attendanceSummaryData||!activitySummaryData){loadDashboardData();}else{renderDashboardCharts();}}
     function closeDashboard(){document.getElementById('dashboardModal').classList.add('hidden');}
-    async function loadDashboardData(){Swal.fire({title:'กำลังโหลดข้อมูล...',allowOutsideClick:false,didOpen:()=>Swal.showLoading()});try{const[attendanceRes,activityRes]=await Promise.all([fetch(SCRIPT_URL+'?action=getAttendanceSummary'),fetch(SCRIPT_URL+'?action=getActivitySummary')]);if(!attendanceRes.ok||!activityRes.ok){throw new Error('Could not load summary data');}
-    attendanceSummaryData=await attendanceRes.json();activitySummaryData=await activityRes.json();renderDashboardCharts();Swal.close();}catch(error){console.error('Failed to load dashboard data:',error);Swal.fire({icon:'error',title:'เกิดข้อผิดพลาด',text:'ไม่สามารถโหลดข้อมูลแดชบอร์ดได้'});}}
+    async function loadDashboardData(){Swal.fire({title:'กำลังโหลดข้อมูล...',allowOutsideClick:false,didOpen:()=>Swal.showLoading()});try{const[attendanceRes,activityRes,absenteeRes]=await Promise.all([fetch(SCRIPT_URL+'?action=getAttendanceSummary'),fetch(SCRIPT_URL+'?action=getActivitySummary'),fetch(SCRIPT_URL+'?action=getAbsenteeReport')]);if(!attendanceRes.ok||!activityRes.ok){throw new Error('Could not load summary data');}
+    attendanceSummaryData=await attendanceRes.json();activitySummaryData=await activityRes.json();absenteeReportData=await absenteeRes.json();renderDashboardCharts();Swal.close();}catch(error){console.error('Failed to load dashboard data:',error);Swal.fire({icon:'error',title:'เกิดข้อผิดพลาด',text:'ไม่สามารถโหลดข้อมูลแดชบอร์ดได้'});}}
     function renderDashboardCharts(){if(!attendanceSummaryData||!activitySummaryData){return;}
     const gradeFilterValue=document.getElementById('dashboardGradeFilter').value;const gradeMapping={"ม.1":"ม.1","ม.2":"ม.2","ม.3":"ม.3","all":"all"};const selectedGrade=gradeMapping[gradeFilterValue];const attendanceLabels=[];const attendanceData={present:[],leave:[],absent:[],skipped:[]};for(const gradeKey in attendanceSummaryData){if(selectedGrade!=='all'&&gradeKey!==selectedGrade)continue;for(const group in attendanceSummaryData[gradeKey]){for(const troop in attendanceSummaryData[gradeKey][group]){const troopData=attendanceSummaryData[gradeKey][group][troop];const label=`${gradeKey}/${group}/${troop}`;attendanceLabels.push(label);attendanceData.present.push(troopData['มา']||0);attendanceData.leave.push(troopData['ลา']||0);attendanceData.absent.push(troopData['ขาด']||0);attendanceData.skipped.push(troopData['หนี']||0);}}}
     const scoreLabels=[];const scoreData=[];for(const gradeKey in activitySummaryData){if(selectedGrade!=='all'&&gradeKey!==selectedGrade)continue;for(const group in activitySummaryData[gradeKey].groups){for(const troop in activitySummaryData[gradeKey].groups[group].troops){const troopData=activitySummaryData[gradeKey].groups[group].troops[troop];const label=`${gradeKey}/${group}/${troop}`;const avgScore=troopData.count>0?(troopData.totalScore/troopData.count).toFixed(2):0;scoreLabels.push(label);scoreData.push(avgScore);}}}
     if(attendanceChartInstance)attendanceChartInstance.destroy();if(scoreChartInstance)scoreChartInstance.destroy();
     const attendanceCtx=document.getElementById('attendanceChart').getContext('2d');attendanceChartInstance=new Chart(attendanceCtx,{type:'bar',data:{labels:attendanceLabels,datasets:[{label:'มา',data:attendanceData.present,backgroundColor:'#10B981'},{label:'ลา',data:attendanceData.leave,backgroundColor:'#F59E0B'},{label:'ขาด',data:attendanceData.absent,backgroundColor:'#EF4444'},{label:'หนี',data:attendanceData.skipped,backgroundColor:'#F97316'}]},options:{responsive:true,scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true}},plugins:{title:{display:true,text:'สรุปการเช็คชื่อ (รายครั้ง)'},tooltip:{mode:'index'}}}});
-    const scoreCtx=document.getElementById('scoreChart').getContext('2d');scoreChartInstance=new Chart(scoreCtx,{type:'bar',data:{labels:scoreLabels,datasets:[{label:'คะแนนเฉลี่ย',data:scoreData,backgroundColor:'rgba(139, 92, 246, 0.6)',borderColor:'rgba(139, 92, 246, 1)',borderWidth:1}]},options:{responsive:true,scales:{y:{beginAtZero:true,max:100}},plugins:{title:{display:true,text:'คะแนนเฉลี่ยกิจกรรมแต่ละหมู่'}}}});}
+    const scoreCtx=document.getElementById('scoreChart').getContext('2d');scoreChartInstance=new Chart(scoreCtx,{type:'bar',data:{labels:scoreLabels,datasets:[{label:'คะแนนเฉลี่ย',data:scoreData,backgroundColor:'rgba(139, 92, 246, 0.6)',borderColor:'rgba(139, 92, 246, 1)',borderWidth:1}]},options:{responsive:true,scales:{y:{beginAtZero:true,max:100}},plugins:{title:{display:true,text:'คะแนนเฉลี่ยกิจกรรมแต่ละหมู่'}}}});
+    renderAbsenteeReport(selectedGrade);}
+
+    function renderAbsenteeReport(selectedGrade) {
+        const container = document.getElementById('absenteeReportContainer');
+        if(!absenteeReportData || absenteeReportData.length === 0) {
+            container.innerHTML = '<p class="text-gray-500 text-center py-4">ไม่มีข้อมูลการขาด/หนี</p>';
+            return;
+        }
+        const filteredData = selectedGrade === 'all' ? absenteeReportData : absenteeReportData.filter(d => d.grade === selectedGrade);
+        const grouped = {};
+        filteredData.forEach(item => {
+            const key = `${item.date} - กิจกรรม${item.activity}`;
+            if (!grouped[key]) grouped[key] = [];
+            grouped[key].push(item);
+        });
+        let html = '<h4 class="text-lg font-semibold mb-4">🚨 รายชื่อนักเรียนที่ ขาด/หนี</h4>';
+        if (Object.keys(grouped).length === 0) {
+            html += '<p class="text-gray-500 text-center py-4">ไม่มีนักเรียนที่ขาด/หนีในระดับชั้นนี้</p>';
+        } else {
+            for (const [key, students] of Object.entries(grouped)) {
+                const absentCount = students.filter(s => s.status === 'ขาด').length;
+                const skippedCount = students.filter(s => s.status === 'หนี').length;
+                html += `<div class="mb-6 border rounded-lg overflow-hidden">
+                    <div class="bg-red-50 p-3 font-semibold text-red-800 flex justify-between flex-col md:flex-row">
+                        <span>📅 ${key}</span>
+                        <span>ขาด: ${absentCount} คน | หนี: ${skippedCount} คน</span>
+                    </div>
+                    <ul class="divide-y divide-gray-200">`;
+                students.forEach(s => {
+                    const statusColor = s.status === 'หนี' ? 'text-orange-600' : 'text-red-600';
+                    html += `<li class="p-3 flex justify-between items-center bg-white hover:bg-gray-50">
+                        <span>👤 ${s.grade} / ${s.group} / ${s.troop} - ${s.name}</span>
+                        <span class="font-semibold px-2 py-1 rounded-full bg-red-100 ${statusColor}">${s.status}</span>
+                    </li>`;
+                });
+                html += `</ul></div>`;
+            }
+        }
+        container.innerHTML = html;
+    }
 
     // 🟢 [เพิ่ม] ตัวแปร global 1 บรรทัดนี้
     let currentTerm = 'term1'; // เริ่มต้นที่ภาคเรียนที่ 1

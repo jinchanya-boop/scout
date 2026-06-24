@@ -421,10 +421,10 @@
                     <div class="mb-6">
                         <label for="specialPhotoInput" class="file-input-label p-4 rounded-lg flex flex-col items-center justify-center text-center">
                             <span class="text-3xl">🖼️</span>
-                            <span class="mt-2 text-sm font-medium text-purple-700">เลือกรูปภาพ</span>
+                            <span class="mt-2 text-sm font-medium text-purple-700">เลือกรูปภาพ (สูงสุด 6 ภาพ)</span>
                         </label>
-                        <input type="file" id="specialPhotoInput" class="hidden" accept="image/*" required onchange="previewImage('specialPhotoInput', 'specialPhotoPreview')">
-                        <img id="specialPhotoPreview" class="mt-4 rounded-lg image-preview hidden" alt="ตัวอย่างภาพ">
+                        <input type="file" id="specialPhotoInput" class="hidden" accept="image/*" multiple required onchange="previewMultipleSpecialImages()">
+                        <div id="specialPhotoPreviewContainer" class="mt-4 grid grid-cols-3 gap-2 hidden"></div>
                     </div>
                     <div class="flex justify-end space-x-3">
                         <button type="button" onclick="closeSpecialUploadModal()" class="px-6 py-2 border rounded-lg">ยกเลิก</button>
@@ -1515,8 +1515,37 @@ function openSpecialUploadModal() {
 function closeSpecialUploadModal() {
     document.getElementById('specialUploadModal').classList.add('hidden');
     document.getElementById('specialUploadForm').reset();
-    document.getElementById('specialPhotoPreview').classList.add('hidden');
-    document.getElementById('specialPhotoPreview').src = '';
+    document.getElementById('specialPhotoPreviewContainer').innerHTML = '';
+    document.getElementById('specialPhotoPreviewContainer').classList.add('hidden');
+}
+
+function previewMultipleSpecialImages() {
+    const input = document.getElementById('specialPhotoInput');
+    const container = document.getElementById('specialPhotoPreviewContainer');
+    container.innerHTML = '';
+    
+    if (input.files && input.files.length > 0) {
+        if (input.files.length > 6) {
+            Swal.fire('แจ้งเตือน', 'สามารถเลือกรูปภาพได้สูงสุด 6 ภาพ', 'warning');
+            input.value = '';
+            container.classList.add('hidden');
+            return;
+        }
+        
+        container.classList.remove('hidden');
+        Array.from(input.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = 'w-full h-24 object-cover rounded-lg border';
+                container.appendChild(img);
+            }
+            reader.readAsDataURL(file);
+        });
+    } else {
+        container.classList.add('hidden');
+    }
 }
 
 document.getElementById('specialUploadForm').addEventListener('submit', async (e) => {
@@ -1524,29 +1553,38 @@ document.getElementById('specialUploadForm').addEventListener('submit', async (e
     const activitySelect = document.getElementById('specialActivitySelect').value;
     const desc = document.getElementById('specialPhotoDesc').value;
     const photoInput = document.getElementById('specialPhotoInput');
+    const files = photoInput.files;
     
-    if (!activitySelect || photoInput.files.length === 0) {
+    if (!activitySelect || files.length === 0) {
         Swal.fire('แจ้งเตือน', 'กรุณาเลือกกิจกรรมและอัพโหลดภาพ', 'warning');
         return;
     }
+    
+    if (files.length > 6) {
+        Swal.fire('แจ้งเตือน', 'สามารถอัพโหลดได้สูงสุด 6 ภาพต่อครั้ง', 'warning');
+        return;
+    }
 
-    Swal.fire({ title: 'กำลังอัพโหลด...', html: 'กรุณารอสักครู่', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+    Swal.fire({ title: 'กำลังอัพโหลด...', html: 'กรุณารอสักครู่ (อาจใช้เวลาสักพักหากมีหลายภาพ)', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
     
     try {
-        const file = photoInput.files[0];
-        const photoBase64 = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = error => reject(error);
-        });
+        const photosBase64 = [];
+        for (let i = 0; i < files.length; i++) {
+            const base64 = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(files[i]);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+            photosBase64.push(base64);
+        }
 
         const gradeSelect = document.getElementById('specialGradeSelect').value;
         const data = {
             type: 'uploadSpecialPhoto',
             activityId: activitySelect,
             description: desc,
-            photo: photoBase64,
+            photos: photosBase64,
             grade: gradeSelect
         };
 

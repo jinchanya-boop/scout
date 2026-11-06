@@ -383,8 +383,8 @@
     </div>
      <div id="dashboardModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
-            <div class="p-6 border-b sticky top-0 bg-white/80 backdrop-blur-md"><div class="flex items-center justify-between"><div class="flex items-center space-x-3"><span class="text-2xl">📈</span><h3 class="text-xl font-bold">แดชบอร์ดสรุปผล</h3></div><button onclick="closeDashboard()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button></div><div class="mt-4"><label for="dashboardGradeFilter" class="text-sm font-medium">กรองตามระดับชั้น:</label><select id="dashboardGradeFilter" onchange="renderDashboardCharts()" class="mt-1 w-full md:w-auto px-3 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500"><option value="all">ทั้งหมด</option><option value="ม.1">ม.1</option><option value="ม.2">ม.2</option><option value="ม.3">ม.3</option></select><label for="dashboardTermFilter" class="text-sm font-medium md:ml-4">ภาคเรียน:</label><select id="dashboardTermFilter" onchange="reloadDashboardForTerm()" class="mt-1 w-full md:w-auto px-3 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500"><option value="2" selected>ภาคเรียนที่ 2</option><option value="1">ภาคเรียนที่ 1</option><option value="all">ทั้งปี</option></select></div></div>
-            <div class="p-6 space-y-8"><div id="attendanceOverview"></div><div><h4 class="text-lg font-semibold mb-4">⭐ คะแนนกิจกรรมเฉลี่ย</h4><div class="p-4 bg-gray-50 rounded-lg"><canvas id="scoreChart"></canvas></div></div><div id="absenteeReportContainer"></div></div>
+            <div class="p-6 border-b sticky top-0 bg-white z-20 rounded-t-2xl"><div class="flex items-center justify-between"><div class="flex items-center space-x-3"><span class="text-2xl">📈</span><h3 class="text-xl font-bold">แดชบอร์ดสรุปผล</h3></div><button onclick="closeDashboard()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button></div><div class="mt-4"><label for="dashboardGradeFilter" class="text-sm font-medium">กรองตามระดับชั้น:</label><select id="dashboardGradeFilter" onchange="renderDashboardCharts()" class="mt-1 w-full md:w-auto px-3 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500"><option value="all">ทั้งหมด</option><option value="ม.1">ม.1</option><option value="ม.2">ม.2</option><option value="ม.3">ม.3</option></select><label for="dashboardTermFilter" class="text-sm font-medium md:ml-4">ภาคเรียน:</label><select id="dashboardTermFilter" onchange="reloadDashboardForTerm()" class="mt-1 w-full md:w-auto px-3 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500"><option value="2" selected>ภาคเรียนที่ 2</option><option value="1">ภาคเรียนที่ 1</option><option value="all">ทั้งปี</option></select></div></div>
+            <div class="p-6 space-y-8"><div id="attendanceOverview"></div><div><h4 class="text-lg font-semibold mb-1">⭐ คะแนนเฉลี่ยรายกิจกรรม</h4><p class="text-xs text-gray-500 mb-3">เรียงจากคะแนนน้อยที่สุด · ชี้ที่แท่งเพื่อดูชื่อกิจกรรมเต็ม</p><div class="p-4 bg-white border rounded-xl"><div class="relative" style="height:300px"><canvas id="scoreChart" aria-label="กราฟคะแนนเฉลี่ยรายกิจกรรม" role="img"></canvas></div></div></div><div id="absenteeReportContainer"></div></div>
         </div>
    </div>
     <div id="activityStatusModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
@@ -1008,6 +1008,14 @@
                 ${tile('เช็คชื่อแล้ว', `${checked}/${expected}`, expected - checked > 0 ? `⚠️ ค้าง ${expected - checked} รอบ (ดูตารางด้านล่าง)` : '✅ ครบทุกหมู่ทุกรอบ', '')}
             </div>`;
 
+        html += `<div class="bg-white border rounded-xl p-4 mb-6">
+                <div class="flex flex-wrap items-baseline justify-between gap-2 mb-2">
+                    <h5 class="font-semibold text-gray-800">📈 แนวโน้มการมาร่วมกิจกรรมรายรอบ</h5>
+                    <span class="text-xs text-gray-500">% มา ของแต่ละรอบ (วันที่ + ช่วงเวลา) · ชี้ที่จุดเพื่อดูตัวเลข</span>
+                </div>
+                <div class="relative" style="height:260px"><canvas id="attTrendChart" aria-label="กราฟแนวโน้มการมาร่วมกิจกรรมรายรอบ" role="img"></canvas></div>
+            </div>`;
+
         // ---------- 2) ตารางรายหมู่ (เรียงจากหมู่ที่มาน้อยที่สุด) ----------
         const troopRows = [];
         grades.forEach(g => troopsOfGrade(g, sessions).forEach(tk => {
@@ -1065,7 +1073,235 @@
         });
 
         box.innerHTML = html;
+        renderAttendanceTrend(grades, sessions);
     }
+    // ==========================================================
+    // 📈 กราฟสรุป (Chart.js) — สีตามชั้นคงที่: ม.1 น้ำเงิน · ม.2 ส้ม · ม.3 เขียวอมฟ้า (แยกได้แม้ตาบอดสี)
+    // แท่งเดียวใช้สีม่วงของระบบ · ต่ำกว่าเกณฑ์ = แดง + ⚠️ (ไม่ใช้สีอย่างเดียว)
+    // ==========================================================
+    const VIZ = {
+        grade: { 'ม.1': '#2a78d6', 'ม.2': '#eb6834', 'ม.3': '#1baf7a' },
+        brand: '#7c3aed', critical: '#d03b3b', text: '#52514e', grid: '#eeedf3'
+    };
+    if (typeof Chart !== 'undefined') {
+        Chart.defaults.font.family = "'Prompt', sans-serif";
+        Chart.defaults.color = VIZ.text;
+    }
+    const chartInstances = {};
+    function makeChart(canvasId, config) {
+        if (chartInstances[canvasId]) { chartInstances[canvasId].destroy(); delete chartInstances[canvasId]; }
+        const el = document.getElementById(canvasId);
+        if (!el || typeof Chart === 'undefined') return null;
+        chartInstances[canvasId] = new Chart(el.getContext('2d'), config);
+        return chartInstances[canvasId];
+    }
+    // ป้ายตัวเลขที่ปลายแท่ง
+    const barValueLabels = {
+        id: 'barValueLabels',
+        afterDatasetsDraw(chart, args, opts) {
+            const { ctx } = chart;
+            ctx.save();
+            ctx.font = "600 12px 'Prompt', sans-serif";
+            ctx.fillStyle = '#1f2937';
+            ctx.textBaseline = 'middle';
+            chart.data.datasets.forEach((ds, di) => {
+                const meta = chart.getDatasetMeta(di);
+                if (meta.hidden) return;
+                meta.data.forEach((bar, i) => {
+                    const v = ds.data[i];
+                    if (v === null || v === undefined) return;
+                    ctx.fillText(opts && opts.format ? opts.format(v) : v, bar.x + 6, bar.y);
+                });
+            });
+            ctx.restore();
+        }
+    };
+    // เส้นประเกณฑ์ (เช่น 80%)
+    const thresholdLine = {
+        id: 'thresholdLine',
+        afterDatasetsDraw(chart, args, opts) {
+            if (!opts || opts.value === undefined || opts.value === null) return;
+            const x = chart.scales.x.getPixelForValue(opts.value);
+            const { top, bottom } = chart.chartArea;
+            const ctx = chart.ctx;
+            ctx.save();
+            ctx.setLineDash([5, 4]); ctx.strokeStyle = VIZ.critical; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.moveTo(x, top); ctx.lineTo(x, bottom); ctx.stroke();
+            ctx.setLineDash([]); ctx.fillStyle = VIZ.critical; ctx.textAlign = 'center';
+            ctx.font = "600 11px 'Prompt', sans-serif";
+            ctx.fillText(opts.label || '', x, top - 7);
+            ctx.restore();
+        }
+    };
+    function chartEmpty(canvasId, message) {
+        if (chartInstances[canvasId]) { chartInstances[canvasId].destroy(); delete chartInstances[canvasId]; }
+        const el = document.getElementById(canvasId);
+        if (!el) return;
+        const wrap = el.parentElement;
+        el.style.display = message ? 'none' : '';
+        let p = wrap.querySelector('.chart-empty');
+        if (message) {
+            if (!p) { p = document.createElement('p'); p.className = 'chart-empty text-gray-500 text-center py-8'; wrap.appendChild(p); }
+            p.textContent = message; wrap.style.height = 'auto';
+        } else if (p) p.remove();
+    }
+
+    // แท่งแนวนอนสีเดียว (เรียงจากน้อยไปมาก) + เส้นเกณฑ์
+    function renderHBar(canvasId, items, { threshold, thresholdLabel, unit = '', tooltip, colorFn } = {}) {
+        const el = document.getElementById(canvasId);
+        if (!el) return;
+        if (!items.length) return chartEmpty(canvasId, 'ยังไม่มีข้อมูล');
+        chartEmpty(canvasId, '');
+        el.parentElement.style.height = (items.length * 30 + 56) + 'px';
+        makeChart(canvasId, {
+            type: 'bar',
+            data: {
+                labels: items.map(i => (threshold !== undefined && i.value < threshold ? '⚠️ ' : '') + i.label),
+                datasets: [{
+                    data: items.map(i => i.value),
+                    backgroundColor: items.map(i => colorFn ? colorFn(i) : (threshold !== undefined && i.value < threshold ? VIZ.critical : VIZ.brand)),
+                    borderRadius: 4, borderSkipped: 'start', barThickness: 16, maxBarThickness: 18
+                }]
+            },
+            options: {
+                indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                layout: { padding: { top: 18, right: 52 } },
+                scales: {
+                    x: { min: 0, max: 100, ticks: { callback: v => v + unit }, grid: { color: VIZ.grid }, border: { display: false } },
+                    y: { grid: { display: false }, border: { display: false }, ticks: { font: { size: 12 } } }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { title: c => items[c[0].dataIndex].full || items[c[0].dataIndex].label, label: c => tooltip ? tooltip(items[c.dataIndex]) : `${c.parsed.x}${unit}` } },
+                    barValueLabels: { format: v => v + unit },
+                    thresholdLine: threshold !== undefined ? { value: threshold, label: thresholdLabel || '' } : null
+                }
+            },
+            plugins: [barValueLabels, thresholdLine]
+        });
+    }
+
+    // 1) แนวโน้ม % มา รายรอบ (เส้นละชั้น)
+    function renderAttendanceTrend(grades, sessions) {
+        const slots = [];
+        sessions.forEach(s => { if (!slots.some(x => x.date === s.date && x.activity === s.activity)) slots.push({ date: s.date, activity: s.activity }); });
+        slots.sort(slotSort);
+        const labels = slots.map(sl => [formatThaiDate(sl.date), sl.activity === 'เช้า' ? 'เช้า' : sl.activity === 'บ่าย' ? 'บ่าย' : sl.activity]);
+        const datasets = grades.filter(g => sessions.some(s => s.grade === g)).map(g => ({
+            label: g,
+            data: slots.map(sl => {
+                const ss = sessions.filter(s => s.grade === g && s.date === sl.date && s.activity === sl.activity);
+                const m = ss.reduce((a, s) => a + (s['มา'] || 0), 0), t = ss.reduce((a, s) => a + (s.total || 0), 0);
+                return t ? pct(m, t) : null;
+            }),
+            borderColor: VIZ.grade[g] || VIZ.brand, backgroundColor: VIZ.grade[g] || VIZ.brand,
+            borderWidth: 2, pointRadius: 4, pointHoverRadius: 7, pointBorderColor: '#fff', pointBorderWidth: 2,
+            tension: 0.25, spanGaps: true
+        }));
+        const values = datasets.flatMap(d => d.data).filter(v => v !== null);
+        if (!values.length) return chartEmpty('attTrendChart', 'ยังไม่มีข้อมูล');
+        const yMin = Math.min(80, Math.max(0, Math.floor((Math.min(...values) - 5) / 5) * 5));
+        makeChart('attTrendChart', {
+            type: 'line',
+            data: { labels, datasets },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                layout: { padding: { top: 6 } },
+                scales: {
+                    y: { min: yMin, max: 100, ticks: { callback: v => v + '%', stepSize: 5 }, grid: { color: VIZ.grid }, border: { display: false } },
+                    x: { offset: true, grid: { display: false }, border: { display: false } }
+                },
+                plugins: {
+                    legend: { display: datasets.length > 1, position: 'top', align: 'end', labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 8, boxHeight: 8 } },
+                    tooltip: { callbacks: { title: c => c[0].label.replace(',', ' · '), label: c => ` ${c.dataset.label}: มา ${c.parsed.y}%` } }
+                }
+            }
+        });
+    }
+
+    // 2) % มาเฉลี่ยรายหมู่ (คำนวณจากข้อมูลรายรอบ)
+    function troopRatesByGrade(sessions) {
+        const out = {};
+        sessions.forEach(s => {
+            const g = (out[s.grade] = out[s.grade] || {});
+            const k = `${s.group} ${s.troop}`;
+            const r = (g[k] = g[k] || { 'มา': 0, 'ลา': 0, 'หนี': 0, 'ขาด': 0, total: 0, rounds: 0 });
+            ['มา', 'ลา', 'หนี', 'ขาด'].forEach(x => r[x] += s[x] || 0); r.total += s.total || 0; r.rounds++;
+        });
+        const res = {};
+        Object.keys(out).forEach(g => {
+            res[g] = Object.keys(out[g]).map(k => {
+                const r = out[g][k];
+                return { label: k, value: pct(r['มา'], r.total), detail: `${r.rounds} รอบ · ลา ${r['ลา']} หนี ${r['หนี']} ขาด ${r['ขาด']}` };
+            }).sort((a, b) => a.value - b.value || thSort(a.label, b.label));
+        });
+        return res;
+    }
+    let reportChartData = {};
+    function gradeChipsHtml(grades, active, fnName) {
+        return `<div class="flex flex-wrap gap-2" role="group">` + grades.map(g =>
+            `<button type="button" data-grade="${g}" onclick="${fnName}('${g}')" class="report-grade-chip px-3 py-1 rounded-full text-sm font-semibold border flex items-center gap-1.5 ${g === active ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-700'}">
+                <span class="inline-block w-2.5 h-2.5 rounded-full" style="background:${VIZ.grade[g] || VIZ.brand}"></span>${g}</button>`).join('') + `</div>`;
+    }
+    function setActiveChip(grade) {
+        document.querySelectorAll('.report-grade-chip').forEach(b => {
+            const on = b.dataset.grade === grade;
+            b.classList.toggle('bg-gray-900', on); b.classList.toggle('text-white', on); b.classList.toggle('border-gray-900', on);
+            b.classList.toggle('bg-white', !on); b.classList.toggle('text-gray-700', !on);
+        });
+    }
+    function renderAttReportChart(grade) {
+        setActiveChip(grade);
+        renderHBar('attReportChart', reportChartData.att?.[grade] || [], { threshold: 80, thresholdLabel: 'เกณฑ์ 80%', unit: '%', tooltip: i => ` มาเฉลี่ย ${i.value}% (${i.detail})` });
+    }
+
+    // 3) คะแนนเฉลี่ยรายกิจกรรม
+    const shortActivity = n => {
+        let s = String(n || '').replace(/^\s*\d{1,2}[.:]\d{2}\s*-\s*\d{1,2}[.:]\d{2}\s*/, '').replace(/\s*\(.*\)\s*$/, '').trim();
+        return s.length > 30 ? s.slice(0, 29) + '…' : s;
+    };
+    function activityAverages(summary, grade) {
+        const acc = {};
+        Object.keys(summary || {}).filter(g => grade === 'all' || g === grade).forEach(g => {
+            Object.values(summary[g].groups || {}).forEach(gr => Object.values(gr.troops || {}).forEach(t => (t.activities || []).forEach(a => {
+                const k = g + '|' + a.name;
+                const x = (acc[k] = acc[k] || { grade: g, name: a.name, sum: 0, n: 0 });
+                x.sum += Number(a.score) || 0; x.n++;
+            })));
+        });
+        return Object.values(acc).map(x => ({ ...x, avg: Math.round((x.sum / x.n) * 10) / 10 })).sort((a, b) => a.avg - b.avg);
+    }
+    function renderActivityScoreChart(canvasId, summary, grade) {
+        const items = activityAverages(summary, grade);
+        const multi = grade === 'all' && new Set(items.map(i => i.grade)).size > 1;
+        const rows = items.map(i => ({
+            label: (multi ? i.grade + ' · ' : '') + shortActivity(i.name),
+            full: `${i.grade} · ${i.name}`, value: i.avg, grade: i.grade, n: i.n
+        }));
+        // คำอธิบายสี (เมื่อแสดงหลายชั้นในกราฟเดียว)
+        const el = document.getElementById(canvasId);
+        if (el) {
+            const box = el.parentElement.parentElement;
+            let lg = box.querySelector('.chart-legend');
+            if (multi) {
+                if (!lg) { lg = document.createElement('div'); lg.className = 'chart-legend flex flex-wrap justify-end gap-3 text-xs text-gray-600 mb-1'; box.insertBefore(lg, el.parentElement); }
+                lg.innerHTML = [...new Set(rows.map(r => r.grade))].sort((a, b) => gradeOrder(a) - gradeOrder(b))
+                    .map(g => `<span class="flex items-center gap-1"><span class="inline-block w-3 h-3 rounded-sm" style="background:${VIZ.grade[g]}"></span>${g}</span>`).join('')
+                    + `<span class="flex items-center gap-1"><span class="inline-block w-3 h-3 rounded-sm" style="background:${VIZ.critical}"></span>⚠️ ต่ำกว่า 60</span>`;
+            } else if (lg) lg.remove();
+        }
+        renderHBar(canvasId, rows, {
+            threshold: 60, thresholdLabel: 'ต่ำกว่า 60 = ปรับปรุง',
+            tooltip: r => ` เฉลี่ย ${r.value} คะแนน (จาก ${r.n} หมู่)`,
+            colorFn: multi ? (r => r.value < 60 ? VIZ.critical : (VIZ.grade[r.grade] || VIZ.brand)) : undefined
+        });
+    }
+    function renderActReportChart(grade) {
+        setActiveChip(grade);
+        renderActivityScoreChart('actReportChart', reportChartData.act || {}, grade);
+    }
+
     function openDashboard(){document.getElementById('dashboardModal').classList.remove('hidden');if(!attendanceSummaryData||!activitySummaryData){loadDashboardData();}else{renderDashboardCharts();}}
     function closeDashboard(){document.getElementById('dashboardModal').classList.add('hidden');}
     function reloadDashboardForTerm(){attendanceSummaryData=null;activitySummaryData=null;loadDashboardData();}
@@ -1074,9 +1310,9 @@
     function renderDashboardCharts(){if(!attendanceSummaryData||!activitySummaryData){return;}
     const gradeFilterValue=document.getElementById('dashboardGradeFilter').value;const gradeMapping={"ม.1":"ม.1","ม.2":"ม.2","ม.3":"ม.3","all":"all"};const selectedGrade=gradeMapping[gradeFilterValue];const attendanceLabels=[];const attendanceData={present:[],leave:[],absent:[],skipped:[]};for(const gradeKey in attendanceSummaryData){if(selectedGrade!=='all'&&gradeKey!==selectedGrade)continue;for(const group in attendanceSummaryData[gradeKey]){for(const troop in attendanceSummaryData[gradeKey][group]){const troopData=attendanceSummaryData[gradeKey][group][troop];const label=`${gradeKey}/${group}/${troop}`;attendanceLabels.push(label);attendanceData.present.push(troopData['มา']||0);attendanceData.leave.push(troopData['ลา']||0);attendanceData.absent.push(troopData['ขาด']||0);attendanceData.skipped.push(troopData['หนี']||0);}}}
     const scoreLabels=[];const scoreData=[];for(const gradeKey in activitySummaryData){if(selectedGrade!=='all'&&gradeKey!==selectedGrade)continue;for(const group in activitySummaryData[gradeKey].groups){for(const troop in activitySummaryData[gradeKey].groups[group].troops){const troopData=activitySummaryData[gradeKey].groups[group].troops[troop];const label=`${gradeKey}/${group}/${troop}`;const avgScore=troopData.count>0?(troopData.totalScore/troopData.count).toFixed(2):0;scoreLabels.push(label);scoreData.push(avgScore);}}}
-    if(scoreChartInstance)scoreChartInstance.destroy();
+    
     renderAttendanceOverview(selectedGrade);
-    const scoreCtx=document.getElementById('scoreChart').getContext('2d');scoreChartInstance=new Chart(scoreCtx,{type:'bar',data:{labels:scoreLabels,datasets:[{label:'คะแนนเฉลี่ย',data:scoreData,backgroundColor:'rgba(139, 92, 246, 0.6)',borderColor:'rgba(139, 92, 246, 1)',borderWidth:1}]},options:{responsive:true,scales:{y:{beginAtZero:true,max:100}},plugins:{title:{display:true,text:'คะแนนเฉลี่ยกิจกรรมแต่ละหมู่'}}}});
+    renderActivityScoreChart('scoreChart',activitySummaryData,selectedGrade);
     renderAbsenteeReport(selectedGrade);}
 
     function renderAbsenteeReport(selectedGrade) {
@@ -1947,7 +2183,19 @@
                 });
                 body += '</div>';
             }
-            Swal.fire({ title: `📊 รายงานสรุปกิจกรรม`, html: reportTermToggle('showActivityReport', term) + body, width: '800px', confirmButtonText: 'ปิด', confirmButtonColor: '#8b5cf6' });
+            let chartHtml = '';
+            reportChartData.act = summary || {};
+            if (grades.length) {
+                chartHtml = `<div class="bg-white border rounded-xl p-3 mb-3 text-left">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+                        <span class="font-semibold text-gray-800">⭐ คะแนนเฉลี่ยรายกิจกรรม <span class="text-xs font-normal text-gray-500">(เรียงจากน้อยที่สุด)</span></span>
+                        ${gradeChipsHtml(grades, grades[0], 'renderActReportChart')}
+                    </div>
+                    <div class="relative" style="height:240px"><canvas id="actReportChart" aria-label="กราฟคะแนนเฉลี่ยรายกิจกรรม" role="img"></canvas></div>
+                </div>`;
+            }
+            Swal.fire({ title: `📊 รายงานสรุปกิจกรรม`, html: reportTermToggle('showActivityReport', term) + chartHtml + body, width: '820px', confirmButtonText: 'ปิด', confirmButtonColor: '#8b5cf6',
+                didOpen: () => { if (grades.length) renderActReportChart(grades[0]); } });
         } catch (error) {
             Swal.fire({ icon: 'error', title: 'ไม่สามารถโหลดรายงานได้', text: error.message, confirmButtonColor: '#8b5cf6' });
         }
@@ -2010,7 +2258,20 @@
                 });
                 body += '</div>';
             }
-            Swal.fire({ title: '✅ รายงานสรุปการเช็คชื่อ', html: reportTermToggle('showAttendanceReport', term) + body, width: '760px', confirmButtonText: 'ปิด', confirmButtonColor: '#8b5cf6' });
+            let chartHtml = '';
+            const attGrades = Object.keys(troopRatesByGrade(sessions)).sort((a, b) => gradeOrder(a) - gradeOrder(b));
+            reportChartData.att = troopRatesByGrade(sessions);
+            if (attGrades.length) {
+                chartHtml = `<div class="bg-white border rounded-xl p-3 mb-3 text-left">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+                        <span class="font-semibold text-gray-800">📊 % มาเฉลี่ยรายหมู่ <span class="text-xs font-normal text-gray-500">(เรียงจากหมู่ที่มาน้อยที่สุด)</span></span>
+                        ${gradeChipsHtml(attGrades, attGrades[0], 'renderAttReportChart')}
+                    </div>
+                    <div class="relative" style="height:240px"><canvas id="attReportChart" aria-label="กราฟเปอร์เซ็นต์การมาเฉลี่ยรายหมู่" role="img"></canvas></div>
+                </div>`;
+            }
+            Swal.fire({ title: '✅ รายงานสรุปการเช็คชื่อ', html: reportTermToggle('showAttendanceReport', term) + chartHtml + body, width: '780px', confirmButtonText: 'ปิด', confirmButtonColor: '#8b5cf6',
+                didOpen: () => { if (attGrades.length) renderAttReportChart(attGrades[0]); } });
         } catch (error) {
             Swal.fire({ icon: 'error', title: 'ไม่สามารถโหลดรายงานได้', text: error.message, confirmButtonColor: '#8b5cf6' });
         }

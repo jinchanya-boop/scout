@@ -361,7 +361,7 @@
     </div>
      <div id="dashboardModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
-            <div class="p-6 border-b sticky top-0 bg-white/80 backdrop-blur-md"><div class="flex items-center justify-between"><div class="flex items-center space-x-3"><span class="text-2xl">📈</span><h3 class="text-xl font-bold">แดชบอร์ดสรุปผล</h3></div><button onclick="closeDashboard()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button></div><div class="mt-4"><label for="dashboardGradeFilter" class="text-sm font-medium">กรองตามระดับชั้น:</label><select id="dashboardGradeFilter" onchange="renderDashboardCharts()" class="mt-1 w-full md:w-auto px-3 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500"><option value="all">ทั้งหมด</option><option value="ม.1">ม.1</option><option value="ม.2">ม.2</option><option value="ม.3">ม.3</option></select></div></div>
+            <div class="p-6 border-b sticky top-0 bg-white/80 backdrop-blur-md"><div class="flex items-center justify-between"><div class="flex items-center space-x-3"><span class="text-2xl">📈</span><h3 class="text-xl font-bold">แดชบอร์ดสรุปผล</h3></div><button onclick="closeDashboard()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button></div><div class="mt-4"><label for="dashboardGradeFilter" class="text-sm font-medium">กรองตามระดับชั้น:</label><select id="dashboardGradeFilter" onchange="renderDashboardCharts()" class="mt-1 w-full md:w-auto px-3 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500"><option value="all">ทั้งหมด</option><option value="ม.1">ม.1</option><option value="ม.2">ม.2</option><option value="ม.3">ม.3</option></select><label for="dashboardTermFilter" class="text-sm font-medium md:ml-4">ภาคเรียน:</label><select id="dashboardTermFilter" onchange="reloadDashboardForTerm()" class="mt-1 w-full md:w-auto px-3 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500"><option value="2" selected>ภาคเรียนที่ 2</option><option value="1">ภาคเรียนที่ 1</option><option value="all">ทั้งปี</option></select></div></div>
             <div class="p-6 space-y-8"><div><h4 class="text-lg font-semibold mb-4">📊 สถิติการเช็คชื่อ (รายครั้ง)</h4><div class="p-4 bg-gray-50 rounded-lg"><canvas id="attendanceChart"></canvas></div></div><div><h4 class="text-lg font-semibold mb-4">⭐ คะแนนกิจกรรมเฉลี่ย</h4><div class="p-4 bg-gray-50 rounded-lg"><canvas id="scoreChart"></canvas></div></div><div id="absenteeReportContainer"></div></div>
         </div>
    </div>
@@ -671,7 +671,8 @@
     let absenteeReportData = [];
     function openDashboard(){document.getElementById('dashboardModal').classList.remove('hidden');if(!attendanceSummaryData||!activitySummaryData){loadDashboardData();}else{renderDashboardCharts();}}
     function closeDashboard(){document.getElementById('dashboardModal').classList.add('hidden');}
-    async function loadDashboardData(){Swal.fire({title:'กำลังโหลดข้อมูล...',allowOutsideClick:false,didOpen:()=>Swal.showLoading()});try{const[attendanceRes,activityRes,absenteeRes]=await Promise.all([fetch(SCRIPT_URL+'?action=getAttendanceSummary'),fetch(SCRIPT_URL+'?action=getActivitySummary'),fetch(SCRIPT_URL+'?action=getAbsenteeReport')]);if(!attendanceRes.ok||!activityRes.ok){throw new Error('Could not load summary data');}
+    function reloadDashboardForTerm(){attendanceSummaryData=null;activitySummaryData=null;loadDashboardData();}
+    async function loadDashboardData(){const termSel=document.getElementById('dashboardTermFilter');const termQ='&term='+encodeURIComponent(termSel?termSel.value:'all');Swal.fire({title:'กำลังโหลดข้อมูล...',allowOutsideClick:false,didOpen:()=>Swal.showLoading()});try{const[attendanceRes,activityRes,absenteeRes]=await Promise.all([fetch(SCRIPT_URL+'?action=getAttendanceSummary'+termQ),fetch(SCRIPT_URL+'?action=getActivitySummary'+termQ),fetch(SCRIPT_URL+'?action=getAbsenteeReport'+termQ)]);if(!attendanceRes.ok||!activityRes.ok){throw new Error('Could not load summary data');}
     attendanceSummaryData=await attendanceRes.json();activitySummaryData=await activityRes.json();absenteeReportData=await absenteeRes.json();renderDashboardCharts();Swal.close();}catch(error){console.error('Failed to load dashboard data:',error);Swal.fire({icon:'error',title:'เกิดข้อผิดพลาด',text:'ไม่สามารถโหลดข้อมูลแดชบอร์ดได้'});}}
     function renderDashboardCharts(){if(!attendanceSummaryData||!activitySummaryData){return;}
     const gradeFilterValue=document.getElementById('dashboardGradeFilter').value;const gradeMapping={"ม.1":"ม.1","ม.2":"ม.2","ม.3":"ม.3","all":"all"};const selectedGrade=gradeMapping[gradeFilterValue];const attendanceLabels=[];const attendanceData={present:[],leave:[],absent:[],skipped:[]};for(const gradeKey in attendanceSummaryData){if(selectedGrade!=='all'&&gradeKey!==selectedGrade)continue;for(const group in attendanceSummaryData[gradeKey]){for(const troop in attendanceSummaryData[gradeKey][group]){const troopData=attendanceSummaryData[gradeKey][group][troop];const label=`${gradeKey}/${group}/${troop}`;attendanceLabels.push(label);attendanceData.present.push(troopData['มา']||0);attendanceData.leave.push(troopData['ลา']||0);attendanceData.absent.push(troopData['ขาด']||0);attendanceData.skipped.push(troopData['หนี']||0);}}}
@@ -807,7 +808,7 @@
                     teacherHtml = `<div class="text-xs text-indigo-600 mt-1 font-medium">👨‍🏫 ${parts[1]}</div>`;
                 }
                 const cleanActivity = mainActivity.replace(/'/g, "\\'");
-                const btn = `<button onclick="openActivityModal('${dayData.title.replace(/'/g, "\\'")}', '${cleanActivity}', ${index + 1})" class="ml-3 px-3 py-1 bg-purple-100 hover:bg-purple-200 text-purple-700 text-xs font-medium rounded-full transition-colors flex-shrink-0">บันทึก</button>`;
+                const btn = `<button onclick="openActivityModal('${dayData.title.replace(/'/g, "\\'")}', '${cleanActivity}', ${index + 1}, ${termNum})" class="ml-3 px-3 py-1 bg-purple-100 hover:bg-purple-200 text-purple-700 text-xs font-medium rounded-full transition-colors flex-shrink-0">บันทึก</button>`;
                 return `<li class="activity-item py-2 border-b border-gray-100 last:border-0 flex justify-between items-start">
                             <div class="flex-1">
                                 <div class="text-sm font-medium text-gray-700">${mainActivity}</div>
@@ -879,7 +880,7 @@
 
     const students=studentData[grade]?.[group]?.[troop]||[];if(students.length===0){Swal.fire({icon:'info',title:'ไม่มีนักเรียนในกลุ่มนี้',confirmButtonColor:'#8b5cf6'});return;}
 
-    const attendanceData=students.map(student=>({studentId:student.id,studentName:`${student.firstName} ${student.lastName}`,status:document.querySelector(`input[name="attendance_${student.id}"]:checked`)?.value||'ไม่ระบุ'}));const payload={type:'attendance',date,activity,grade,group,troop,attendanceData};Swal.fire({title:'กำลังบันทึก...',willOpen:()=>Swal.showLoading()});try{await postData(payload);showSuccessMessage(payload,false);}catch(error){showSuccessMessage(payload,true);console.error('Failed to save attendance:',error);}}
+    const attendanceData=students.map(student=>({studentId:student.id,studentName:`${student.firstName} ${student.lastName}`,status:document.querySelector(`input[name="attendance_${student.id}"]:checked`)?.value||'ไม่ระบุ'}));const term=document.getElementById('attendanceTerm').value||'1';const payload={type:'attendance',date,activity,grade,group,troop,term,attendanceData};Swal.fire({title:'กำลังบันทึก...',allowOutsideClick:false,allowEscapeKey:false,willOpen:()=>Swal.showLoading()});try{const res=await postData(payload);payload._replaced=res.replaced||0;attendanceSummaryData=null;absenteeReportData=[];showSuccessMessage(payload,false);}catch(error){showSuccessMessage(payload,true);console.error('Failed to save attendance:',error);}}
 
     function loadStudentList(){const grade=document.getElementById('activityGrade').value;const group=document.getElementById('selectedGroup').value;const troop=document.getElementById('selectedTroop').value;const container=document.getElementById('studentCheckList');const wrapper=document.getElementById('studentAttendanceList');const summary=document.getElementById('attendanceSummary');const students=studentData[grade]?.[group]?.[troop]||[];if(grade&&group&&troop){let html='';if(students.length>0){students.forEach(student=>{html+=`<div class="flex items-center justify-between p-3 bg-white rounded-lg border"><div class="flex items-center space-x-3"><span class="font-medium">${student.firstName} ${student.lastName} (${student.id})${student.room ? ' | ห้อง: ' + grade.replace('ม.', '') + '/' + student.room : ''}</span></div><div class="flex space-x-2"><label class="flex items-center space-x-1 cursor-pointer"><input type="radio" onchange="updateAttendanceSummary()" name="activity_attendance_${student.id}" value="มา" checked><span class="text-sm">มา</span></label><label class="flex items-center space-x-1 cursor-pointer"><input type="radio" onchange="updateAttendanceSummary()" name="activity_attendance_${student.id}" value="ลา"><span class="text-sm">ลา</span></label><label class="flex items-center space-x-1 cursor-pointer"><input type="radio" onchange="updateAttendanceSummary()" name="activity_attendance_${student.id}" value="ขาด"><span class="text-sm">ขาด</span></label><label class="flex items-center space-x-1 cursor-pointer"><input type="radio" onchange="updateAttendanceSummary()" name="activity_attendance_${student.id}" value="หนี"><span class="text-sm">หนี</span></label></div></div>`;});}else{html=`<p class="text-center text-gray-500 py-2">-- ไม่มีข้อมูลนักเรียน --</p>`;}
 
@@ -983,6 +984,11 @@
 
     async function saveActivityRecord() {
 
+        if (!document.getElementById('activityGrade').value || !document.getElementById('selectedGroup').value || !document.getElementById('selectedTroop').value) {
+            Swal.fire({ icon: 'warning', title: 'กรุณาเลือกระดับชั้น กอง และหมู่ให้ครบ', confirmButtonColor: '#8b5cf6' });
+            return;
+        }
+
         Swal.fire({
 
             title: 'กำลังบันทึกกิจกรรม',
@@ -1082,7 +1088,11 @@
 
         try {
 
-            await postData(payload);
+            const res = await postData(payload);
+
+            payload._updated = res.updated || 0;
+
+            activitySummaryData = null; // ให้แดชบอร์ดโหลดข้อมูลใหม่
 
             showSuccessMessage(payload, false);
 
@@ -1187,38 +1197,34 @@
 
                 Swal.fire({
                     title: `พบข้อมูล ${studentsToImport.length} คน`,
-                    text: 'คุณต้องการแทนที่ข้อมูลเดิมของหมู่นี้ หรือเพิ่มต่อท้าย?',
+                    html: `หมู่ที่อยู่ในไฟล์: <b>${[...new Set(studentsToImport.map(s => s.grade + ' ' + s.group + '/' + s.troop))].join(', ')}</b><br><br>
+                           <b>แทนที่</b> = ลบรายชื่อเดิม <u>เฉพาะหมู่ข้างบน</u> แล้วใส่รายชื่อใหม่ (ชั้น/หมู่อื่นไม่ถูกลบ)<br>
+                           <b>เพิ่มต่อท้าย</b> = เก็บรายชื่อเดิมไว้ แล้วเพิ่มรายชื่อใหม่`,
                     icon: 'question',
                     showDenyButton: true,
                     showCancelButton: true,
-                    confirmButtonText: 'แทนที่ทั้งหมด',
+                    confirmButtonText: 'แทนที่เฉพาะหมู่ในไฟล์',
                     denyButtonText: 'เพิ่มต่อท้าย',
                     cancelButtonText: 'ยกเลิก'
                 }).then(async (result) => {
                     if (result.isConfirmed || result.isDenied) {
                         const replace = result.isConfirmed;
-                        Swal.fire({ title: 'กำลังนำเข้าข้อมูล...', didOpen: () => Swal.showLoading() });
-                        
-                        // ส่งข้อมูลไปยัง Backend
+                        Swal.fire({ title: 'กำลังนำเข้าข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+                        // ส่งข้อมูลไปยัง Backend (ใช้ postData เพื่อให้รู้ผลจริง ไม่ใช่ no-cors ที่ขึ้นสำเร็จเสมอ)
                         try {
-                            const response = await fetch(SCRIPT_URL, {
-                                method: 'POST',
-                                mode: 'no-cors',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    type: 'importStudents',
-                                    students: studentsToImport,
-                                    replace: replace
-                                })
+                            const res = await postData({
+                                type: 'importStudents',
+                                students: studentsToImport,
+                                replace: replace
                             });
-                            
-                            Swal.fire('สำเร็จ', 'นำเข้าข้อมูลนักเรียนเรียบร้อย', 'success');
                             // โหลดข้อมูลนักเรียนใหม่
                             await fetchStudents();
                             loadManageStudentList();
+                            Swal.fire('สำเร็จ', `นำเข้า ${res.imported ?? studentsToImport.length} คน` + (replace ? ` (ลบรายชื่อเดิม ${res.removed ?? 0} คน)` : ''), 'success');
                         } catch (error) {
                             console.error(error);
-                            Swal.fire('ข้อผิดพลาด', 'ไม่สามารถส่งข้อมูลไปยังเซิร์ฟเวอร์ได้', 'error');
+                            Swal.fire('ข้อผิดพลาด', 'ไม่สามารถนำเข้าข้อมูลได้: ' + error.message, 'error');
                         }
                     }
                 });
@@ -1243,7 +1249,7 @@
         document.getElementById('activityModal').classList.remove('hidden');
         document.getElementById('activityTime').value=time;
         document.getElementById('activityName').value=activity;
-        document.getElementById('activityTerm').value=term;
+        document.getElementById('activityTerm').value=(String(term)==='2')?'2':'1';
         let criteriaKey='default';
         if(['เงื่อน','เข็มทิศ','ปฐมพยาบาล'].some(s=>activity.includes(s)))criteriaKey='skill';
         else if(['ผูนำ','บังคับบัญชา'].some(s=>activity.includes(s)))criteriaKey='leadership';
@@ -1308,7 +1314,7 @@
 
     }
 
-    function showSuccessMessage(data,isOffline=false){const statusHtml=`<div class="mt-4 p-3 ${isOffline?'bg-yellow-100':'bg-green-100'} rounded-lg text-sm">${isOffline?'⚠️ บันทึกในเครื่องเท่านั้น':'☁️ บันทึกลง Sheets แล้ว'}</div>`;if(data.type==='attendance'){closeAttendanceCheck();Swal.fire({icon:'success',title:'บันทึกการเช็คชื่อสำเร็จ!',html:`<div class="text-left"><p><strong>กลุ่ม:</strong> ${data.grade}/${data.group}/${data.troop}</p></div>`+statusHtml,confirmButtonColor:'#8b5cf6'});}else{closeModal();closeActivityStatusDashboard();openActivityStatusDashboard();Swal.fire({icon:'success',title:'บันทึกกิจกรรมสำเร็จ!',html:`<div class="text-left"><p><strong>กิจกรรม:</strong> ${data.activity}</p><p><strong>คะแนน:</strong> ${data.totalScore}/100</p></div>`+statusHtml,confirmButtonColor:'#8b5cf6'});}}
+    function showSuccessMessage(data,isOffline=false){const statusHtml=`<div class="mt-4 p-3 ${isOffline?'bg-yellow-100':'bg-green-100'} rounded-lg text-sm">${isOffline?'⚠️ บันทึกในเครื่องเท่านั้น':'☁️ บันทึกลง Sheets แล้ว'}</div>`;if(data.type==='attendance'){closeAttendanceCheck();const replacedHtml=(!isOffline&&data._replaced)?`<div class="mt-2 p-2 bg-blue-50 rounded-lg text-sm">♻️ พบข้อมูลเดิมของหมู่นี้ ระบบได้อัปเดตทับให้แล้ว (ไม่บันทึกซ้ำ)</div>`:'';Swal.fire({icon:'success',title:'บันทึกการเช็คชื่อสำเร็จ!',html:`<div class="text-left"><p><strong>กลุ่ม:</strong> ${data.grade}/${data.group}/${data.troop} (เทอม ${data.term})</p></div>`+statusHtml+replacedHtml,confirmButtonColor:'#8b5cf6'});}else{closeModal();closeActivityStatusDashboard();openActivityStatusDashboard();const replacedHtml=(!isOffline&&data._updated)?`<div class="mt-2 p-2 bg-blue-50 rounded-lg text-sm">♻️ หมู่นี้เคยบันทึกกิจกรรมนี้แล้ว ระบบได้อัปเดตทับข้อมูลเดิมให้ (ไม่บันทึกซ้ำ)</div>`:'';Swal.fire({icon:'success',title:'บันทึกกิจกรรมสำเร็จ!',html:`<div class="text-left"><p><strong>กิจกรรม:</strong> ${data.activity}</p><p><strong>กอง/หมู่:</strong> ${data.selectedGroup||''} / ${data.selectedTroop||''} (เทอม ${data.term||'1'})</p><p><strong>คะแนน:</strong> ${data.totalScore}/100</p></div>`+statusHtml+replacedHtml,confirmButtonColor:'#8b5cf6'});}}
 
     async function showActivityReport(){Swal.fire({title:'กำลังโหลดรายงาน...',didOpen:()=>Swal.showLoading()});try{const response=await fetch(SCRIPT_URL+'?action=getActivitySummary');const summary=await response.json();if(Object.keys(summary).length===0){return Swal.fire({icon:'info',title:'ไม่มีข้อมูลกิจกรรม'});}
 
@@ -1384,7 +1390,19 @@
         currentStatusGrade = gradeKey;
         const gradeMap = { 'm1': 'ม.1', 'm2': 'ม.2', 'm3': 'ม.3' };
         const gradeThai = gradeMap[gradeKey]; // เช่น "ม.1"
-        const recordedList = recordedActivitiesData[gradeThai] || []; // เช่น ["กิจการของคณะลูกเสือ...", "คำปฏิญาณ..."]
+        // โครงสร้างใหม่: recordedActivitiesData['ม.1']['1']['ชื่อกิจกรรม'] = ['กอง1/หมู่1', ...]
+        const recordedByTerm = (recordedActivitiesData && recordedActivitiesData[gradeThai]) || {};
+
+        // รายชื่อหมู่ทั้งหมดของชั้นนี้ (จากรายชื่อนักเรียน) — ถ้ายังไม่มีข้อมูลใช้ 4 กอง x 4 หมู่
+        let allTroops = [];
+        const gradeStudents = studentData[gradeThai] || {};
+        Object.keys(gradeStudents).forEach(g => Object.keys(gradeStudents[g]).forEach(t => {
+            if ((gradeStudents[g][t] || []).length > 0) allTroops.push(`${g}/${t}`);
+        }));
+        if (allTroops.length === 0) {
+            for (let g = 1; g <= 4; g++) for (let t = 1; t <= 4; t++) allTroops.push(`กอง${g}/หมู่${t}`);
+        }
+        allTroops.sort((a, b) => a.localeCompare(b, 'th', { numeric: true }));
         
         const container = document.getElementById('activityStatusContentContainer');
         if (!container) return;
@@ -1408,19 +1426,31 @@
                     if (activity.includes(' | ')) {
                         mainActivity = activity.split(' | ')[0];
                     }
-                    const isRecorded = recordedList.includes(mainActivity) || recordedList.includes(activity);
+                    const termRecords = recordedByTerm[String(termNum)] || {};
+                    const doneTroops = termRecords[mainActivity.trim()] || termRecords[activity.trim()] || [];
+                    const doneCount = allTroops.filter(t => doneTroops.includes(t)).length;
+                    const totalCount = allTroops.length;
+                    const missing = allTroops.filter(t => !doneTroops.includes(t));
                     const cleanActivity = mainActivity.replace(/'/g, "\\'");
                     const dayTitle = dayData.title.replace(/'/g, "\\'");
 
                     let statusHtml = '';
                     if (activity.includes('พักรับประทานอาหารกลางวัน') || activity.includes('ลงทะเบียน')) {
                         statusHtml = ''; // ไม่แสดงปุ่ม
-                    } else if (isRecorded) {
-                        statusHtml = `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 flex-shrink-0">✅ บันทึกแล้ว</span>`;
                     } else {
-                        statusHtml = `<button onclick="openActivityModal('${dayTitle}', '${cleanActivity}', ${dayNum}, ${termNum})" class="ml-2 text-xs text-purple-600 hover:underline flex-shrink-0">🅾️ บันทึก</button>`;
+                        let badgeClass, badgeText;
+                        if (doneCount >= totalCount) { badgeClass = 'bg-green-100 text-green-800'; badgeText = `✅ ครบ ${doneCount}/${totalCount}`; }
+                        else if (doneCount > 0) { badgeClass = 'bg-yellow-100 text-yellow-800'; badgeText = `⏳ ${doneCount}/${totalCount} หมู่`; }
+                        else { badgeClass = 'bg-gray-100 text-gray-600'; badgeText = `⭕ 0/${totalCount} หมู่`; }
+                        const missingTitle = missing.length ? `ยังไม่บันทึก: ${missing.join(', ')}` : 'บันทึกครบทุกหมู่แล้ว';
+                        statusHtml = `<span class="flex items-center gap-2 flex-shrink-0">
+                            <span title="${missingTitle}" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${badgeClass} cursor-help">${badgeText}</span>
+                            <button onclick="openActivityModal('${dayTitle}', '${cleanActivity}', ${dayNum}, ${termNum})" class="text-xs text-purple-600 hover:underline">✏️ บันทึก</button>
+                        </span>`;
                     }
-                    return `<li class="activity-item"><span>${activity}</span>${statusHtml}</li>`;
+                    const missingHtml = (statusHtml && missing.length && doneCount > 0)
+                        ? `<div class="text-xs text-red-500 mt-1">ยังไม่บันทึก: ${missing.join(', ')}</div>` : '';
+                    return `<li class="activity-item"><div class="flex-1"><span>${activity}</span>${missingHtml}</div>${statusHtml}</li>`;
                 }).join('');
             };
 
@@ -1554,9 +1584,20 @@ const createPrintContentForActivity = (details) => {
 async function printGradeReport() {
     const gradeMap = { 'm1': 'ม.1', 'm2': 'ม.2', 'm3': 'ม.3' };
     const gradeThai = gradeMap[currentStatusGrade];
+    const { value: printTerm, isConfirmed } = await Swal.fire({
+        title: `พิมพ์รายงาน ${gradeThai}`,
+        input: 'select',
+        inputOptions: { '2': 'ภาคเรียนที่ 2', '1': 'ภาคเรียนที่ 1', 'all': 'ทั้งปี' },
+        inputValue: '2',
+        showCancelButton: true,
+        confirmButtonText: 'สร้างรายงาน',
+        cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#8b5cf6'
+    });
+    if (!isConfirmed) return;
     Swal.fire({ title: `กำลังสร้างรายงานสรุป ${gradeThai}...`, html: 'กำลังเตรียมข้อมูลและรูปภาพ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
     try {
-        const response = await fetch(`${SCRIPT_URL}?action=getActivitiesForGrade&grade=${encodeURIComponent(gradeThai)}`);
+        const response = await fetch(`${SCRIPT_URL}?action=getActivitiesForGrade&grade=${encodeURIComponent(gradeThai)}&term=${encodeURIComponent(printTerm)}`);
         if (!response.ok) throw new Error('Could not fetch activity details for the grade.');
         const activities = await response.json();
         if (!activities || activities.length === 0) {

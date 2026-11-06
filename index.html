@@ -47,6 +47,15 @@
         border-bottom: 1px dashed #e5e7eb; /* เส้นประคั่นแต่ละรายการ */
     }
     .activity-item:last-child { border-bottom: none; }
+
+    /* ปุ่มสถานะเช็คชื่อ (มา/ลา/หนี/ขาด) — CSS ตายตัว ไม่พึ่ง Tailwind */
+    .att-btn { display:inline-block; min-width:3.25rem; text-align:center; padding:.5rem .75rem; border-radius:.5rem; border:1px solid #d1d5db; background:#fff; font-size:.875rem; font-weight:600; color:#4b5563; transition:background-color .15s, color .15s; }
+    input:focus-visible + .att-btn { outline:2px solid #a78bfa; outline-offset:2px; }
+    input:checked + .att-btn.att-ma  { background:#16a34a; border-color:#16a34a; color:#fff; }
+    input:checked + .att-btn.att-la  { background:#facc15; border-color:#facc15; color:#111827; }
+    input:checked + .att-btn.att-ni  { background:#f97316; border-color:#f97316; color:#fff; }
+    input:checked + .att-btn.att-kad { background:#dc2626; border-color:#dc2626; color:#fff; }
+    .att-radio { position:absolute; opacity:0; width:1px; height:1px; }
     .activity-item span {
         max-width: 70%; /* ป้องกันข้อความยาวดันปุ่มตก */
     }
@@ -238,6 +247,7 @@
                     </div>
                 </div>
                 <div class="flex flex-wrap items-center gap-2 justify-end">
+                    <button id="pendingBtn" onclick="openPendingQueue()" title="ข้อมูลที่บันทึกไว้ในเครื่องแต่ยังไม่ได้ส่ง" class="hidden px-3 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold whitespace-nowrap animate-pulse">📤 ค้างส่ง <span id="pendingCount">0</span></button>
                     <span id="currentTermBadge" class="px-3 py-2 rounded-lg bg-purple-600 text-white text-sm font-semibold whitespace-nowrap">📌 ภาคเรียนที่ 2</span>
                     <button onclick="openTermSettings()" title="ตั้งค่าภาคเรียนปัจจุบัน (ผู้ดูแลระบบ)" class="px-3 py-2 rounded-lg border border-purple-200 bg-white hover:bg-purple-50 text-sm">⚙️</button>
                     <select id="gradeSelect" class="px-4 py-2 rounded-lg border border-purple-200 focus:ring-2 focus:ring-purple-500">
@@ -337,6 +347,14 @@
         <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div class="p-6 border-b"><div class="flex items-center justify-between"><div class="flex items-center space-x-3"><span class="text-2xl">📝</span><h3 class="text-xl font-bold">บันทึกกิจกรรม</h3></div><button onclick="closeModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button></div></div>
             <div class="p-6"><form id="activityForm"><input type="hidden" id="activityTerm"><div class="mb-6"><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label class="block text-sm font-medium mb-2">🕐 เวลา</label><input type="text" id="activityTime" class="w-full px-4 py-2 rounded-lg border" readonly></div><div><label class="block text-sm font-medium mb-2">📋 กิจกรรม</label><input type="text" id="activityName" class="w-full px-4 py-2 rounded-lg border" readonly></div></div></div><div class="mb-6"><label class="block text-sm font-medium mb-2">👥 เลือกระดับชั้น, กอง และหมู่</label><div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4"><div><label class="block text-xs mb-1">ระดับชั้น</label><select id="activityGrade" onchange="loadStudentList()" class="w-full px-3 py-2 rounded-lg border"><option value="">เลือกระดับชั้น</option><option value="ม.1">ม.1</option><option value="ม.2">ม.2</option><option value="ม.3">ม.3</option></select></div><div><label class="block text-xs mb-1">กอง</label><select id="selectedGroup" onchange="updateActivityTroopOptions()" class="w-full px-3 py-2 rounded-lg border"><option value="">เลือกกอง</option><option value="กอง1">กอง 1</option><option value="กอง2">กอง 2</option><option value="กอง3">กอง 3</option><option value="กอง4">กอง 4</option></select></div><div><label class="block text-xs mb-1">หมู่</label><select id="selectedTroop" onchange="loadStudentList()" class="w-full px-3 py-2 rounded-lg border" disabled><option value="">เลือกหมู่</option></select></div></div><div id="studentAttendanceList" class="hidden"><div class="bg-purple-50 rounded-lg p-4"><h4 class="font-medium mb-3 flex items-center"><span class="mr-2">📋</span>รายชื่อนักเรียน - เช็คชื่อ</h4><div id="studentCheckList" class="space-y-2"></div></div></div></div><div id="attendanceSummary" class="mt-4 p-4 bg-gray-100 rounded-lg hidden"><h5 class="font-semibold mb-2">สรุปการเช็คชื่อ:</h5><div class="flex flex-wrap gap-x-6 gap-y-2 text-sm"><span class="font-medium">✅ มา: <span id="summaryPresent" class="text-green-600 font-bold">0</span></span><span class="font-medium">📋 ลา: <span id="summaryLeave" class="text-yellow-600 font-bold">0</span></span><span class="font-medium">❌ ขาด: <span id="summaryAbsent" class="text-red-600 font-bold">0</span></span><span class="font-medium">🏃 หนี: <span id="summarySkipped" class="text-orange-600 font-bold">0</span></span></div></div>
+            <div id="attendanceSyncBox" class="mt-3 p-3 bg-blue-50 border border-blue-100 rounded-lg text-sm hidden">
+                <label class="flex items-center gap-2 font-medium cursor-pointer"><input type="checkbox" id="syncAttendance" class="w-5 h-5" checked> ใช้รายชื่อนี้เป็น "การเช็คชื่อ" ด้วย (ไม่ต้องเข้าเมนูเช็คชื่อซ้ำ)</label>
+                <div class="flex flex-wrap gap-3 mt-2 items-center">
+                    <span>วันที่</span><input type="date" id="activityAttDate" class="px-2 py-1 rounded border">
+                    <span>ช่วง</span><select id="activityAttSession" class="px-2 py-1 rounded border"><option value="เช้า">☀️ เช้า</option><option value="บ่าย">🌤️ บ่าย</option></select>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">ถ้าช่วงนั้นมีการเช็คชื่อไว้แล้ว ระบบจะเพิ่มเฉพาะคนที่ยังไม่มี และอัปเดตคนที่ ลา/หนี/ขาด ในกิจกรรมนี้ (ไม่ลบข้อมูลเดิม)</p>
+            </div>
             <div class="mb-6 mt-6">
                 <h4 class="text-lg font-semibold mb-4 flex items-center"><span class="mr-2">📸</span>ภาพประกอบกิจกรรม (2 ภาพ)</h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -643,6 +661,10 @@
         applyCurrentTerm(); // แสดงค่าเริ่มต้นทันที
         loadConfig();       // แล้วโหลดค่าที่ผู้ดูแลตั้งไว้จากเซิร์ฟเวอร์
         fetchStudents(); // ยังคงเรียก fetchStudents() เหมือนเดิม
+        refreshPendingBadge().then(n => { if (n) setTimeout(() => flushPendingQueue(false), 3000); }); // มีข้อมูลค้าง → ลองส่ง
+        // ผูกปุ่มบันทึกนักเรียนครั้งเดียว (เดิมผูกซ้ำทุกครั้งที่เปิดหน้าต่าง → บันทึกซ้ำหลายแถว)
+        document.getElementById('addStudentForm').addEventListener('submit', (e) => { e.preventDefault(); saveStudent(); });
+        setupSignatureCanvas();
         document.getElementById('gradeSelect').addEventListener('change', loadSchedule);
         
         // 🟢 [เพิ่มบรรทัดนี้] เพิ่ม Event Listener ที่นี่ (ทำงานครั้งเดียว)
@@ -666,17 +688,187 @@
         }
     }
 
-    async function postData(payload) {
+    // ส่งข้อมูลไป Apps Script — error ที่ "ลองใหม่ได้" (เน็ตหลุด/หมดเวลา/เซิร์ฟเวอร์ไม่ว่าง) จะมี err.retryable = true
+    async function postData(payload, timeoutMs = 90000) {
+        const mkErr = (msg, retryable) => { const e = new Error(msg); e.retryable = retryable; return e; };
+        const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+        const timer = ctrl ? setTimeout(() => ctrl.abort(), timeoutMs) : null;
+        let response;
         try {
-            const response = await fetch(SCRIPT_URL, {method: 'POST', mode: 'cors', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify(payload)});
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            const result = await response.json();
-            if (result.status !== 'success') throw new Error(result.message || 'Unknown error');
-            return result;
-        } catch (error) {
-            console.error('Error posting data:', error);
-            throw error;
+            response = await fetch(SCRIPT_URL, { method: 'POST', mode: 'cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload), signal: ctrl ? ctrl.signal : undefined });
+        } catch (e) {
+            console.error('Network error:', e);
+            throw mkErr(e && e.name === 'AbortError' ? 'เชื่อมต่อนานเกินไป (สัญญาณอินเทอร์เน็ตอ่อน)' : 'เชื่อมต่ออินเทอร์เน็ตไม่ได้', true);
+        } finally {
+            if (timer) clearTimeout(timer);
         }
+        if (!response.ok) throw mkErr(`เซิร์ฟเวอร์ตอบกลับผิดพลาด (HTTP ${response.status})`, response.status >= 500 || response.status === 429);
+        let result;
+        try { result = await response.json(); }
+        catch (e) { throw mkErr('เซิร์ฟเวอร์ไม่ว่างชั่วคราว (ได้รับข้อมูลตอบกลับไม่ถูกต้อง)', true); }
+        if (result.status !== 'success') {
+            const msg = String(result.message || 'Unknown error').replace(/^Error:\s*/, '');
+            throw mkErr(msg, /กำลังบันทึกข้อมูลของผู้ใช้อื่น|ไม่ได้รับข้อมูล|too many|simultaneous|service|timed out|timeout|lock|quota/i.test(msg));
+        }
+        return result;
+    }
+
+    // ==========================================================
+    // 📤 คิวข้อมูลค้างส่ง (เน็ตหลุดก็ไม่หาย) — เก็บใน IndexedDB ของเครื่อง (สำรอง localStorage)
+    // ส่งใหม่อัตโนมัติเมื่อเน็ตกลับมา / ทุก 1 นาที / เมื่อเปิดหน้าเว็บ
+    // ส่งซ้ำได้อย่างปลอดภัย เพราะเซิร์ฟเวอร์อัปเดตทับข้อมูลเดิม (ไม่บันทึกซ้ำ)
+    // ==========================================================
+    const OfflineQueue = (() => {
+        const LS_KEY = 'scoutOfflineQueue';
+        let dbPromise = null;
+        const openDb = () => {
+            if (!dbPromise) dbPromise = new Promise((resolve, reject) => {
+                if (!window.indexedDB) return reject(new Error('no indexedDB'));
+                const req = indexedDB.open('scoutOffline', 1);
+                req.onupgradeneeded = () => req.result.createObjectStore('queue', { keyPath: 'id' });
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+            return dbPromise;
+        };
+        const run = async (mode, fn) => {
+            const db = await openDb();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction('queue', mode);
+                const req = fn(tx.objectStore('queue'));
+                tx.oncomplete = () => resolve(req ? req.result : undefined);
+                tx.onerror = () => reject(tx.error);
+                tx.onabort = () => reject(tx.error || new Error('aborted'));
+            });
+        };
+        const lsGet = () => { try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch (e) { return []; } };
+        const lsSet = arr => localStorage.setItem(LS_KEY, JSON.stringify(arr));
+        return {
+            async put(item) {
+                try { await run('readwrite', s => s.put(item)); return; } catch (e) { console.warn('IndexedDB put failed, fallback localStorage', e); }
+                const arr = lsGet().filter(x => x.id !== item.id); arr.push(item); lsSet(arr); // อาจ throw ถ้าเครื่องเต็ม
+            },
+            async all() {
+                let arr = [];
+                try { arr = (await run('readonly', s => s.getAll())) || []; } catch (e) { /* ignore */ }
+                return [...arr, ...lsGet()].sort((a, b) => a.createdAt - b.createdAt);
+            },
+            async remove(id) {
+                try { await run('readwrite', s => s.delete(id)); } catch (e) { /* ignore */ }
+                const arr = lsGet(); if (arr.some(x => x.id === id)) lsSet(arr.filter(x => x.id !== id));
+            }
+        };
+    })();
+
+    function queueLabel(p) {
+        if (p.type === 'attendance') return `✅ เช็คชื่อ ${p.grade} ${p.group}/${p.troop} · ${p.date} ช่วง${p.activity}`;
+        if (p.type === 'activity') return `📝 กิจกรรม ${p.activity} · ${p.grade} ${p.selectedGroup}/${p.selectedTroop}`;
+        return p.type;
+    }
+    async function enqueuePayload(payload, reason) {
+        const item = { id: Date.now() + '-' + Math.random().toString(36).slice(2, 8), createdAt: Date.now(), label: queueLabel(payload), payload, lastError: reason || '' };
+        await OfflineQueue.put(item);
+        refreshPendingBadge();
+        return item;
+    }
+    async function refreshPendingBadge() {
+        const items = await OfflineQueue.all();
+        const btn = document.getElementById('pendingBtn');
+        if (!btn) return items.length;
+        document.getElementById('pendingCount').textContent = items.length;
+        btn.classList.toggle('hidden', items.length === 0);
+        return items.length;
+    }
+    let flushingQueue = false;
+    async function flushPendingQueue(manual = false) {
+        if (flushingQueue) return;
+        flushingQueue = true;
+        let sent = 0, failed = 0, stoppedOffline = false;
+        try {
+            const items = await OfflineQueue.all();
+            if (!items.length) { if (manual) Swal.fire({ icon: 'success', title: 'ไม่มีข้อมูลค้างส่ง', confirmButtonColor: '#8b5cf6' }); return; }
+            if (manual) Swal.fire({ title: `กำลังส่งข้อมูลที่ค้าง 0/${items.length}`, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            for (let i = 0; i < items.length; i++) {
+                const it = items[i];
+                if (manual) { Swal.update({ title: `กำลังส่งข้อมูลที่ค้าง ${i + 1}/${items.length}` }); Swal.showLoading(); }
+                try {
+                    await postData(it.payload);
+                    await OfflineQueue.remove(it.id);
+                    sent++;
+                } catch (e) {
+                    failed++;
+                    it.lastError = e.message; it.attempts = (it.attempts || 0) + 1;
+                    try { await OfflineQueue.put(it); } catch (x) { /* ignore */ }
+                    if (e.retryable) { stoppedOffline = true; break; } // ยังไม่มีเน็ต → หยุดไว้ก่อน
+                }
+            }
+            if (sent) { attendanceSummaryData = null; activitySummaryData = null; }
+            const left = await refreshPendingBadge();
+            if (manual) {
+                Swal.fire({
+                    icon: left ? 'warning' : 'success',
+                    title: left ? `ส่งแล้ว ${sent} รายการ · ยังค้าง ${left}` : `ส่งข้อมูลที่ค้างครบแล้ว (${sent} รายการ)`,
+                    text: left ? (stoppedOffline ? 'ยังเชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ระบบจะลองส่งให้อัตโนมัติ' : 'บางรายการส่งไม่ผ่าน กดดูรายละเอียดที่ปุ่ม 📤') : '',
+                    confirmButtonColor: '#8b5cf6'
+                });
+            } else if (sent && !Swal.isVisible()) {
+                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: `📤 ส่งข้อมูลที่ค้างแล้ว ${sent} รายการ`, showConfirmButton: false, timer: 4000 });
+            }
+        } finally {
+            flushingQueue = false;
+        }
+    }
+    async function openPendingQueue() {
+        const items = await OfflineQueue.all();
+        if (!items.length) { refreshPendingBadge(); return Swal.fire({ icon: 'success', title: 'ไม่มีข้อมูลค้างส่ง', confirmButtonColor: '#8b5cf6' }); }
+        const list = items.map(it => `<li class="py-2 border-b flex justify-between gap-2 items-start">
+                <div><div class="font-medium">${escapeHtml(it.label)}</div>
+                <div class="text-xs text-gray-500">เก็บเมื่อ ${new Date(it.createdAt).toLocaleString('th-TH')}${it.lastError ? ' · ' + escapeHtml(it.lastError) : ''}</div></div>
+                <button onclick="deletePendingItem('${it.id}')" class="text-xs text-red-600 hover:underline flex-shrink-0">ลบ</button></li>`).join('');
+        const r = await Swal.fire({
+            title: `📤 ข้อมูลค้างส่ง ${items.length} รายการ`,
+            html: `<p class="text-sm text-gray-600 mb-2">ข้อมูลเก็บไว้ในเครื่องนี้แล้ว ไม่หาย (อย่าล้างข้อมูลเบราว์เซอร์) · ระบบจะส่งให้อัตโนมัติเมื่อมีอินเทอร์เน็ต</p><ul class="text-left text-sm max-h-72 overflow-y-auto">${list}</ul>`,
+            showCancelButton: true, confirmButtonText: '📤 ส่งทั้งหมดตอนนี้', cancelButtonText: 'ปิด', confirmButtonColor: '#8b5cf6', width: 640
+        });
+        if (r.isConfirmed) flushPendingQueue(true);
+    }
+    async function deletePendingItem(id) {
+        const r = await Swal.fire({ icon: 'warning', title: 'ลบรายการนี้?', text: 'ข้อมูลรายการนี้จะหายไปและไม่ถูกส่ง', showCancelButton: true, confirmButtonText: 'ลบ', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#dc2626' });
+        if (r.isConfirmed) { await OfflineQueue.remove(id); await refreshPendingBadge(); openPendingQueue(); }
+        else openPendingQueue();
+    }
+    // ส่งให้อัตโนมัติ
+    window.addEventListener('online', () => setTimeout(() => flushPendingQueue(false), 1500));
+    setInterval(() => { if (navigator.onLine !== false) flushPendingQueue(false); }, 60000);
+
+    // บันทึกแบบ "ไม่หาย": ออฟไลน์/ส่งไม่ผ่านแบบชั่วคราว → เก็บในคิว
+    // คืนค่า { ok:true, res } เมื่อส่งสำเร็จ, { queued:true, reason } เมื่อเก็บไว้ในเครื่อง, หรือ throw เมื่อเป็นข้อผิดพลาดที่ต้องแก้
+    async function sendOrQueue(payload) {
+        if (navigator.onLine === false) {
+            await enqueuePayload(payload, 'ไม่มีอินเทอร์เน็ตขณะบันทึก');
+            return { queued: true, reason: 'ไม่มีอินเทอร์เน็ต' };
+        }
+        try {
+            return { ok: true, res: await postData(payload) };
+        } catch (e) {
+            if (!e.retryable) throw e;
+            await enqueuePayload(payload, e.message);
+            return { queued: true, reason: e.message };
+        }
+    }
+    function showQueuedMessage(payload, reason, after) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'เก็บข้อมูลไว้ในเครื่องแล้ว (ยังไม่ได้ส่ง)',
+            html: `<div class="text-left text-sm space-y-2"><p><b>${escapeHtml(queueLabel(payload))}</b></p>
+                   <p>สาเหตุ: ${escapeHtml(reason || '')}</p>
+                   <p>✅ ข้อมูล<b>ไม่หาย</b> ระบบจะส่งให้อัตโนมัติเมื่อมีอินเทอร์เน็ต หรือกดปุ่ม <b>📤 ค้างส่ง</b> ด้านบนเพื่อส่งเอง</p>
+                   <p class="text-red-600">⚠️ อย่าล้างข้อมูลเบราว์เซอร์ / อย่าใช้โหมดไม่ระบุตัวตน จนกว่าจะส่งเสร็จ</p></div>`,
+            confirmButtonColor: '#8b5cf6'
+        }).then(() => after && after());
+    }
+    function escapeHtml(s) {
+        return String(s === undefined || s === null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     }
 
     let absenteeReportData = [];
@@ -1069,7 +1261,7 @@
 
     editingStudent=null;document.getElementById('formTitle').textContent=`เพิ่มนักเรียน (${grade}/${group}/${troop})`;document.getElementById('addStudentForm').reset();document.getElementById('studentForm').classList.remove('hidden');}
 
-    async function saveStudent(){const grade=document.getElementById('manageGrade').value;const group=document.getElementById('manageGroup').value;const troop=document.getElementById('manageTroop').value;const firstName=document.getElementById('studentFirstName').value.trim();const lastName=document.getElementById('studentLastName').value.trim();const studentId=document.getElementById('studentId').value.trim();const room=document.getElementById('studentRoom')?document.getElementById('studentRoom').value.trim():'';const studentObj={id:studentId,firstName,lastName,grade,group,troop,room};const payload={type:'manageStudent',action:editingStudent?'edit':'add',student:studentObj,...(editingStudent&&{originalId:editingStudent.originalId})};Swal.fire({title:'กำลังบันทึก...',willOpen:()=>Swal.showLoading()});try{await postData(payload);await fetchStudents();hideStudentForm();loadManageStudentList();Swal.fire({icon:'success',title:editingStudent?'แก้ไขสำเร็จ':'เพิ่มสำเร็จ'});}catch(error){Swal.fire({icon:'error',title:'เกิดข้อผิดพลาด',text:'ไม่สามารถบันทึกข้อมูลได้: '+error.message});}}
+    async function saveStudent(){const grade=document.getElementById('manageGrade').value;const group=document.getElementById('manageGroup').value;const troop=document.getElementById('manageTroop').value;const firstName=document.getElementById('studentFirstName').value.trim();const lastName=document.getElementById('studentLastName').value.trim();const studentId=document.getElementById('studentId').value.trim();const room=document.getElementById('studentRoom')?document.getElementById('studentRoom').value.trim():'';if(!grade||!group||!troop){Swal.fire({icon:'warning',title:'กรุณาเลือกระดับชั้น กอง และหมู่ก่อน',confirmButtonColor:'#8b5cf6'});return;}if(!firstName||!studentId){Swal.fire({icon:'warning',title:'กรุณากรอกชื่อและเลขประจำตัว',confirmButtonColor:'#8b5cf6'});return;}const wasEditing=!!editingStudent;const studentObj={id:studentId,firstName,lastName,grade,group,troop,room};const payload={type:'manageStudent',action:wasEditing?'edit':'add',student:studentObj,...(wasEditing&&{originalId:editingStudent.originalId})};Swal.fire({title:'กำลังบันทึก...',allowOutsideClick:false,willOpen:()=>Swal.showLoading()});try{await postData(payload);await fetchStudents();hideStudentForm();loadManageStudentList();Swal.fire({icon:'success',title:wasEditing?'แก้ไขสำเร็จ':'เพิ่มสำเร็จ',confirmButtonColor:'#8b5cf6'});}catch(error){Swal.fire({icon:'error',title:'เกิดข้อผิดพลาด',text:'ไม่สามารถบันทึกข้อมูลได้: '+error.message});}}
 
     function editStudent(grade,group,troop,index){const student=studentData[grade]?.[group]?.[troop]?.[index];if(!student)return;editingStudent={grade,group,troop,index,originalId:student.id};document.getElementById('formTitle').textContent=`แก้ไขข้อมูล (${grade}/${group}/${troop})`;document.getElementById('studentFirstName').value=student.firstName;document.getElementById('studentLastName').value=student.lastName;
 
@@ -1077,21 +1269,122 @@
 
     function deleteStudent(grade,group,troop,index){const student=studentData[grade]?.[group]?.[troop]?.[index];if(!student)return;Swal.fire({title:'ยืนยันการลบ',text:`ต้องการลบ ${student.firstName} ${student.lastName} หรือไม่?`,icon:'warning',showCancelButton:true,confirmButtonText:'ลบ',cancelButtonText:'ยกเลิก'}).then(async(result)=>{if(result.isConfirmed){Swal.fire({title:'กำลังลบ...',willOpen:()=>Swal.showLoading()});try{await postData({type:'manageStudent',action:'delete',student:{id:student.id,grade,group,troop}});await fetchStudents();loadManageStudentList();Swal.fire({icon:'success',title:'ลบสำเร็จ'});}catch(error){Swal.fire({icon:'error',title:'เกิดข้อผิดพลาด',text:'ไม่สามารถลบข้อมูลได้: '+error.message});}}});}
 
-    function loadAttendanceStudentList(){const grade=document.getElementById('attendanceGrade').value;const group=document.getElementById('attendanceGroup').value;const troop=document.getElementById('attendanceTroop').value;const container=document.getElementById('attendanceStudentList');const students=studentData[grade]?.[group]?.[troop]||[];if(grade&&group&&troop){let html=`<div class="bg-purple-50 rounded-lg p-4 mb-4"><h4 class="font-medium">${grade} / ${group} / ${troop} - (${students.length} คน)</h4></div><div class="space-y-3">`;if(students.length>0){students.forEach(student=>{html+=`<div class="flex items-center justify-between p-4 bg-white rounded-lg border"><div class="flex items-center space-x-3"><div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center"><span class="text-purple-600 font-medium">${student.firstName.charAt(0)}</span></div><div><div class="font-medium">${student.firstName} ${student.lastName}</div><div class="text-sm text-gray-500">ID: ${student.id}${student.room ? ' | ห้อง: ' + grade.replace('ม.', '') + '/' + student.room : ''}</div></div></div><div class="flex flex-wrap gap-x-3 gap-y-2"><label class="flex items-center space-x-2 cursor-pointer"><input type="radio" name="attendance_${student.id}" value="มา" checked><span>มา</span></label><label class="flex items-center space-x-2 cursor-pointer"><input type="radio" name="attendance_${student.id}" value="ลา"><span>ลา</span></label><label class="flex items-center space-x-2 cursor-pointer"><input type="radio" name="attendance_${student.id}" value="ขาด"><span>ขาด</span></label><label class="flex items-center space-x-2 cursor-pointer"><input type="radio" name="attendance_${student.id}" value="หนี"><span>หนี</span></label></div></div>`;});}else{html+=`<p class="text-center text-gray-500 py-4">-- ไม่มีข้อมูลนักเรียน --</p>`;}
+    // ==========================================================
+    // ✅ รายชื่อเช็คชื่อแบบปุ่มใหญ่ (กดง่ายบนมือถือ) + ปุ่ม "มาทั้งหมด" + จำ ชั้น/กอง/หมู่ ล่าสุด
+    // ==========================================================
+    const ATT_BTNS = [
+        { v: 'มา',  cls: 'att-ma' },
+        { v: 'ลา',  cls: 'att-la' },
+        { v: 'หนี', cls: 'att-ni' },
+        { v: 'ขาด', cls: 'att-kad' }
+    ];
+    function statusButtonsHtml(name, onchange) {
+        return `<div class="flex gap-1.5 flex-shrink-0" role="radiogroup">` + ATT_BTNS.map((b, i) =>
+            `<label class="relative cursor-pointer select-none"><input type="radio" class="att-radio" name="${name}" value="${b.v}" ${i === 0 ? 'checked' : ''} onchange="${onchange}">` +
+            `<span class="att-btn ${b.cls}">${b.v}</span></label>`
+        ).join('') + `</div>`;
+    }
+    function studentRowsHtml(students, grade, namePrefix, onchange) {
+        return students.map((s, i) => `<div class="flex flex-wrap items-center justify-between gap-2 p-3 bg-white rounded-lg border">
+                <div class="min-w-0"><div class="font-medium">${i + 1}. ${escapeHtml(s.firstName)} ${escapeHtml(s.lastName)}</div>
+                <div class="text-xs text-gray-500">ID: ${escapeHtml(s.id)}${s.room ? ' · ห้อง ' + escapeHtml(grade.replace('ม.', '')) + '/' + escapeHtml(s.room) : ''}</div></div>
+                ${statusButtonsHtml(namePrefix + s.id, onchange)}</div>`).join('');
+    }
+    function attendanceToolbarHtml(containerId, onchangeFn, summaryId) {
+        return `<div class="flex flex-wrap items-center justify-between gap-2 p-2 mb-1 rounded-lg bg-white border">
+                <button type="button" onclick="setAllAttendance('${containerId}','มา','${onchangeFn}')" class="px-3 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white text-sm font-semibold">✅ มาทั้งหมด</button>
+                <div id="${summaryId}" class="text-sm font-medium flex flex-wrap gap-x-3"></div></div>`;
+    }
+    function setAllAttendance(containerId, status, onchangeFn) {
+        document.querySelectorAll(`#${containerId} input[type=radio][value="${status}"]`).forEach(r => { r.checked = true; });
+        if (onchangeFn && typeof window[onchangeFn] === 'function') window[onchangeFn]();
+    }
+    function countStatuses(containerId) {
+        const c = {};
+        ATT_BTNS.forEach(b => { c[b.v] = document.querySelectorAll(`#${containerId} input[type=radio][value="${b.v}"]:checked`).length; });
+        return c;
+    }
+    function summaryInlineHtml(c) {
+        return `<span class="text-green-700">มา ${c['มา']}</span><span class="text-yellow-700">ลา ${c['ลา']}</span><span class="text-orange-600">หนี ${c['หนี']}</span><span class="text-red-600">ขาด ${c['ขาด']}</span>`;
+    }
 
-    html+='</div>';container.innerHTML=html;}else{container.innerHTML=`<div class="text-center text-gray-500 py-8"><span class="text-4xl block mb-2">✅</span><p>กรุณาเลือกกองและหมู่</p></div>`;}}
+    // จำ ชั้น/กอง/หมู่ ที่ครูเลือกล่าสุด (เก็บในเครื่อง)
+    const LAST_SEL_KEY = 'scoutLastSelection';
+    function saveLastSelection(grade, group, troop) {
+        if (grade && group && troop) { try { localStorage.setItem(LAST_SEL_KEY, JSON.stringify({ grade, group, troop })); } catch (e) { /* ignore */ } }
+    }
+    function getLastSelection() { try { return JSON.parse(localStorage.getItem(LAST_SEL_KEY) || 'null'); } catch (e) { return null; } }
+    function applySelection(gradeId, groupId, troopId, grade, group, troop) {
+        const g = document.getElementById(gradeId), gr = document.getElementById(groupId), t = document.getElementById(troopId);
+        if (grade) g.value = grade;
+        if (group) { gr.value = group; updateTroopOptions(groupId, troopId); t.disabled = false; }
+        if (troop) t.value = troop;
+    }
+
+    function loadAttendanceStudentList() {
+        const grade = document.getElementById('attendanceGrade').value;
+        const group = document.getElementById('attendanceGroup').value;
+        const troop = document.getElementById('attendanceTroop').value;
+        const container = document.getElementById('attendanceStudentList');
+        if (!(grade && group && troop)) {
+            container.innerHTML = `<div class="text-center text-gray-500 py-8"><span class="text-4xl block mb-2">✅</span><p>กรุณาเลือกกองและหมู่</p></div>`;
+            return;
+        }
+        saveLastSelection(grade, group, troop);
+        const students = studentData[grade]?.[group]?.[troop] || [];
+        let html = `<div class="bg-purple-50 rounded-lg p-3 mb-3"><h4 class="font-medium">${grade} / ${group} / ${troop} — ${students.length} คน</h4><p class="text-xs text-gray-500">ทุกคนเริ่มต้นเป็น "มา" · กดเฉพาะคนที่ ลา / หนี / ขาด</p></div>`;
+        if (students.length) {
+            html += attendanceToolbarHtml('attendanceStudentList', 'updateAttendanceCheckSummary', 'attendanceCheckSummary');
+            html += `<div class="space-y-2">${studentRowsHtml(students, grade, 'attendance_', 'updateAttendanceCheckSummary()')}</div>`;
+        } else {
+            html += `<p class="text-center text-gray-500 py-4">-- ไม่มีข้อมูลนักเรียน --</p>`;
+        }
+        container.innerHTML = html;
+        updateAttendanceCheckSummary();
+    }
+    function updateAttendanceCheckSummary() {
+        const el = document.getElementById('attendanceCheckSummary');
+        if (el) el.innerHTML = summaryInlineHtml(countStatuses('attendanceStudentList'));
+    }
 
     async function saveAttendance(){const date=document.getElementById('attendanceDate').value;const activity=document.getElementById('attendanceActivity').value;const grade=document.getElementById('attendanceGrade').value;const group=document.getElementById('attendanceGroup').value;const troop=document.getElementById('attendanceTroop').value;if(!date||!activity||!grade||!group||!troop){Swal.fire({icon:'warning',title:'กรุณากรอกข้อมูลให้ครบ',confirmButtonColor:'#8b5cf6'});return;}
 
     const students=studentData[grade]?.[group]?.[troop]||[];if(students.length===0){Swal.fire({icon:'info',title:'ไม่มีนักเรียนในกลุ่มนี้',confirmButtonColor:'#8b5cf6'});return;}
 
-    const attendanceData=students.map(student=>({studentId:student.id,studentName:`${student.firstName} ${student.lastName}`,status:document.querySelector(`input[name="attendance_${student.id}"]:checked`)?.value||'ไม่ระบุ'}));const term=document.getElementById('attendanceTerm').value||'1';const payload={type:'attendance',date,activity,grade,group,troop,term,attendanceData};Swal.fire({title:'กำลังบันทึก...',allowOutsideClick:false,allowEscapeKey:false,willOpen:()=>Swal.showLoading()});try{const res=await postData(payload);payload._replaced=res.replaced||0;attendanceSummaryData=null;absenteeReportData=[];showSuccessMessage(payload,false);}catch(error){showSuccessMessage(payload,true);console.error('Failed to save attendance:',error);}}
+    const attendanceData=students.map(student=>({studentId:student.id,studentName:`${student.firstName} ${student.lastName}`,status:document.querySelector(`input[name="attendance_${student.id}"]:checked`)?.value||'ไม่ระบุ'}));const term=document.getElementById('attendanceTerm').value||'1';const payload={type:'attendance',date,activity,grade,group,troop,term,attendanceData};Swal.fire({title:'กำลังบันทึก...',allowOutsideClick:false,allowEscapeKey:false,willOpen:()=>Swal.showLoading()});try{const r=await sendOrQueue(payload);if(r.queued){closeAttendanceCheck();showQueuedMessage(payload,r.reason);return;}payload._replaced=r.res.replaced||0;attendanceSummaryData=null;absenteeReportData=[];showSuccessMessage(payload,false);}catch(error){console.error('Failed to save attendance:',error);Swal.fire({icon:'error',title:'บันทึกไม่สำเร็จ',text:error.message,confirmButtonColor:'#8b5cf6'});}}
 
-    function loadStudentList(){const grade=document.getElementById('activityGrade').value;const group=document.getElementById('selectedGroup').value;const troop=document.getElementById('selectedTroop').value;const container=document.getElementById('studentCheckList');const wrapper=document.getElementById('studentAttendanceList');const summary=document.getElementById('attendanceSummary');const students=studentData[grade]?.[group]?.[troop]||[];if(grade&&group&&troop){let html='';if(students.length>0){students.forEach(student=>{html+=`<div class="flex items-center justify-between p-3 bg-white rounded-lg border"><div class="flex items-center space-x-3"><span class="font-medium">${student.firstName} ${student.lastName} (${student.id})${student.room ? ' | ห้อง: ' + grade.replace('ม.', '') + '/' + student.room : ''}</span></div><div class="flex space-x-2"><label class="flex items-center space-x-1 cursor-pointer"><input type="radio" onchange="updateAttendanceSummary()" name="activity_attendance_${student.id}" value="มา" checked><span class="text-sm">มา</span></label><label class="flex items-center space-x-1 cursor-pointer"><input type="radio" onchange="updateAttendanceSummary()" name="activity_attendance_${student.id}" value="ลา"><span class="text-sm">ลา</span></label><label class="flex items-center space-x-1 cursor-pointer"><input type="radio" onchange="updateAttendanceSummary()" name="activity_attendance_${student.id}" value="ขาด"><span class="text-sm">ขาด</span></label><label class="flex items-center space-x-1 cursor-pointer"><input type="radio" onchange="updateAttendanceSummary()" name="activity_attendance_${student.id}" value="หนี"><span class="text-sm">หนี</span></label></div></div>`;});}else{html=`<p class="text-center text-gray-500 py-2">-- ไม่มีข้อมูลนักเรียน --</p>`;}
+    function loadStudentList() {
+        const grade = document.getElementById('activityGrade').value;
+        const group = document.getElementById('selectedGroup').value;
+        const troop = document.getElementById('selectedTroop').value;
+        const container = document.getElementById('studentCheckList');
+        const wrapper = document.getElementById('studentAttendanceList');
+        const summary = document.getElementById('attendanceSummary');
+        const syncBox = document.getElementById('attendanceSyncBox');
+        if (!(grade && group && troop)) {
+            container.innerHTML = '';
+            wrapper.classList.add('hidden'); summary.classList.add('hidden'); if (syncBox) syncBox.classList.add('hidden');
+            return;
+        }
+        saveLastSelection(grade, group, troop);
+        const students = studentData[grade]?.[group]?.[troop] || [];
+        container.innerHTML = students.length
+            ? attendanceToolbarHtml('studentCheckList', 'updateAttendanceSummary', 'activityCheckSummary') + studentRowsHtml(students, grade, 'activity_attendance_', 'updateAttendanceSummary()')
+            : `<p class="text-center text-gray-500 py-2">-- ไม่มีข้อมูลนักเรียน --</p>`;
+        wrapper.classList.remove('hidden'); summary.classList.remove('hidden');
+        if (syncBox) syncBox.classList.toggle('hidden', students.length === 0);
+        updateAttendanceSummary();
+    }
 
-    container.innerHTML=html;wrapper.classList.remove('hidden');summary.classList.remove('hidden');updateAttendanceSummary();}else{container.innerHTML='';wrapper.classList.add('hidden');summary.classList.add('hidden');}}
-
-    function updateAttendanceSummary(){const container=document.getElementById('studentCheckList');if(!container)return;const present=container.querySelectorAll('input[value="มา"]:checked').length;const leave=container.querySelectorAll('input[value="ลา"]:checked').length;const absent=container.querySelectorAll('input[value="ขาด"]:checked').length;const skipped=container.querySelectorAll('input[value="หนี"]:checked').length;document.getElementById('summaryPresent').innerText=present;document.getElementById('summaryLeave').innerText=leave;document.getElementById('summaryAbsent').innerText=absent;document.getElementById('summarySkipped').innerText=skipped;}
+    function updateAttendanceSummary() {
+        const c = countStatuses('studentCheckList');
+        document.getElementById('summaryPresent').innerText = c['มา'];
+        document.getElementById('summaryLeave').innerText = c['ลา'];
+        document.getElementById('summaryAbsent').innerText = c['ขาด'];
+        document.getElementById('summarySkipped').innerText = c['หนี'];
+        const el = document.getElementById('activityCheckSummary');
+        if (el) el.innerHTML = summaryInlineHtml(c);
+    }
 
     // ==========================================================
     // 📷 ระบบเตรียมรูปภาพ (รองรับทุกมือถือ/ทุกชนิดไฟล์)
@@ -1282,7 +1575,8 @@
 
         });
 
-        const signatureData = canvas ? canvas.toDataURL('image/png', 0.5) : '';
+        // ส่งลายเซ็นเฉพาะเมื่อเซ็นจริง (ถ้าไม่เซ็นรอบนี้ เซิร์ฟเวอร์จะคงลายเซ็นเดิมไว้)
+        const signatureData = (canvas && signatureDirty) ? canvas.toDataURL('image/png') : '';
 
         const payload = {
 
@@ -1327,23 +1621,44 @@
 
         };
 
+        // รายชื่อที่เช็คในฟอร์มนี้ → ส่งไปบันทึกเป็นการเช็คชื่อด้วย (ถ้าติ๊กไว้)
+        const actStudents = studentData[payload.grade]?.[payload.selectedGroup]?.[payload.selectedTroop] || [];
+        if (document.getElementById('syncAttendance').checked && actStudents.length) {
+            payload.syncAttendance = true;
+            payload.attendanceDate = document.getElementById('activityAttDate').value;
+            payload.attendanceSession = document.getElementById('activityAttSession').value;
+            payload.attendanceData = actStudents.map(s => ({
+                studentId: s.id,
+                studentName: `${s.firstName} ${s.lastName}`,
+                status: document.querySelector(`input[name="activity_attendance_${s.id}"]:checked`)?.value || 'มา'
+            }));
+        }
+
         try {
 
-            const res = await postData(payload);
+            const r = await sendOrQueue(payload);
+
+            if (r.queued) { closeModal(); showQueuedMessage(payload, r.reason); return; }
+
+            const res = r.res;
 
             payload._updated = res.updated || 0;
 
             payload._warnings = res.warnings || [];
 
+            payload._attendance = res.attendance || null;
+
             activitySummaryData = null; // ให้แดชบอร์ดโหลดข้อมูลใหม่
+
+            attendanceSummaryData = null;
 
             showSuccessMessage(payload, false);
 
         } catch (error) {
 
-            showSuccessMessage(payload, true);
-
             console.error('Failed to save activity to Sheet:', error);
+
+            Swal.fire({ icon: 'error', title: 'บันทึกไม่สำเร็จ', text: error.message, confirmButtonColor: '#8b5cf6' });
 
         }
 
@@ -1358,11 +1673,6 @@
     function updateAttendanceTroopOptions(){updateTroopOptions('attendanceGroup','attendanceTroop');loadAttendanceStudentList();}
 
     function updateActivityTroopOptions(){updateTroopOptions('selectedGroup','selectedTroop');document.getElementById('selectedTroop').disabled=!document.getElementById('selectedGroup').value;loadStudentList();}
-
-    function showAddStudentForm() {
-        document.getElementById('studentForm').classList.remove('hidden');
-        document.getElementById('formTitle').textContent = 'เพิ่มนักเรียนใหม่';
-    }
 
     async function handleExcelImport(event) {
         const file = event.target.files[0];
@@ -1480,11 +1790,11 @@
         event.target.value = ''; // รีเซ็ต input
     }
 
-    function openStudentManagement(){document.getElementById('studentManagementModal').classList.remove('hidden');document.getElementById('addStudentForm').addEventListener('submit',(e)=>{e.preventDefault();saveStudent();});}
+    function openStudentManagement(){document.getElementById('studentManagementModal').classList.remove('hidden');}
 
     function closeStudentManagement(){document.getElementById('studentManagementModal').classList.add('hidden');hideStudentForm();}
 
-    function openAttendanceCheck(){document.getElementById('attendanceModal').classList.remove('hidden');const d=new Date();document.getElementById('attendanceDate').value=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;document.getElementById('attendanceTerm').value=CURRENT_TERM;const act=document.getElementById('attendanceActivity');if(!act.value)act.value=d.getHours()<12?'เช้า':'บ่าย';}
+    function openAttendanceCheck(){document.getElementById('attendanceModal').classList.remove('hidden');const d=new Date();document.getElementById('attendanceDate').value=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;document.getElementById('attendanceTerm').value=CURRENT_TERM;const act=document.getElementById('attendanceActivity');if(!act.value)act.value=d.getHours()<12?'เช้า':'บ่าย';const last=getLastSelection();if(last&&!document.getElementById('attendanceTroop').value){applySelection('attendanceGrade','attendanceGroup','attendanceTroop',last.grade,last.group,last.troop);}loadAttendanceStudentList();}
 
     function closeAttendanceCheck(){document.getElementById('attendanceModal').classList.add('hidden');}
 
@@ -1498,7 +1808,23 @@
         else if(['ผูนำ','บังคับบัญชา'].some(s=>activity.includes(s)))criteriaKey='leadership';
         loadRubricItems(rubricCriteria[criteriaKey]);
         setupSignatureCanvas();
-        // (บรรทัด EventListener ถูกลบไปแล้ว)
+
+        // เลือก ชั้น อัตโนมัติตามหน้าที่เปิดอยู่ และ กอง/หมู่ ตามที่ครูเลือกครั้งล่าสุด
+        const gradeMapK = { m1: 'ม.1', m2: 'ม.2', m3: 'ม.3' };
+        const statusOpen = !document.getElementById('activityStatusModal').classList.contains('hidden');
+        const ctxGrade = gradeMapK[statusOpen ? currentStatusGrade : document.getElementById('gradeSelect').value] || '';
+        const last = getLastSelection();
+        if (last && last.grade === ctxGrade) applySelection('activityGrade', 'selectedGroup', 'selectedTroop', last.grade, last.group, last.troop);
+        else applySelection('activityGrade', 'selectedGroup', 'selectedTroop', ctxGrade, '', '');
+        loadStudentList();
+
+        // ค่าเริ่มต้นการเช็คชื่อจากกิจกรรม: วันนี้ + ช่วงตามเวลากิจกรรม (เช่น "13.00-14.00 ..." → บ่าย)
+        const now = new Date();
+        document.getElementById('activityAttDate').value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        const m = String(activity).match(/^\s*(\d{1,2})[.:]\d{2}/);
+        const hour = m ? parseInt(m[1], 10) : now.getHours();
+        document.getElementById('activityAttSession').value = hour < 12 ? 'เช้า' : 'บ่าย';
+        document.getElementById('syncAttendance').checked = true;
     }
     
     function closeModal() {
@@ -1527,19 +1853,30 @@
 
     function updateRubricScore(){let total=0;document.querySelectorAll('[id^="rubric_"]').forEach((item,index)=>{const value=parseInt(item.value);const maxScore=parseInt(item.max);document.getElementById(`score_${index}`).textContent=`${value}/${maxScore}`;total+=value;});document.getElementById('totalScore').value=total;const gradeSelect=document.getElementById('gradeLevel');if(total>=90)gradeSelect.value='ดีเยี่ยม';else if(total>=80)gradeSelect.value='ดีมาก';else if(total>=70)gradeSelect.value='ดี';else if(total>=60)gradeSelect.value='พอใช้';else gradeSelect.value='ปรับปรุง';}
 
-    function setupSignatureCanvas(){canvas=document.getElementById('signatureCanvas');if(!canvas)return;ctx=canvas.getContext('2d');clearSignature();['mousedown','touchstart'].forEach(evt=>canvas.addEventListener(evt,startDraw));['mousemove','touchmove'].forEach(evt=>canvas.addEventListener(evt,draw));['mouseup','mouseout','touchend'].forEach(evt=>canvas.addEventListener(evt,stopDraw));}
+    // ✍️ ลายเซ็น: ผูกเหตุการณ์ครั้งเดียว · ส่งลายเซ็นเฉพาะเมื่อเซ็นจริง · ตำแหน่งปากกาตรงแม้หน้าจอย่อขนาด
+    let signatureBound = false, signatureDirty = false;
+    function setupSignatureCanvas(){
+        canvas=document.getElementById('signatureCanvas');if(!canvas)return;ctx=canvas.getContext('2d');
+        if(!signatureBound){
+            canvas.style.touchAction='none';canvas.style.maxWidth='100%';
+            canvas.addEventListener('pointerdown',startDraw);canvas.addEventListener('pointermove',draw);
+            ['pointerup','pointerleave','pointercancel'].forEach(evt=>canvas.addEventListener(evt,stopDraw));
+            signatureBound=true;
+        }
+        clearSignature();
+    }
 
-    function getCoords(e){const rect=canvas.getBoundingClientRect();const touch=e.touches?.[0];return[(e.clientX||touch.clientX)-rect.left,(e.clientY||touch.clientY)-rect.top];}
+    function getCoords(e){const rect=canvas.getBoundingClientRect();const sx=canvas.width/rect.width,sy=canvas.height/rect.height;return[(e.clientX-rect.left)*sx,(e.clientY-rect.top)*sy];}
 
-    function startDraw(e){e.preventDefault();isDrawing=true;[ctx.lastX,ctx.lastY]=getCoords(e);}
+    function startDraw(e){e.preventDefault();isDrawing=true;try{canvas.setPointerCapture(e.pointerId);}catch(x){}[ctx.lastX,ctx.lastY]=getCoords(e);}
 
     function draw(e){if(!isDrawing)return;e.preventDefault();drawLine(...getCoords(e));}
 
     function stopDraw(){isDrawing=false;}
 
-    function drawLine(x,y){ctx.beginPath();ctx.moveTo(ctx.lastX,ctx.lastY);ctx.lineTo(x,y);ctx.strokeStyle='#8b5cf6';ctx.lineWidth=2;ctx.lineCap='round';ctx.stroke();[ctx.lastX,ctx.lastY]=[x,y];}
+    function drawLine(x,y){ctx.beginPath();ctx.moveTo(ctx.lastX,ctx.lastY);ctx.lineTo(x,y);ctx.strokeStyle='#4c1d95';ctx.lineWidth=2.5;ctx.lineCap='round';ctx.stroke();[ctx.lastX,ctx.lastY]=[x,y];signatureDirty=true;}
 
-    function clearSignature(){if(!ctx)return;ctx.fillStyle='#faf5ff';ctx.fillRect(0,0,canvas.width,canvas.height);}
+    function clearSignature(){if(!ctx)return;ctx.fillStyle='#faf5ff';ctx.fillRect(0,0,canvas.width,canvas.height);signatureDirty=false;}
 
     function saveDataLocally(data, key) {
 
@@ -1559,7 +1896,7 @@
 
     }
 
-    function showSuccessMessage(data,isOffline=false){const statusHtml=`<div class="mt-4 p-3 ${isOffline?'bg-yellow-100':'bg-green-100'} rounded-lg text-sm">${isOffline?'⚠️ บันทึกในเครื่องเท่านั้น':'☁️ บันทึกลง Sheets แล้ว'}</div>`;if(data.type==='attendance'){closeAttendanceCheck();const replacedHtml=(!isOffline&&data._replaced)?`<div class="mt-2 p-2 bg-blue-50 rounded-lg text-sm">♻️ พบข้อมูลเดิมของหมู่นี้ ระบบได้อัปเดตทับให้แล้ว (ไม่บันทึกซ้ำ)</div>`:'';Swal.fire({icon:'success',title:'บันทึกการเช็คชื่อสำเร็จ!',html:`<div class="text-left"><p><strong>กลุ่ม:</strong> ${data.grade}/${data.group}/${data.troop} (เทอม ${data.term})</p></div>`+statusHtml+replacedHtml,confirmButtonColor:'#8b5cf6'});}else{closeModal();closeActivityStatusDashboard();openActivityStatusDashboard();const replacedHtml=(!isOffline&&data._updated)?`<div class="mt-2 p-2 bg-blue-50 rounded-lg text-sm">♻️ หมู่นี้เคยบันทึกกิจกรรมนี้แล้ว ระบบได้อัปเดตทับข้อมูลเดิมให้ (ไม่บันทึกซ้ำ)</div>`:'';const warnHtml=(!isOffline&&data._warnings&&data._warnings.length)?`<div class="mt-2 p-2 bg-orange-50 rounded-lg text-sm text-left">⚠️ ${[...new Set(data._warnings)].join('<br>⚠️ ')}</div>`:'';Swal.fire({icon:warnHtml?'warning':'success',title:'บันทึกกิจกรรมสำเร็จ!',html:`<div class="text-left"><p><strong>กิจกรรม:</strong> ${data.activity}</p><p><strong>กอง/หมู่:</strong> ${data.selectedGroup||''} / ${data.selectedTroop||''} (เทอม ${data.term||'1'})</p><p><strong>คะแนน:</strong> ${data.totalScore}/100</p></div>`+statusHtml+replacedHtml+warnHtml,confirmButtonColor:'#8b5cf6'});}}
+    function showSuccessMessage(data,isOffline=false){const statusHtml=`<div class="mt-4 p-3 ${isOffline?'bg-yellow-100':'bg-green-100'} rounded-lg text-sm">${isOffline?'⚠️ บันทึกในเครื่องเท่านั้น':'☁️ บันทึกลง Sheets แล้ว'}</div>`;if(data.type==='attendance'){closeAttendanceCheck();const replacedHtml=(!isOffline&&data._replaced)?`<div class="mt-2 p-2 bg-blue-50 rounded-lg text-sm">♻️ พบข้อมูลเดิมของหมู่นี้ ระบบได้อัปเดตทับให้แล้ว (ไม่บันทึกซ้ำ)</div>`:'';Swal.fire({icon:'success',title:'บันทึกการเช็คชื่อสำเร็จ!',html:`<div class="text-left"><p><strong>กลุ่ม:</strong> ${data.grade}/${data.group}/${data.troop} (เทอม ${data.term})</p></div>`+statusHtml+replacedHtml,confirmButtonColor:'#8b5cf6'});}else{closeModal();closeActivityStatusDashboard();openActivityStatusDashboard(true);const replacedHtml=(!isOffline&&data._updated)?`<div class="mt-2 p-2 bg-blue-50 rounded-lg text-sm">♻️ หมู่นี้เคยบันทึกกิจกรรมนี้แล้ว ระบบได้อัปเดตทับข้อมูลเดิมให้ (ไม่บันทึกซ้ำ)</div>`:'';const warnHtml=(!isOffline&&data._warnings&&data._warnings.length)?`<div class="mt-2 p-2 bg-orange-50 rounded-lg text-sm text-left">⚠️ ${[...new Set(data._warnings)].join('<br>⚠️ ')}</div>`:'';const att=data._attendance;const attHtml=(att&&!att.skipped&&(att.added||att.updated||att.added===0))?`<div class="mt-2 p-2 bg-blue-50 rounded-lg text-sm">📋 บันทึกเป็นการเช็คชื่อช่วง${att.session} ${formatThaiDate(att.date)} แล้ว (เพิ่ม ${att.added} คน${att.updated?`, อัปเดต ลา/หนี/ขาด ${att.updated} คน`:''})</div>`:'';Swal.fire({icon:warnHtml?'warning':'success',title:'บันทึกกิจกรรมสำเร็จ!',html:`<div class="text-left"><p><strong>กิจกรรม:</strong> ${data.activity}</p><p><strong>กอง/หมู่:</strong> ${data.selectedGroup||''} / ${data.selectedTroop||''} (เทอม ${data.term||'1'})</p><p><strong>คะแนน:</strong> ${data.totalScore}/100</p></div>`+statusHtml+replacedHtml+attHtml+warnHtml,confirmButtonColor:'#8b5cf6'});}}
 
     async function showActivityReport(){Swal.fire({title:'กำลังโหลดรายงาน...',didOpen:()=>Swal.showLoading()});try{const response=await fetch(SCRIPT_URL+'?action=getActivitySummary');const summary=await response.json();if(Object.keys(summary).length===0){return Swal.fire({icon:'info',title:'ไม่มีข้อมูลกิจกรรม'});}
 
@@ -1579,11 +1916,12 @@
 
     
 
-    async function openActivityStatusDashboard() {
+    // silent = true: โหลดเบื้องหลัง ไม่แสดง/ไม่ปิดหน้าต่างแจ้งเตือน (ใช้หลังบันทึก เพื่อไม่ให้ปิดข้อความ "บันทึกสำเร็จ")
+    async function openActivityStatusDashboard(silent = false) {
 
         document.getElementById('activityStatusModal').classList.remove('hidden');
 
-        Swal.fire({ title: 'กำลังโหลดสถานะกิจกรรม...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+        if (!silent) Swal.fire({ title: 'กำลังโหลดสถานะกิจกรรม...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
         try {
 
@@ -1607,13 +1945,12 @@
 
             console.error(error);
 
-            Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลสถานะกิจกรรมได้', 'error');
-
-        } finally {
-
-            Swal.close();
+            if (!silent) Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลสถานะกิจกรรมได้', 'error');
+            return;
 
         }
+
+        if (!silent) Swal.close();
 
     }
 

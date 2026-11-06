@@ -1898,23 +1898,123 @@
 
     function showSuccessMessage(data,isOffline=false){const statusHtml=`<div class="mt-4 p-3 ${isOffline?'bg-yellow-100':'bg-green-100'} rounded-lg text-sm">${isOffline?'⚠️ บันทึกในเครื่องเท่านั้น':'☁️ บันทึกลง Sheets แล้ว'}</div>`;if(data.type==='attendance'){closeAttendanceCheck();const replacedHtml=(!isOffline&&data._replaced)?`<div class="mt-2 p-2 bg-blue-50 rounded-lg text-sm">♻️ พบข้อมูลเดิมของหมู่นี้ ระบบได้อัปเดตทับให้แล้ว (ไม่บันทึกซ้ำ)</div>`:'';Swal.fire({icon:'success',title:'บันทึกการเช็คชื่อสำเร็จ!',html:`<div class="text-left"><p><strong>กลุ่ม:</strong> ${data.grade}/${data.group}/${data.troop} (เทอม ${data.term})</p></div>`+statusHtml+replacedHtml,confirmButtonColor:'#8b5cf6'});}else{closeModal();closeActivityStatusDashboard();openActivityStatusDashboard(true);const replacedHtml=(!isOffline&&data._updated)?`<div class="mt-2 p-2 bg-blue-50 rounded-lg text-sm">♻️ หมู่นี้เคยบันทึกกิจกรรมนี้แล้ว ระบบได้อัปเดตทับข้อมูลเดิมให้ (ไม่บันทึกซ้ำ)</div>`:'';const warnHtml=(!isOffline&&data._warnings&&data._warnings.length)?`<div class="mt-2 p-2 bg-orange-50 rounded-lg text-sm text-left">⚠️ ${[...new Set(data._warnings)].join('<br>⚠️ ')}</div>`:'';const att=data._attendance;const attHtml=(att&&!att.skipped&&(att.added||att.updated||att.added===0))?`<div class="mt-2 p-2 bg-blue-50 rounded-lg text-sm">📋 บันทึกเป็นการเช็คชื่อช่วง${att.session} ${formatThaiDate(att.date)} แล้ว (เพิ่ม ${att.added} คน${att.updated?`, อัปเดต ลา/หนี/ขาด ${att.updated} คน`:''})</div>`:'';Swal.fire({icon:warnHtml?'warning':'success',title:'บันทึกกิจกรรมสำเร็จ!',html:`<div class="text-left"><p><strong>กิจกรรม:</strong> ${data.activity}</p><p><strong>กอง/หมู่:</strong> ${data.selectedGroup||''} / ${data.selectedTroop||''} (เทอม ${data.term||'1'})</p><p><strong>คะแนน:</strong> ${data.totalScore}/100</p></div>`+statusHtml+replacedHtml+attHtml+warnHtml,confirmButtonColor:'#8b5cf6'});}}
 
-    async function showActivityReport(){Swal.fire({title:'กำลังโหลดรายงาน...',didOpen:()=>Swal.showLoading()});try{const response=await fetch(SCRIPT_URL+'?action=getActivitySummary');const summary=await response.json();if(Object.keys(summary).length===0){return Swal.fire({icon:'info',title:'ไม่มีข้อมูลกิจกรรม'});}
+    // ==========================================================
+    // 📊 รายงานสรุปกิจกรรม / 📋 รายงานเช็คชื่อ — เปิดที่ภาคเรียนปัจจุบัน + ปุ่มสลับภาคเรียน
+    // ==========================================================
+    function reportTermToggle(fnName, term) {
+        return `<div class="flex flex-wrap justify-center gap-2 mb-3">` + ['1', '2', 'all'].map(t =>
+            `<button type="button" onclick="${fnName}('${t}')" class="px-3 py-1.5 rounded-lg text-sm font-semibold border ${t === term ? 'bg-purple-600 text-white border-purple-600' : 'bg-white text-gray-700 hover:bg-purple-50'}">${t === 'all' ? 'ทั้งปี' : 'ภาคเรียนที่ ' + t}${t === CURRENT_TERM ? ' (ปัจจุบัน)' : ''}</button>`
+        ).join('') + `</div>`;
+    }
+    const termText = t => t === 'all' ? 'ทั้งปี' : `ภาคเรียนที่ ${t}`;
+    const gradeOrder = g => ({ 'ม.1': 1, 'ม.2': 2, 'ม.3': 3 }[g] || 9);
+    const thSort = (a, b) => String(a).localeCompare(String(b), 'th', { numeric: true });
+    async function fetchJsonOrExplain(url) {
+        const res = await fetch(url);
+        const text = await res.text();
+        try { return JSON.parse(text); }
+        catch (e) { throw new Error('เซิร์ฟเวอร์ยังไม่รองรับรายงานนี้ — กรุณา Deploy code.gs เวอร์ชันล่าสุด (New version)'); }
+    }
 
-    let reportHtml='<div class="max-h-[70vh] overflow-y-auto text-left space-y-2">';for(const gradeName in summary){const gradeData=summary[gradeName];const gradeAvg=(gradeData.totalScore/gradeData.count).toFixed(2);reportHtml+=`<details class="bg-gray-100 rounded-xl border overflow-hidden"><summary class="p-4 font-bold text-xl flex justify-between"><span>${gradeName.toUpperCase()}</span><span>เฉลี่ย: ${gradeAvg}</span></summary><div class="px-4 py-2 border-t space-y-3">`;for(const groupName in gradeData.groups){const groupData=gradeData.groups[groupName];const groupAvg=(groupData.totalScore/groupData.count).toFixed(2);reportHtml+=`<details class="bg-purple-50 rounded-lg border"><summary class="p-3 font-semibold text-lg flex justify-between"><span>${groupName}</span><span>เฉลี่ย: ${groupAvg}</span></summary><div class="p-3 border-t space-y-2">`;for(const troopName in groupData.troops){const troopData=groupData.troops[troopName];const troopAvg=(troopData.totalScore/troopData.count).toFixed(2);const activitiesHtml=troopData.activities.map(act=>`<div class="flex justify-between text-sm py-1 pl-4"><span>- ${act.name}</span><span>${act.score} คะแนน</span></div>`).join('');reportHtml+=`<details class="bg-white rounded-md border"><summary class="p-2 font-medium flex justify-between"><span>${troopName}</span><span class="text-sm">เฉลี่ย: ${troopAvg} (${troopData.count} กิจกรรม)</span></summary><div class="px-2 pb-1 border-t">${activitiesHtml}</div></details>`;}
+    async function showActivityReport(term) {
+        term = term || CURRENT_TERM;
+        Swal.fire({ title: 'กำลังโหลดรายงาน...', allowOutsideClick: false, showConfirmButton: false }); Swal.showLoading();
+        try {
+            const summary = await fetchJsonOrExplain(SCRIPT_URL + '?action=getActivitySummary&term=' + encodeURIComponent(term));
+            let body = '';
+            const grades = Object.keys(summary || {}).sort((a, b) => gradeOrder(a) - gradeOrder(b));
+            if (!grades.length) {
+                body = `<p class="text-gray-500 py-6">ยังไม่มีข้อมูลกิจกรรมใน${termText(term)}</p>`;
+            } else {
+                body = '<div class="max-h-[65vh] overflow-y-auto text-left space-y-2">';
+                grades.forEach(gradeName => {
+                    const gradeData = summary[gradeName];
+                    const gradeAvg = (gradeData.totalScore / gradeData.count).toFixed(2);
+                    body += `<details class="bg-gray-100 rounded-xl border overflow-hidden"><summary class="p-4 font-bold text-xl flex justify-between cursor-pointer"><span>${escapeHtml(gradeName)}</span><span>เฉลี่ย: ${gradeAvg}</span></summary><div class="px-4 py-2 border-t space-y-3">`;
+                    Object.keys(gradeData.groups).sort(thSort).forEach(groupName => {
+                        const groupData = gradeData.groups[groupName];
+                        const groupAvg = (groupData.totalScore / groupData.count).toFixed(2);
+                        body += `<details class="bg-purple-50 rounded-lg border"><summary class="p-3 font-semibold text-lg flex justify-between cursor-pointer"><span>${escapeHtml(groupName)}</span><span>เฉลี่ย: ${groupAvg}</span></summary><div class="p-3 border-t space-y-2">`;
+                        Object.keys(groupData.troops).sort(thSort).forEach(troopName => {
+                            const troopData = groupData.troops[troopName];
+                            const troopAvg = (troopData.totalScore / troopData.count).toFixed(2);
+                            const acts = troopData.activities.map(act => `<div class="flex justify-between gap-3 text-sm py-1 pl-4"><span>- ${escapeHtml(act.name)}</span><span class="whitespace-nowrap">${act.score} คะแนน</span></div>`).join('');
+                            body += `<details class="bg-white rounded-md border"><summary class="p-2 font-medium flex justify-between cursor-pointer"><span>${escapeHtml(troopName)}</span><span class="text-sm">เฉลี่ย: ${troopAvg} (${troopData.count} กิจกรรม)</span></summary><div class="px-2 pb-1 border-t">${acts}</div></details>`;
+                        });
+                        body += `</div></details>`;
+                    });
+                    body += `</div></details>`;
+                });
+                body += '</div>';
+            }
+            Swal.fire({ title: `📊 รายงานสรุปกิจกรรม`, html: reportTermToggle('showActivityReport', term) + body, width: '800px', confirmButtonText: 'ปิด', confirmButtonColor: '#8b5cf6' });
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'ไม่สามารถโหลดรายงานได้', text: error.message, confirmButtonColor: '#8b5cf6' });
+        }
+    }
 
-    reportHtml+=`</div></details>`;}
-
-    reportHtml+=`</div></details>`;}
-
-    reportHtml+='</div>';Swal.fire({title:'📊 รายงานสรุปกิจกรรม',html:reportHtml,width:'800px',confirmButtonText:'ปิด'});}catch(error){Swal.fire({icon:'error',title:'เกิดข้อผิดพลาด',text:'ไม่สามารถโหลดรายงานได้'});}}
-
-    async function showAttendanceReport(){Swal.fire({title:'กำลังโหลดรายงาน...',didOpen:()=>Swal.showLoading()});try{const response=await fetch(SCRIPT_URL+'?action=getAttendanceSummary');const summary=await response.json();if(Object.keys(summary).length===0){return Swal.fire({icon:'info',title:'ไม่มีข้อมูลการเช็คชื่อ'});}
-
-    let reportHtml='<div class="max-h-[60vh] overflow-y-auto text-left space-y-2">';const statusOrder=['มา','ลา','ขาด','หนี'];for(const grade in summary){for(const group in summary[grade]){for(const troop in summary[grade][group]){const data=summary[grade][group][troop];const totalEnrolled=studentData[grade]?.[group]?.[troop]?.length||0;let statusText=statusOrder.filter(status=>data[status]).map(status=>`${status} ${data[status]}`).join(', ');reportHtml+=`<div class="p-3 bg-green-50 border rounded-lg"><div class="font-semibold">${grade} ${group} ${troop}</div><div class="text-sm text-gray-600">ทั้งหมด ${totalEnrolled} คน: ${statusText}</div></div>`;}}}
-
-    reportHtml+='</div>';Swal.fire({title:'✅ รายงานสรุปการเช็คชื่อ',html:reportHtml,width:'600px',confirmButtonText:'ปิด'});}catch(error){Swal.fire({icon:'error',title:'เกิดข้อผิดพลาด',text:'ไม่สามารถโหลดรายงานได้'});}}
-
-    
+    // รายงานเช็คชื่อแยก "รายรอบ" (วันที่ + ช่วงเช้า/บ่าย) — ตัวเลขแต่ละรอบไม่เกินจำนวนนักเรียนในหมู่
+    async function showAttendanceReport(term) {
+        term = term || CURRENT_TERM;
+        Swal.fire({ title: 'กำลังโหลดรายงาน...', allowOutsideClick: false, showConfirmButton: false }); Swal.showLoading();
+        try {
+            const sessions = await fetchJsonOrExplain(SCRIPT_URL + '?action=getAttendanceSessions&term=' + encodeURIComponent(term));
+            if (!Array.isArray(sessions)) throw new Error('รูปแบบข้อมูลไม่ถูกต้อง — กรุณา Deploy code.gs เวอร์ชันล่าสุด');
+            let body = '';
+            if (!sessions.length) {
+                body = `<p class="text-gray-500 py-6">ยังไม่มีข้อมูลการเช็คชื่อใน${termText(term)}</p>`;
+            } else {
+                // จัดกลุ่ม: ชั้น → หมู่ → รอบ
+                const tree = {};
+                sessions.forEach(s => {
+                    ((tree[s.grade] = tree[s.grade] || {})[`${s.group} ${s.troop}`] = tree[s.grade][`${s.group} ${s.troop}`] || []).push(s);
+                });
+                const sessionLabel = s => `${formatThaiDate(s.date)} · ${s.activity === 'เช้า' ? '☀️ เช้า' : s.activity === 'บ่าย' ? '🌤️ บ่าย' : escapeHtml(s.activity)}`;
+                const chip = (n, label, cls) => n ? `<span class="px-1.5 py-0.5 rounded ${cls} text-xs font-semibold">${label} ${n}</span>` : '';
+                body = `<p class="text-xs text-gray-500 mb-2">แต่ละแถว = การเช็คชื่อ 1 รอบ (วันที่ + ช่วงเวลา) · กดที่ชื่อหมู่เพื่อดู/ซ่อนรายละเอียด</p>
+                        <div class="max-h-[62vh] overflow-y-auto text-left space-y-3">`;
+                Object.keys(tree).sort((a, b) => gradeOrder(a) - gradeOrder(b)).forEach(grade => {
+                    const troops = tree[grade];
+                    const gs = Object.values(troops).flat();
+                    const gPresent = gs.reduce((a, s) => a + (s['มา'] || 0), 0), gTotal = gs.reduce((a, s) => a + (s.total || 0), 0);
+                    body += `<div class="border rounded-xl overflow-hidden">
+                        <div class="bg-gray-100 px-3 py-2 font-bold flex justify-between"><span>${escapeHtml(grade)}</span><span class="text-sm font-semibold">มาเฉลี่ย ${pct(gPresent, gTotal)}%</span></div>
+                        <div class="p-2 space-y-2">`;
+                    Object.keys(troops).sort(thSort).forEach(tk => {
+                        const list = troops[tk].slice().sort(slotSort);
+                        const [group, troop] = tk.split(' ');
+                        const enrolled = (studentData[grade]?.[group]?.[troop] || []).length;
+                        const sum = { 'มา': 0, 'ลา': 0, 'หนี': 0, 'ขาด': 0, total: 0 };
+                        list.forEach(s => { ['มา', 'ลา', 'หนี', 'ขาด'].forEach(k => sum[k] += s[k] || 0); sum.total += s.total || 0; });
+                        const rate = pct(sum['มา'], sum.total);
+                        const rows = list.map(s => {
+                            const of = enrolled || s.total;
+                            const partial = enrolled && s.total < enrolled ? ` <span class="text-xs text-orange-600">(มีข้อมูล ${s.total} จาก ${enrolled} คน)</span>` : '';
+                            return `<tr class="border-t">
+                                <td class="py-1.5 pr-2 whitespace-nowrap">${sessionLabel(s)}</td>
+                                <td class="py-1.5 pr-2 whitespace-nowrap font-semibold text-green-700">มา ${s['มา'] || 0}/${of}${partial}</td>
+                                <td class="py-1.5 text-right space-x-1 whitespace-nowrap">${chip(s['ลา'], 'ลา', 'bg-yellow-100 text-yellow-800')}${chip(s['หนี'], 'หนี', 'bg-orange-100 text-orange-700')}${chip(s['ขาด'], 'ขาด', 'bg-red-100 text-red-700')}</td>
+                            </tr>`;
+                        }).join('');
+                        const flag = rate < 80 ? '⚠️ ' : '';
+                        body += `<details class="bg-green-50 border rounded-lg">
+                            <summary class="px-3 py-2 cursor-pointer flex flex-wrap justify-between gap-2">
+                                <span class="font-semibold">${escapeHtml(grade)} ${escapeHtml(group)} ${escapeHtml(troop)}</span>
+                                <span class="text-sm text-gray-700">${enrolled ? enrolled + ' คน · ' : ''}เช็ค ${list.length} รอบ · <b>${flag}มาเฉลี่ย ${rate}%</b>
+                                ${['ลา', 'หนี', 'ขาด'].filter(k => sum[k]).map(k => `${k} ${sum[k]}`).join(' ') ? ' · ' + ['ลา', 'หนี', 'ขาด'].filter(k => sum[k]).map(k => `${k} ${sum[k]} ครั้ง`).join(', ') : ''}</span>
+                            </summary>
+                            <div class="px-3 pb-2 bg-white rounded-b-lg"><table class="w-full text-sm">${rows}</table></div>
+                        </details>`;
+                    });
+                    body += `</div></div>`;
+                });
+                body += '</div>';
+            }
+            Swal.fire({ title: '✅ รายงานสรุปการเช็คชื่อ', html: reportTermToggle('showAttendanceReport', term) + body, width: '760px', confirmButtonText: 'ปิด', confirmButtonColor: '#8b5cf6' });
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'ไม่สามารถโหลดรายงานได้', text: error.message, confirmButtonColor: '#8b5cf6' });
+        }
+    }
 
     // silent = true: โหลดเบื้องหลัง ไม่แสดง/ไม่ปิดหน้าต่างแจ้งเตือน (ใช้หลังบันทึก เพื่อไม่ให้ปิดข้อความ "บันทึกสำเร็จ")
     async function openActivityStatusDashboard(silent = false) {

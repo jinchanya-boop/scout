@@ -378,6 +378,11 @@
                 </div>
             </div>
             <div class="p-6 flex-grow overflow-y-auto">
+                <div class="flex flex-wrap items-center gap-2 mb-4" role="group" aria-label="เลือกภาคเรียน">
+                    <span class="text-sm font-medium text-gray-600 mr-1">ภาคเรียน:</span>
+                    <button type="button" data-term="1" onclick="setStatusTerm('1')" class="status-term-btn px-4 py-2 rounded-lg border text-sm font-semibold">ภาคเรียนที่ 1</button>
+                    <button type="button" data-term="2" onclick="setStatusTerm('2')" class="status-term-btn px-4 py-2 rounded-lg border text-sm font-semibold">ภาคเรียนที่ 2</button>
+                </div>
                 <div class="border-b border-gray-200 mb-4">
                     <nav id="statusTabs" class="flex space-x-4" aria-label="Tabs">
                         <a href="#" onclick="renderActivityStatusTable('m1'); setActiveTab(this); return false;" class="status-tab text-purple-600 border-purple-600 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">มัธยมศึกษาปีที่ 1</a>
@@ -733,7 +738,7 @@
         try {
             const res = await postData({ type: 'setConfig', pin: form.pin, currentTerm: form.currentTerm });
             CURRENT_TERM = res.currentTerm || form.currentTerm;
-            attendanceSummaryData = null; activitySummaryData = null;
+            attendanceSummaryData = null; activitySummaryData = null; currentStatusTerm = null;
             applyCurrentTerm();
             Swal.fire({ icon: 'success', title: `ตั้งเป็นภาคเรียนที่ ${CURRENT_TERM} แล้ว`, text: 'เครื่องอื่นจะเห็นค่าใหม่เมื่อรีเฟรชหน้าเว็บ', confirmButtonColor: '#8b5cf6' });
         } catch (e) {
@@ -1548,9 +1553,15 @@
 
             recordedActivitiesData = await response.json();
 
-            renderActivityStatusTable('m1');
+            if (!currentStatusTerm) currentStatusTerm = CURRENT_TERM; // เปิดครั้งแรก = ภาคเรียนปัจจุบัน
 
-            setActiveTab(document.querySelector('.status-tab'));
+            updateStatusTermButtons();
+
+            const gradeIdx = { m1: 0, m2: 1, m3: 2 }[currentStatusGrade] || 0;
+
+            renderActivityStatusTable(currentStatusGrade || 'm1');
+
+            setActiveTab(document.querySelectorAll('.status-tab')[gradeIdx]);
 
         } catch (error) {
 
@@ -1568,6 +1579,26 @@
 
     function closeActivityStatusDashboard() {
         document.getElementById('activityStatusModal').classList.add('hidden');
+    }
+
+    // 🔀 ปุ่มเลือกภาคเรียนในแดชบอร์ดสถานะกิจกรรม
+    let currentStatusTerm = null;
+    function updateStatusTermButtons() {
+        document.querySelectorAll('.status-term-btn').forEach(btn => {
+            const active = btn.dataset.term === currentStatusTerm;
+            btn.classList.toggle('bg-purple-600', active);
+            btn.classList.toggle('text-white', active);
+            btn.classList.toggle('border-purple-600', active);
+            btn.classList.toggle('bg-white', !active);
+            btn.classList.toggle('text-gray-700', !active);
+            btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+            btn.textContent = `ภาคเรียนที่ ${btn.dataset.term}` + (btn.dataset.term === CURRENT_TERM ? ' (ปัจจุบัน)' : '');
+        });
+    }
+    function setStatusTerm(term) {
+        currentStatusTerm = term;
+        updateStatusTermButtons();
+        renderActivityStatusTable(currentStatusGrade || 'm1');
     }
 
     function setActiveTab(selectedTab) {
@@ -1609,8 +1640,8 @@
         
         let html = '';
         
-        // วนลูปทั้ง 2 ภาคเรียน — แสดงภาคเรียนปัจจุบันก่อน
-        (CURRENT_TERM === '2' ? ['term2', 'term1'] : ['term1', 'term2']).forEach(termKey => {
+        // แสดงเฉพาะภาคเรียนที่เลือกจากปุ่มด้านบน
+        ['term' + (currentStatusTerm || CURRENT_TERM)].forEach(termKey => {
             const data = allScheduleData[termKey]?.[gradeKey];
             if (!data || !data.schedule) return;
 
@@ -1788,7 +1819,7 @@ async function printGradeReport() {
         title: `พิมพ์รายงาน ${gradeThai}`,
         input: 'select',
         inputOptions: { '1': 'ภาคเรียนที่ 1', '2': 'ภาคเรียนที่ 2', 'all': 'ทั้งปี' },
-        inputValue: CURRENT_TERM,
+        inputValue: currentStatusTerm || CURRENT_TERM,
         showCancelButton: true,
         confirmButtonText: 'สร้างรายงาน',
         cancelButtonText: 'ยกเลิก',

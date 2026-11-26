@@ -1479,7 +1479,12 @@
             recordedActivitiesData[gradeThai][String(termNum)][String(activityName).trim()]) || [];
         const last = getLastSelection();
         const mine = last && last.grade === gradeThai && last.group && last.troop ? `${last.group}/${last.troop}` : '';
-        return { total: list.length, mine, mineDone: !!mine && list.includes(mine) };
+        // จำนวนหมู่ทั้งหมดของชั้น (จากรายชื่อนักเรียน) — ถ้ายังไม่มีข้อมูลใช้ 4 กอง × 4 หมู่ = 16
+        let troops = 0;
+        const gs = studentData[gradeThai] || {};
+        Object.keys(gs).forEach(g => Object.keys(gs[g]).forEach(t => { if ((gs[g][t] || []).length) troops++; }));
+        const troopsTotal = troops || 16;
+        return { total: list.length, troopsTotal, mine, mineDone: !!mine && list.includes(mine) };
     }
     // โหลดสถานะการบันทึก แล้ววาดตารางใหม่ (ปุ่มของหมู่ที่บันทึกแล้วเป็นสีเขียว)
     async function loadRecordedStatus() {
@@ -1526,10 +1531,16 @@
                 // สถานะ: เขียว = หมู่ของครู (ชั้น/กอง/หมู่ที่เลือกล่าสุด) บันทึกกิจกรรมนี้แล้ว
                 const st = scheduleRecordState(mainActivity, termNum);
                 const onclick = `openActivityModal('${dayData.title.replace(/'/g, "\\'")}', '${cleanActivity}', ${index + 1}, ${termNum})`;
-                const countHtml = st.total ? `<span class="text-[11px] text-gray-500 whitespace-nowrap" title="บันทึกแล้ว ${st.total} หมู่">${st.total} หมู่</span>` : '';
-                const btn = isBreakItem(mainActivity) ? '' : (st.mineDone
-                    ? `<span class="ml-3 flex items-center gap-1.5 flex-shrink-0">${countHtml}<button onclick="${onclick}" title="${st.mine} บันทึกแล้ว · กดเพื่อแก้ไข" class="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-full transition-colors">✅ บันทึกแล้ว</button></span>`
-                    : `<span class="ml-3 flex items-center gap-1.5 flex-shrink-0">${countHtml}<button onclick="${onclick}" class="px-3 py-1 bg-purple-100 hover:bg-purple-200 text-purple-700 text-xs font-medium rounded-full transition-colors">บันทึก</button></span>`);
+                // สีปุ่ม: เขียวเข้ม = ครบทุกหมู่ หรือหมู่ของครูบันทึกแล้ว · เขียวอ่อน = บันทึกแล้วบางหมู่ · ม่วง = ยังไม่มีใครบันทึก
+                const full = st.total >= st.troopsTotal;
+                const tip = st.total ? `บันทึกแล้ว ${st.total} จาก ${st.troopsTotal} หมู่${st.mineDone ? ` (รวม ${st.mine} ของคุณ)` : ''} · กดเพื่อบันทึก/แก้ไข` : 'ยังไม่มีหมู่ใดบันทึก';
+                let cls, label;
+                if (full) { cls = 'bg-green-600 hover:bg-green-700 text-white font-semibold'; label = `✅ ครบ ${st.total}/${st.troopsTotal}`; }
+                else if (st.mineDone) { cls = 'bg-green-600 hover:bg-green-700 text-white font-semibold'; label = `✅ บันทึกแล้ว ${st.total}/${st.troopsTotal}`; }
+                else if (st.total) { cls = 'bg-green-100 hover:bg-green-200 text-green-800 border border-green-300 font-semibold'; label = `✅ ${st.total}/${st.troopsTotal} หมู่`; }
+                else { cls = 'bg-purple-100 hover:bg-purple-200 text-purple-700 font-medium'; label = 'บันทึก'; }
+                const btn = isBreakItem(mainActivity) ? '' :
+                    `<button onclick="${onclick}" title="${tip}" class="ml-3 px-3 py-1 ${cls} text-xs rounded-full transition-colors flex-shrink-0 whitespace-nowrap">${label}</button>`;
                 return `<li class="activity-item py-2 border-b border-gray-100 last:border-0 flex justify-between items-start">
                             <div class="flex-1">
                                 <div class="text-sm font-medium text-gray-700">${mainActivity}</div>

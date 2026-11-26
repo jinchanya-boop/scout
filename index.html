@@ -326,7 +326,7 @@
                     <div><label class="block text-sm font-medium mb-2">หมู่</label><select id="manageTroop" onchange="loadManageStudentList()" class="w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500"><option value="">เลือกหมู่</option></select></div>
                     <div class="flex items-end space-x-2"><button onclick="showAddStudentForm()" class="w-full px-4 py-2 btn-primary text-white rounded-lg font-medium">➕ เพิ่ม</button><label class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium text-center cursor-pointer">📥 Excel<input type="file" id="importExcel" class="hidden" accept=".xlsx, .xls, .csv" onchange="handleExcelImport(event)"></label></div>
                 </div>
-                <div id="studentForm" class="hidden mb-6 p-4 bg-purple-50 rounded-lg"><h4 class="font-medium mb-4" id="formTitle">เพิ่มนักเรียนใหม่</h4><form id="addStudentForm"><div class="grid grid-cols-1 md:grid-cols-4 gap-4"><div><label class="block text-sm font-medium mb-1">ชื่อ</label><input type="text" id="studentFirstName" required class="w-full px-3 py-2 rounded-lg border" placeholder="ชื่อ"></div><div><label class="block text-sm font-medium mb-1">นามสกุล</label><input type="text" id="studentLastName" required class="w-full px-3 py-2 rounded-lg border" placeholder="นามสกุล"></div><div><label class="block text-sm font-medium mb-1">เลขประจำตัว</label><input type="text" id="studentId" required class="w-full px-3 py-2 rounded-lg border" placeholder="เลขประจำตัว"></div><div><label class="block text-sm font-medium mb-1">ห้อง</label><input type="text" id="studentRoom" class="w-full px-3 py-2 rounded-lg border" placeholder="เช่น 5"></div></div><div class="flex justify-end space-x-3 mt-4"><button type="button" onclick="hideStudentForm()" class="px-4 py-2 border rounded-lg">ยกเลิก</button><button type="submit" class="px-4 py-2 btn-primary text-white rounded-lg">บันทึก</button></div></form></div>
+                <div id="studentForm" class="hidden mb-6 p-4 bg-purple-50 rounded-lg"><h4 class="font-medium mb-4" id="formTitle">เพิ่มนักเรียนใหม่</h4><form id="addStudentForm"><div class="grid grid-cols-1 md:grid-cols-4 gap-4"><div><label class="block text-sm font-medium mb-1">ชื่อ</label><input type="text" id="studentFirstName" required class="w-full px-3 py-2 rounded-lg border" placeholder="ชื่อ"></div><div><label class="block text-sm font-medium mb-1">นามสกุล</label><input type="text" id="studentLastName" required class="w-full px-3 py-2 rounded-lg border" placeholder="นามสกุล"></div><div><label class="block text-sm font-medium mb-1">เลขประจำตัว</label><input type="text" id="studentId" required class="w-full px-3 py-2 rounded-lg border" placeholder="เลขประจำตัว"></div><div><label class="block text-sm font-medium mb-1">ห้อง</label><input type="text" id="studentRoom" class="w-full px-3 py-2 rounded-lg border" placeholder="เช่น 5"></div></div><div id="studentPlacement" class="mt-4 p-3 bg-white rounded-lg border border-purple-200"><div class="text-sm font-medium mb-2">📍 ชั้น / กอง / หมู่ <span id="placementHint" class="text-xs font-normal text-gray-500">(เปลี่ยนตรงนี้เพื่อย้ายนักเรียนไปกอง/หมู่อื่น)</span></div><div class="grid grid-cols-3 gap-3"><select id="formGrade" class="w-full px-3 py-2 rounded-lg border"><option value="ม.1">ม.1</option><option value="ม.2">ม.2</option><option value="ม.3">ม.3</option></select><select id="formGroup" class="w-full px-3 py-2 rounded-lg border"><option value="กอง1">กอง 1</option><option value="กอง2">กอง 2</option><option value="กอง3">กอง 3</option><option value="กอง4">กอง 4</option></select><select id="formTroop" class="w-full px-3 py-2 rounded-lg border"><option value="หมู่1">หมู่ 1</option><option value="หมู่2">หมู่ 2</option><option value="หมู่3">หมู่ 3</option><option value="หมู่4">หมู่ 4</option></select></div><p id="moveNotice" class="hidden mt-2 text-sm text-orange-700 bg-orange-50 rounded p-2"></p></div><div class="flex justify-end space-x-3 mt-4"><button type="button" onclick="hideStudentForm()" class="px-4 py-2 border rounded-lg">ยกเลิก</button><button type="submit" class="px-4 py-2 btn-primary text-white rounded-lg">บันทึก</button></div></form></div>
                 <div id="manageStudentList"><div class="text-center text-gray-500 py-8"><span class="text-4xl block mb-2">👥</span><p>เลือกระดับชั้น, กอง และหมู่ เพื่อจัดการนักเรียน</p></div></div>
             </div>
         </div>
@@ -723,6 +723,7 @@
         applyCurrentTerm(); // แสดงค่าเริ่มต้นทันที
         loadConfig();       // แล้วโหลดค่าที่ผู้ดูแลตั้งไว้จากเซิร์ฟเวอร์
         fetchStudents(); // ยังคงเรียก fetchStudents() เหมือนเดิม
+        loadRecordedStatus(); // ปุ่ม "บันทึก" เป็นสีเขียวเมื่อหมู่ของครูบันทึกแล้ว
         refreshPendingBadge().then(n => { if (n) setTimeout(() => flushPendingQueue(false), 3000); }); // มีข้อมูลค้าง → ลองส่ง
         // ผูกปุ่มบันทึกนักเรียนครั้งเดียว (เดิมผูกซ้ำทุกครั้งที่เปิดหน้าต่าง → บันทึกซ้ำหลายแถว)
         document.getElementById('addStudentForm').addEventListener('submit', (e) => { e.preventDefault(); saveStudent(); });
@@ -864,7 +865,7 @@
                     if (e.retryable) { stoppedOffline = true; break; } // ยังไม่มีเน็ต → หยุดไว้ก่อน
                 }
             }
-            if (sent) { attendanceSummaryData = null; activitySummaryData = null; }
+            if (sent) { attendanceSummaryData = null; activitySummaryData = null; loadRecordedStatus(); }
             const left = await refreshPendingBadge();
             if (manual) {
                 Swal.fire({
@@ -1471,6 +1472,25 @@
 
     // 🟢 3. [แทนที่] ฟังก์ชัน generateScheduleTableHtml เก่าด้วยฟังก์ชันใหม่นี้
 
+    // หมู่ไหนบันทึกกิจกรรมนี้แล้วบ้าง (จาก getRecordedActivities) + หมู่ของครูบันทึกแล้วหรือยัง
+    function scheduleRecordState(activityName, termNum) {
+        const gradeThai = { m1: 'ม.1', m2: 'ม.2', m3: 'ม.3' }[document.getElementById('gradeSelect').value];
+        const list = (recordedActivitiesData && recordedActivitiesData[gradeThai] && recordedActivitiesData[gradeThai][String(termNum)] &&
+            recordedActivitiesData[gradeThai][String(termNum)][String(activityName).trim()]) || [];
+        const last = getLastSelection();
+        const mine = last && last.grade === gradeThai && last.group && last.troop ? `${last.group}/${last.troop}` : '';
+        return { total: list.length, mine, mineDone: !!mine && list.includes(mine) };
+    }
+    // โหลดสถานะการบันทึก แล้ววาดตารางใหม่ (ปุ่มของหมู่ที่บันทึกแล้วเป็นสีเขียว)
+    async function loadRecordedStatus() {
+        try {
+            const res = await fetch(SCRIPT_URL + '?action=getRecordedActivities');
+            if (!res.ok) return;
+            const data = await res.json();
+            if (data && !data.error) { recordedActivitiesData = data; loadSchedule(); }
+        } catch (e) { console.warn('โหลดสถานะการบันทึกไม่ได้', e); }
+    }
+
     function generateScheduleTableHtml(data, termNum) {
         if (!data || !data.schedule) return '<p>ไม่พบข้อมูลกำหนดการ</p>';
 
@@ -1503,7 +1523,13 @@
                     teacherHtml = `<div class="text-xs text-indigo-600 mt-1 font-medium">👨‍🏫 ${parts[1]}</div>`;
                 }
                 const cleanActivity = mainActivity.replace(/'/g, "\\'");
-                const btn = isBreakItem(mainActivity) ? '' : `<button onclick="openActivityModal('${dayData.title.replace(/'/g, "\\'")}', '${cleanActivity}', ${index + 1}, ${termNum})" class="ml-3 px-3 py-1 bg-purple-100 hover:bg-purple-200 text-purple-700 text-xs font-medium rounded-full transition-colors flex-shrink-0">บันทึก</button>`;
+                // สถานะ: เขียว = หมู่ของครู (ชั้น/กอง/หมู่ที่เลือกล่าสุด) บันทึกกิจกรรมนี้แล้ว
+                const st = scheduleRecordState(mainActivity, termNum);
+                const onclick = `openActivityModal('${dayData.title.replace(/'/g, "\\'")}', '${cleanActivity}', ${index + 1}, ${termNum})`;
+                const countHtml = st.total ? `<span class="text-[11px] text-gray-500 whitespace-nowrap" title="บันทึกแล้ว ${st.total} หมู่">${st.total} หมู่</span>` : '';
+                const btn = isBreakItem(mainActivity) ? '' : (st.mineDone
+                    ? `<span class="ml-3 flex items-center gap-1.5 flex-shrink-0">${countHtml}<button onclick="${onclick}" title="${st.mine} บันทึกแล้ว · กดเพื่อแก้ไข" class="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-full transition-colors">✅ บันทึกแล้ว</button></span>`
+                    : `<span class="ml-3 flex items-center gap-1.5 flex-shrink-0">${countHtml}<button onclick="${onclick}" class="px-3 py-1 bg-purple-100 hover:bg-purple-200 text-purple-700 text-xs font-medium rounded-full transition-colors">บันทึก</button></span>`);
                 return `<li class="activity-item py-2 border-b border-gray-100 last:border-0 flex justify-between items-start">
                             <div class="flex-1">
                                 <div class="text-sm font-medium text-gray-700">${mainActivity}</div>
@@ -1551,19 +1577,24 @@
         }
     }
     
-    function loadManageStudentList(){const grade=document.getElementById('manageGrade').value;const group=document.getElementById('manageGroup').value;const troop=document.getElementById('manageTroop').value;const container=document.getElementById('manageStudentList');const students=studentData[grade]?.[group]?.[troop]||[];if(grade&&group&&troop){let html=`<div class="bg-purple-50 rounded-lg p-4 mb-4"><h4 class="font-medium">${grade} / ${group} / ${troop} - (${students.length} คน)</h4></div><div class="space-y-3">`;if(students.length>0){students.forEach((student,index)=>{html+=`<div class="flex items-center justify-between p-4 bg-white rounded-lg border"><div class="flex items-center space-x-4"><div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center"><span class="text-purple-600 font-medium">${index+1}</span></div><div><div class="font-medium">${student.firstName} ${student.lastName}</div><div class="text-sm text-gray-500">ID: ${student.id}${student.room ? ' | ห้อง: ' + grade.replace('ม.', '') + '/' + student.room : ''}</div></div></div><div class="flex space-x-2"><button onclick="editStudent('${grade}','${group}','${troop}',${index})" class="px-3 py-1 bg-blue-500 text-white text-sm rounded-lg">แก้ไข</button><button onclick="deleteStudent('${grade}','${group}','${troop}',${index})" class="px-3 py-1 bg-red-500 text-white text-sm rounded-lg">ลบ</button></div></div>`;});}else{html+=`<p class="text-center text-gray-500">-- ไม่มีข้อมูลนักเรียน --</p>`;}
+    function loadManageStudentList(){const grade=document.getElementById('manageGrade').value;const group=document.getElementById('manageGroup').value;const troop=document.getElementById('manageTroop').value;const container=document.getElementById('manageStudentList');const students=studentData[grade]?.[group]?.[troop]||[];if(grade&&group&&troop){let html=`<div class="bg-purple-50 rounded-lg p-4 mb-4"><h4 class="font-medium">${grade} / ${group} / ${troop} - (${students.length} คน)</h4></div><div class="space-y-3">`;if(students.length>0){students.forEach((student,index)=>{html+=`<div class="flex items-center justify-between p-4 bg-white rounded-lg border"><div class="flex items-center space-x-4"><div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center"><span class="text-purple-600 font-medium">${index+1}</span></div><div><div class="font-medium">${student.firstName} ${student.lastName}</div><div class="text-sm text-gray-500">ID: ${student.id}${student.room ? ' | ห้อง: ' + grade.replace('ม.', '') + '/' + student.room : ''}</div></div></div><div class="flex space-x-2"><button onclick="editStudent('${grade}','${group}','${troop}',${index})" class="px-3 py-1 bg-blue-500 text-white text-sm rounded-lg">แก้ไข / ย้าย</button><button onclick="deleteStudent('${grade}','${group}','${troop}',${index})" class="px-3 py-1 bg-red-500 text-white text-sm rounded-lg">ลบ</button></div></div>`;});}else{html+=`<p class="text-center text-gray-500">-- ไม่มีข้อมูลนักเรียน --</p>`;}
 
     html+='</div>';container.innerHTML=html;}else{container.innerHTML=`<div class="text-center text-gray-500 py-8"><span class="text-4xl block mb-2">👥</span><p>เลือกระดับชั้น, กอง และหมู่</p></div>`;}}
 
     function showAddStudentForm(){const grade=document.getElementById('manageGrade').value;const group=document.getElementById('manageGroup').value;const troop=document.getElementById('manageTroop').value;if(!grade||!group||!troop){Swal.fire({icon:'warning',title:'กรุณาเลือกข้อมูลให้ครบ',text:'เลือกระดับชั้น, กอง และหมู่ก่อนเพิ่มนักเรียน',confirmButtonColor:'#8b5cf6'});return;}
 
-    editingStudent=null;document.getElementById('formTitle').textContent=`เพิ่มนักเรียน (${grade}/${group}/${troop})`;document.getElementById('addStudentForm').reset();document.getElementById('studentForm').classList.remove('hidden');}
+    editingStudent=null;document.getElementById('formTitle').textContent=`เพิ่มนักเรียน (${grade}/${group}/${troop})`;document.getElementById('addStudentForm').reset();setPlacement(grade,group,troop);document.getElementById('studentForm').classList.remove('hidden');}
 
-    async function saveStudent(){const grade=document.getElementById('manageGrade').value;const group=document.getElementById('manageGroup').value;const troop=document.getElementById('manageTroop').value;const firstName=document.getElementById('studentFirstName').value.trim();const lastName=document.getElementById('studentLastName').value.trim();const studentId=document.getElementById('studentId').value.trim();const room=document.getElementById('studentRoom')?document.getElementById('studentRoom').value.trim():'';if(!grade||!group||!troop){Swal.fire({icon:'warning',title:'กรุณาเลือกระดับชั้น กอง และหมู่ก่อน',confirmButtonColor:'#8b5cf6'});return;}if(!firstName||!studentId){Swal.fire({icon:'warning',title:'กรุณากรอกชื่อและเลขประจำตัว',confirmButtonColor:'#8b5cf6'});return;}const wasEditing=!!editingStudent;const studentObj={id:studentId,firstName,lastName,grade,group,troop,room};const payload={type:'manageStudent',action:wasEditing?'edit':'add',student:studentObj,...(wasEditing&&{originalId:editingStudent.originalId})};Swal.fire({title:'กำลังบันทึก...',allowOutsideClick:false,willOpen:()=>Swal.showLoading()});try{await postData(payload);await fetchStudents();hideStudentForm();loadManageStudentList();Swal.fire({icon:'success',title:wasEditing?'แก้ไขสำเร็จ':'เพิ่มสำเร็จ',confirmButtonColor:'#8b5cf6'});}catch(error){Swal.fire({icon:'error',title:'เกิดข้อผิดพลาด',text:'ไม่สามารถบันทึกข้อมูลได้: '+error.message});}}
+    // 📍 ช่อง ชั้น/กอง/หมู่ ในฟอร์มนักเรียน (ใช้ย้ายนักเรียนไปกอง/หมู่อื่น)
+    function setPlacement(grade,group,troop){document.getElementById('formGrade').value=grade;document.getElementById('formGroup').value=group;document.getElementById('formTroop').value=troop;updateMoveNotice();}
+    function updateMoveNotice(){const n=document.getElementById('moveNotice');if(!n)return;if(!editingStudent){n.classList.add('hidden');return;}const g=document.getElementById('formGrade').value,gr=document.getElementById('formGroup').value,t=document.getElementById('formTroop').value;const moved=g!==editingStudent.grade||gr!==editingStudent.group||t!==editingStudent.troop;n.classList.toggle('hidden',!moved);if(moved)n.textContent=`🔀 จะย้ายจาก ${editingStudent.grade} ${editingStudent.group} ${editingStudent.troop} → ${g} ${gr} ${t}`;}
+    ['formGrade','formGroup','formTroop'].forEach(id=>document.getElementById(id).addEventListener('change',updateMoveNotice));
+
+    async function saveStudent(){const grade=document.getElementById('formGrade').value;const group=document.getElementById('formGroup').value;const troop=document.getElementById('formTroop').value;const firstName=document.getElementById('studentFirstName').value.trim();const lastName=document.getElementById('studentLastName').value.trim();const studentId=document.getElementById('studentId').value.trim();const room=document.getElementById('studentRoom')?document.getElementById('studentRoom').value.trim():'';if(!grade||!group||!troop){Swal.fire({icon:'warning',title:'กรุณาเลือกระดับชั้น กอง และหมู่ก่อน',confirmButtonColor:'#8b5cf6'});return;}if(!firstName||!studentId){Swal.fire({icon:'warning',title:'กรุณากรอกชื่อและเลขประจำตัว',confirmButtonColor:'#8b5cf6'});return;}const wasEditing=!!editingStudent;const moving=wasEditing&&(grade!==editingStudent.grade||group!==editingStudent.group||troop!==editingStudent.troop);if(moving){const ok=await Swal.fire({icon:'question',title:'ยืนยันการย้ายนักเรียน',html:`<b>${escapeHtml(firstName)} ${escapeHtml(lastName)}</b><br>${editingStudent.grade} ${editingStudent.group} ${editingStudent.troop} → <b>${grade} ${group} ${troop}</b><p class="text-xs text-gray-500 mt-2">ประวัติการเช็คชื่อ/กิจกรรมที่บันทึกไปแล้วยังอยู่ที่หมู่เดิม · ตั้งแต่นี้ไปจะเช็คชื่อที่หมู่ใหม่</p>`,showCancelButton:true,confirmButtonText:'ย้าย',cancelButtonText:'ยกเลิก',confirmButtonColor:'#8b5cf6'});if(!ok.isConfirmed)return;}const studentObj={id:studentId,firstName,lastName,grade,group,troop,room};const payload={type:'manageStudent',action:wasEditing?'edit':'add',student:studentObj,...(wasEditing&&{originalId:editingStudent.originalId})};Swal.fire({title:'กำลังบันทึก...',allowOutsideClick:false,willOpen:()=>Swal.showLoading()});try{await postData(payload);await fetchStudents();hideStudentForm();loadManageStudentList();Swal.fire({icon:'success',title:moving?`ย้ายไป ${grade} ${group} ${troop} แล้ว`:(wasEditing?'แก้ไขสำเร็จ':'เพิ่มสำเร็จ'),confirmButtonColor:'#8b5cf6'});}catch(error){Swal.fire({icon:'error',title:'เกิดข้อผิดพลาด',text:'ไม่สามารถบันทึกข้อมูลได้: '+error.message});}}
 
     function editStudent(grade,group,troop,index){const student=studentData[grade]?.[group]?.[troop]?.[index];if(!student)return;editingStudent={grade,group,troop,index,originalId:student.id};document.getElementById('formTitle').textContent=`แก้ไขข้อมูล (${grade}/${group}/${troop})`;document.getElementById('studentFirstName').value=student.firstName;document.getElementById('studentLastName').value=student.lastName;
 
-    document.getElementById('studentId').value=student.id;if(document.getElementById('studentRoom'))document.getElementById('studentRoom').value=student.room||'';document.getElementById('studentForm').classList.remove('hidden');}
+    document.getElementById('studentId').value=student.id;if(document.getElementById('studentRoom'))document.getElementById('studentRoom').value=student.room||'';setPlacement(grade,group,troop);document.getElementById('studentForm').classList.remove('hidden');document.getElementById('studentForm').scrollIntoView({behavior:'smooth',block:'nearest'});}
 
     function deleteStudent(grade,group,troop,index){const student=studentData[grade]?.[group]?.[troop]?.[index];if(!student)return;Swal.fire({title:'ยืนยันการลบ',text:`ต้องการลบ ${student.firstName} ${student.lastName} หรือไม่?`,icon:'warning',showCancelButton:true,confirmButtonText:'ลบ',cancelButtonText:'ยกเลิก'}).then(async(result)=>{if(result.isConfirmed){Swal.fire({title:'กำลังลบ...',willOpen:()=>Swal.showLoading()});try{await postData({type:'manageStudent',action:'delete',student:{id:student.id,grade,group,troop}});await fetchStudents();loadManageStudentList();Swal.fire({icon:'success',title:'ลบสำเร็จ'});}catch(error){Swal.fire({icon:'error',title:'เกิดข้อผิดพลาด',text:'ไม่สามารถลบข้อมูลได้: '+error.message});}}});}
 
@@ -2353,6 +2384,8 @@
             if (!response.ok) throw new Error('Failed to fetch recorded activities.');
 
             recordedActivitiesData = await response.json();
+
+            loadSchedule(); // อัปเดตสีปุ่มในหน้าหลักด้วย
 
             if (!currentStatusTerm) currentStatusTerm = CURRENT_TERM; // เปิดครั้งแรก = ภาคเรียนปัจจุบัน
 
